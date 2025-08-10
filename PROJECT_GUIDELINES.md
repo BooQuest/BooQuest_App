@@ -109,3 +109,45 @@ Apply caching only for complex logic
 Use Flutter Intl
 Manage all strings through localization files
 Initially support Korean/English only
+
+11. Flutter iOS/Android Guidelines 
+
+Platform-Specific Handling
+
+Use Platform.isIOS / Platform.isAndroid to separate platform-specific logic
+Always implement platform branching for features that behave differently on iOS/Android
+
+Responsive Layout
+
+Avoid hardcoded sizes - use MediaQuery or LayoutBuilder
+Breakpoints: 600px (mobile), 1024px (tablet)
+Handle orientation changes with OrientationBuilder
+
+iOS-Specific Requirements
+
+Use SafeArea to handle notch areas
+Consider swipe-back gesture behavior
+Use CupertinoPageRoute for navigation
+
+Android-Specific Requirements
+
+Handle hardware back button with WillPopScope
+Consider transparent status bar handling
+Use MaterialPageRoute for navigation
+
+Performance Optimization
+
+Set cacheExtent when using ListView.builder
+Check conditional widgets only once at build time
+Keyboard handling: resizeToAvoidBottomInset + SingleChildScrollView
+
+Common Utilities
+
+Create PlatformUtils class for platform-specific value selection
+Manage responsive breakpoints with Breakpoints constants
+Create DeviceUtils for screen size information helpers
+
+Navigation
+
+Apply platform-specific page transition animations
+iOS: CupertinoPageRoute, Android: MaterialPageRoute
