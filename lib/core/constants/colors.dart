@@ -19,6 +19,7 @@ class AppColors {
   // 테두리 색상
   static const Color inputBorder = Color(0xFF545F71);      // 입력 필드 테두리
   static const Color avatarBorder = Color(0xFFBBBBBB);     // 아바타 테두리
+  static const Color cardBorder = Color(0xFFE0E0E0);      // 카드 테두리
   
   // 버튼 색상
   static const Color buttonActive = Color(0xFF525252);     // 활성화된 버튼
