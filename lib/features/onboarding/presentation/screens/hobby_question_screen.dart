@@ -4,7 +4,6 @@ import 'package:booquest/features/onboarding/presentation/widgets/onboarding_pro
 import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/features/onboarding/presentation/screens/coaching_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/job_question_screen.dart';
-import 'package:booquest/core/navigation/transitions.dart';
 
 /// 온보딩 2단계 - 취미 질문 화면 (선택지 방식)
 class HobbyQuestionScreen extends StatefulWidget {
@@ -15,7 +14,6 @@ class HobbyQuestionScreen extends StatefulWidget {
 }
 
 class _HobbyQuestionScreenState extends State<HobbyQuestionScreen> {
-  // 예시 선택지 (Figma의 라벨과 순서를 반영)
   static const List<String> _hobbyOptions = [
     '글쓰기', '요리', '악기연주',
     '사진촬영', '운동', '독서',
@@ -69,7 +67,6 @@ class _HobbyQuestionScreenState extends State<HobbyQuestionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
@@ -77,80 +74,64 @@ class _HobbyQuestionScreenState extends State<HobbyQuestionScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              // 상단: 뒤로가기 + 중앙 진행바
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.textPrimary),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () async {
-                      await _setStage(1);
-                      if (!mounted) return;
-                      Navigator.of(context).pushReplacement(PageRouteBuilder(
-                        pageBuilder: (_, a, sa) => const JobQuestionScreen(),
-                        transitionsBuilder: (_, animation, __, child) {
-                          final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
-                              .chain(CurveTween(curve: Curves.easeOutCubic));
-                          return SlideTransition(position: animation.drive(tween), child: child);
-                        },
-                        transitionDuration: const Duration(milliseconds: 280),
-                      ));
-                    },
-                  ),
-                  const Expanded(
-                    child: Center(child: OnboardingProgress(currentStep: 1)),
-                  ),
-                  const SizedBox(width: 40),
-                ],
-              ),
+              _buildTopRow(),
               const SizedBox(height: _topSpacing - 40 - _topRowCompensation),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '취미가 뭐야?',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                    height: 1.4,
-                  ),
-                ),
-              ),
+              _buildTitle(),
               const SizedBox(height: 20),
-
-              // 선택 칩 영역
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: _hobbyOptions.map((label) => _buildChoiceChip(label)).toList(),
-              ),
-
-              const SizedBox(height: 120), // 본문과 하단 버튼 영역 사이 시각적 여백
+              _buildChoiceChips(),
+              const SizedBox(height: 120),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(context),
+      bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  Widget _buildTopRow() {
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.textPrimary),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () => _goBack(),
+        ),
+        const Expanded(
+          child: Center(child: OnboardingProgress(currentStep: 1)),
+        ),
+        const SizedBox(width: 40),
+      ],
+    );
+  }
+
+  Widget _buildTitle() {
+    return const Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        '취미가 뭐야?',
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+          height: 1.4,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChoiceChips() {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: _hobbyOptions.map((label) => _buildChoiceChip(label)).toList(),
     );
   }
 
   Widget _buildChoiceChip(String label) {
     final bool isSelected = _selected.contains(label);
     return GestureDetector(
-      onTap: () async {
-        setState(() {
-          if (isSelected) {
-            _selected.remove(label);
-          } else {
-            _selected.add(label);
-          }
-        });
-        try {
-          final storage = _storage ?? await LocalStorageService.getInstance();
-          await storage.saveHobbies(_selected.toList());
-        } catch (_) {}
-      },
+      onTap: () => _toggleHobby(label),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -170,7 +151,7 @@ class _HobbyQuestionScreenState extends State<HobbyQuestionScreen> {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context) {
+  Widget _buildBottomBar() {
     final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bool canProceed = _selected.isNotEmpty;
 
@@ -190,9 +171,7 @@ class _HobbyQuestionScreenState extends State<HobbyQuestionScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: canProceed ? AppColors.buttonActive : AppColors.buttonInactive,
               foregroundColor: AppColors.buttonText,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               elevation: 0,
             ),
             child: const Text(
@@ -203,6 +182,35 @@ class _HobbyQuestionScreenState extends State<HobbyQuestionScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _toggleHobby(String label) async {
+    setState(() {
+      if (_selected.contains(label)) {
+        _selected.remove(label);
+      } else {
+        _selected.add(label);
+      }
+    });
+    
+    try {
+      final storage = _storage ?? await LocalStorageService.getInstance();
+      await storage.saveHobbies(_selected.toList());
+    } catch (_) {}
+  }
+
+  Future<void> _goBack() async {
+    await _setStage(1);
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(PageRouteBuilder(
+      pageBuilder: (_, a, sa) => const JobQuestionScreen(),
+      transitionsBuilder: (_, animation, __, child) {
+        final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
+            .chain(CurveTween(curve: Curves.easeOutCubic));
+        return SlideTransition(position: animation.drive(tween), child: child);
+      },
+      transitionDuration: const Duration(milliseconds: 280),
+    ));
   }
 
   Future<void> _onNext() async {

@@ -9,6 +9,7 @@ import 'package:booquest/features/onboarding/presentation/screens/job_question_s
 import 'package:booquest/features/onboarding/presentation/screens/hobby_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/coaching_question_screen.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 
 void main() async {
   // Flutter 바인딩 초기화
@@ -143,59 +144,6 @@ class _OnboardingRouter extends StatelessWidget {
         }
         return snapshot.data ?? const LoginScreen();
       },
-    );
-  }
-}
-
-/// 메인 화면 (인증된 사용자용)
-class MainScreen extends StatelessWidget {
-  const MainScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('BooQuest'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              try {
-                final storage = await LocalStorageService.getInstance();
-                await storage.setOnboardingCompleted(false);
-              } catch (_) {}
-
-              // 로그아웃 수행 후 로그인 화면으로 완전 전환
-              try {
-                await context.read<AuthProvider>().logout();
-              } finally {
-                if (!context.mounted) return;
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (route) => false,
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 64,
-            ),
-            SizedBox(height: 16),
-            Text('로그인 성공!'),
-            SizedBox(height: 8),
-            Text('메인 화면입니다.'),
-          ],
-        ),
-      ),
     );
   }
 }
