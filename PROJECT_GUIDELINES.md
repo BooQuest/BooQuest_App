@@ -146,8 +146,3 @@ Common Utilities
 Create PlatformUtils class for platform-specific value selection
 Manage responsive breakpoints with Breakpoints constants
 Create DeviceUtils for screen size information helpers
-
-Navigation
-
-Apply platform-specific page transition animations
-iOS: CupertinoPageRoute, Android: MaterialPageRoute

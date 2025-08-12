@@ -43,6 +43,9 @@ dependencies:
   
   # 상태 관리
   provider: ^6.1.2
+  
+  # 로컬 스토리지
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
