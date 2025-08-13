@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../constants.dart';
+import 'package:booquest/core/storage/token_storage.dart';
 
 /// HTTP 네트워크 클라이언트
 /// 
@@ -39,24 +40,18 @@ class NetworkClient {
     // 요청 인터셉터
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
+        onRequest: (options, handler) async {
           // JWT 토큰이 있으면 헤더에 추가
-          // TODO: SharedPreferences에서 토큰 가져오기
-          // final token = await _getStoredToken();
-          // if (token != null) {
-          //   options.headers['Authorization'] = 'Bearer $token';
-          // }
-          
-        //   print('🌐 API 요청: ${options.method} ${options.path}');
+          final token = await TokenStorage.getAccessToken();
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
           handler.next(options);
         },
         onResponse: (response, handler) {
-        //   print('✅ API 응답: ${response.statusCode} ${response.requestOptions.path}');
           handler.next(response);
         },
         onError: (error, handler) {
-        //   print('❌ API 에러: ${error.response?.statusCode} ${error.requestOptions.path}');
-        //   print('에러 메시지: ${error.message}');
           handler.next(error);
         },
       ),
@@ -147,4 +142,6 @@ class NetworkClient {
         return AppConstants.unknownErrorMessage;
     }
   }
+
+
 }
