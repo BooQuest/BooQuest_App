@@ -34,7 +34,7 @@ class MyScreen extends StatelessWidget {
               FutureBuilder<String>(
                 future: _loadDisplayName(),
                 builder: (context, snapshot) {
-                  final displayName = snapshot.data ?? '김소현';
+                  final displayName = '소현'
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
