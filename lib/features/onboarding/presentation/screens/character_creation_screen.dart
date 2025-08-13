@@ -50,12 +50,15 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
     try {
       final localStorage = _storage ?? await LocalStorageService.getInstance();
       final savedName = localStorage.getCharacterName();
-      if (savedName != null && savedName.isNotEmpty) {
-        setState(() {
+      setState(() {
+        if (savedName != null && savedName.isNotEmpty) {
           _nameController.text = savedName;
           _isNameValid = true;
-        });
-      }
+        } else {
+          _nameController.text = ''; // 명시적으로 지우기
+          _isNameValid = false;
+        }
+      });
     } catch (e) {
       debugPrint('저장된 이름 불러오기 실패: $e');
     }
@@ -153,19 +156,10 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
         color: AppColors.overlayLight.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
-      child: Center(
-        child: Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: AppColors.avatarIcon,
-            border: Border.all(
-              color: AppColors.avatarBorder,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
+      child: const Icon(
+        Icons.pets,
+        size: 48,
+        color: Colors.grey,
       ),
     );
   }
@@ -191,10 +185,14 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
           onChanged: (v) {
             final trimmed = v.trim();
             _saveDebouncer.run(() async {
-              if (trimmed.isEmpty) return;
               try {
                 final storage = _storage ?? await LocalStorageService.getInstance();
-                await storage.saveCharacterName(trimmed);
+                if (trimmed.isEmpty) {
+                  await storage.removeCharacterName();
+                  _nameController.clear();
+                } else {
+                  await storage.saveCharacterName(trimmed);
+                }
               } catch (_) {}
             });
           },

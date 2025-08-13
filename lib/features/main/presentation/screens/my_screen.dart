@@ -6,9 +6,14 @@ import 'package:booquest/features/auth/presentation/auth_provider.dart';
 import 'package:booquest/features/auth/presentation/login_screen.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
 
-class MyScreen extends StatelessWidget {
+class MyScreen extends StatefulWidget {
   const MyScreen({super.key});
 
+  @override
+  State<MyScreen> createState() => _MyScreenState();
+}
+
+class _MyScreenState extends State<MyScreen> {
   static const double _horizontalPadding = 20.0;
   static const double _sectionSpacing = 32.0;
 
@@ -34,7 +39,7 @@ class MyScreen extends StatelessWidget {
               FutureBuilder<String>(
                 future: _loadDisplayName(),
                 builder: (context, snapshot) {
-                  final displayName = '소현'
+                  final displayName = '소현';
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -77,7 +82,7 @@ class MyScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
-                          Icons.landscape,
+                          Icons.pets,
                           size: 40,
                           color: Colors.grey,
                         ),
@@ -171,10 +176,10 @@ class MyScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      const TextField(
+                      TextField(
                         maxLines: 5,
                         maxLength: 300,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: '부퀘스트에 대한 의견이나 개선사항을 자유롭게 작성해주세요.',
                           hintStyle: TextStyle(
                             fontSize: 13,
@@ -184,11 +189,13 @@ class MyScreen extends StatelessWidget {
                           border: InputBorder.none,
                           counterText: '',
                         ),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           color: AppColors.textPrimary,
                         ),
+                        textInputAction: TextInputAction.done,
+                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       ),
                     ],
                   ),
@@ -243,6 +250,8 @@ class MyScreen extends StatelessWidget {
       );
     }
   }
+
+
 }
 
 class _ManagementItem extends StatelessWidget {

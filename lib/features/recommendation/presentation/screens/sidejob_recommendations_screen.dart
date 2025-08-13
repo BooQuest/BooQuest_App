@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
+import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 
 /// 부업 추천 화면
 class SideJobRecommendationsScreen extends StatefulWidget {
@@ -10,15 +12,30 @@ class SideJobRecommendationsScreen extends StatefulWidget {
   State<SideJobRecommendationsScreen> createState() => _SideJobRecommendationsScreenState();
 }
 
-class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScreen> {
+class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScreen> with TickerProviderStateMixin {
   static const double _horizontalPadding = 20.0;
   static const double _cardSpacing = 12.0;
 
   String _characterName = '';
+  bool _isLoading = false;
+  int? _selectedCardIndex;
+  late final AnimationController _selectionController;
+  late final Animation<double> _selectionScale;
+  late final Animation<double> _selectionOpacity;
 
   @override
   void initState() {
     super.initState();
+    _selectionController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _selectionScale = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _selectionController, curve: Curves.easeInOut),
+    );
+    _selectionOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _selectionController, curve: Curves.easeInOut),
+    );
     _loadCharacterName();
   }
 
@@ -36,24 +53,38 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 48),
-              _buildTopBar(),
-              const SizedBox(height: 48),
-              _buildTitle(),
-              const SizedBox(height: 48),
-              _buildCardList(),
-              const SizedBox(height: 100),
-            ],
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 48),
+                        _buildTopBar(),
+                        const SizedBox(height: 40),
+                        _buildTitle(),
+                        const SizedBox(height: 48),
+                        _buildCardList(),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
+                  ),
+                ),
+                _buildBottomBar(),
+              ],
+            ),
           ),
-        ),
+          if (_isLoading) const AILoadingOverlay(
+            title: 'AI가 추천을 탐색 중...',
+            subtitle: '취향, 패턴, 목표를 분석하고 있어요',
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
@@ -67,7 +98,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
             color: AppColors.overlayLight.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.landscape, size: 20, color: Colors.orange),
+          child: const Icon(Icons.pets, size: 20, color: Colors.orange),
         ),
         const SizedBox(width: 10),
         const Text(
@@ -125,7 +156,104 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (_, index) => _SideJobCard(item: items[index]),
+      itemBuilder: (_, index) => GestureDetector(
+        onTap: () => _handleCardTap(index),
+        child: AnimatedBuilder(
+          animation: _selectionController,
+          builder: (context, child) {
+            final isSelected = _selectedCardIndex == index;
+            final scale = isSelected ? _selectionScale.value : 1.0;
+            final opacity = isSelected ? _selectionOpacity.value : 0.0;
+            
+            return Transform.scale(
+              scale: scale,
+              child: Stack(
+                children: [
+                  _SideJobCard(item: items[index]),
+                  if (isSelected) ...[
+                    // Glowing border
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Opacity(
+                          opacity: opacity,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFF7BA8FF),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF7BA8FF).withValues(alpha: 0.45 * opacity),
+                                  blurRadius: 22,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Soft highlight overlay
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Opacity(
+                          opacity: 0.06 * opacity,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7BA8FF),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Sparkle star (top-right)
+                    Positioned(
+                      right: 12,
+                      top: 12,
+                      child: Opacity(
+                        opacity: opacity,
+                        child: Transform.translate(
+                          offset: Offset(6 * _selectionController.value, -6 * _selectionController.value),
+                          child: Transform.scale(
+                            scale: 0.8 + 0.4 * _selectionController.value,
+                            child: const Icon(
+                              Icons.star_rounded,
+                              size: 14,
+                              color: Color(0xFF7BA8FF),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Small sparkle (bottom-left)
+                    Positioned(
+                      left: 10,
+                      bottom: 10,
+                      child: Opacity(
+                        opacity: opacity * 0.8,
+                        child: Transform.translate(
+                          offset: Offset(-5 * _selectionController.value, 5 * _selectionController.value),
+                          child: Transform.rotate(
+                            angle: 0.6 * _selectionController.value,
+                            child: const Icon(
+                              Icons.star_rate_rounded,
+                              size: 10,
+                              color: Color(0xFFB2C7FF),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+      ),
       separatorBuilder: (_, __) => const SizedBox(height: _cardSpacing),
       itemCount: items.length,
     );
@@ -143,18 +271,40 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
         child: SizedBox(
           width: double.infinity,
           height: 46,
-          child: ElevatedButton(
-            onPressed: () => _showConfirmationPopup(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.buttonActive,
-              foregroundColor: AppColors.buttonText,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              elevation: 0,
-            ),
-            child: const Text(
-              '이대로 진행하기',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
+          child: Stack(
+            children: [
+              AbsorbPointer(
+                absorbing: true, // 클릭 이벤트 제거 요청에 따라 항상 비활성화
+                child: ElevatedButton(
+                  onPressed: null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonActive,
+                    foregroundColor: AppColors.buttonText,
+                    disabledBackgroundColor: AppColors.buttonInactive,
+                    disabledForegroundColor: AppColors.buttonText,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.refresh, size: 20, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('다시 추천해줘', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ),
+              ),
+              if (_isLoading)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -247,7 +397,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
                           ],
                         ),
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.white,
@@ -283,14 +433,54 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     );
   }
 
-  void _onConfirmRecommendations() {
-    // TODO: 온보딩 완료 처리 및 메인 화면으로 이동
+  void _onConfirmRecommendations() async {
+    // 온보딩 데이터 초기화 및 메인(Home) 이동
+    try {
+      final storage = await LocalStorageService.getInstance();
+      await storage.clearOnboardingDetailsOnly();
+      await storage.setOnboardingCompleted(true);
+    } catch (_) {}
+
+    if (!mounted) return;
     Navigator.pop(context); // 팝업 닫기
-    
-    // 여기에 온보딩 완료 로직 추가
-    // 예: LocalStorageService.setOnboardingCompleted(true)
-    // 예: Navigator.pushReplacement으로 메인 화면 이동
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const MainScreen()),
+      (_) => false,
+    );
   }
+
+  @override
+  void dispose() {
+    _selectionController.dispose();
+    super.dispose();
+  }
+
+  void _handleCardTap(int index) {
+    setState(() {
+      _selectedCardIndex = index;
+    });
+
+    // AI 선택 애니메이션 시작
+    _selectionController.forward().then((_) {
+      // 애니메이션 완료 후 로딩 시작
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Simulate AI processing delay
+      Future.delayed(const Duration(seconds: 2), () {
+        setState(() {
+          _isLoading = false;
+          _selectedCardIndex = null;
+        });
+        _selectionController.reset();
+        _showConfirmationPopup();
+      });
+    });
+  }
+
+
 }
 
 class _SideJobItem {
@@ -327,7 +517,7 @@ class _SideJobCard extends StatelessWidget {
                     color: AppColors.overlayLight.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.landscape, size: 24, color: Colors.orange),
+                  child: const Icon(Icons.pets, size: 24, color: Colors.orange),
                 ),
                 const Spacer(),
                 const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),

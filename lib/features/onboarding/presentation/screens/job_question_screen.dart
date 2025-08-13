@@ -58,12 +58,15 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
     try {
       final storage = _storage ?? await LocalStorageService.getInstance();
       final saved = storage.getJob();
-      if (saved != null && saved.isNotEmpty) {
-        setState(() {
+      setState(() {
+        if (saved != null && saved.isNotEmpty) {
           _jobController.text = saved;
           _isValid = true;
-        });
-      }
+        } else {
+          _jobController.text = ''; // 명시적으로 지우기
+          _isValid = false;
+        }
+      });
     } catch (_) {}
   }
 
@@ -177,10 +180,14 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
           onChanged: (v) {
             final trimmed = v.trim();
             _saveDebouncer.run(() async {
-              if (trimmed.isEmpty) return;
               try {
                 final storage = _storage ?? await LocalStorageService.getInstance();
-                await storage.saveJob(trimmed);
+                if (trimmed.isEmpty) {
+                  await storage.removeJob();
+                  _jobController.clear();
+                } else {
+                  await storage.saveJob(trimmed);
+                }
               } catch (_) {}
             });
           },
