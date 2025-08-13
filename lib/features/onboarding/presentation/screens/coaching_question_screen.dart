@@ -5,6 +5,7 @@ import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/features/onboarding/presentation/screens/hobby_question_screen.dart';
 import 'package:booquest/core/utils/debouncer.dart';
 import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
+import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
 
 /// 온보딩 3단계 - 코칭 여부 질문 화면
 class CoachingQuestionScreen extends StatefulWidget {
@@ -21,6 +22,7 @@ class _CoachingQuestionScreenState extends State<CoachingQuestionScreen> {
   static const double _topRowCompensation = 24.0;
 
   bool _showHaveForm = false;
+  bool _isLoading = false;
   final TextEditingController _sideJobController = TextEditingController();
   final FocusNode _sideJobFocusNode = FocusNode();
   final Debouncer _saveDebouncer = Debouncer(350);
@@ -88,25 +90,39 @@ class _CoachingQuestionScreenState extends State<CoachingQuestionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: () => _sideJobFocusNode.unfocus(),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+      body: Stack(
+        children: [
+          SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
-                _buildTopRow(),
-                const SizedBox(height: _topSpacing - 40 - _topRowCompensation),
-                _buildTitle(),
-                const SizedBox(height: 20),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _sideJobFocusNode.unfocus(),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 40),
+                          _buildTopRow(),
+                          const SizedBox(height: _topSpacing - 40 - _topRowCompensation),
+                          _buildTitle(),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                _buildBottomBar(),
               ],
             ),
           ),
-        ),
+          if (_isLoading) const AILoadingOverlay(
+            title: 'AI가 추천을 탐색 중...',
+            subtitle: '취향, 패턴, 목표를 분석하고 있어요',
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
@@ -284,6 +300,8 @@ class _CoachingQuestionScreenState extends State<CoachingQuestionScreen> {
     );
   }
 
+
+
   Future<void> _persistScreenState(int state) async {
     try {
       final storage = _storage ?? await LocalStorageService.getInstance();
@@ -297,12 +315,22 @@ class _CoachingQuestionScreenState extends State<CoachingQuestionScreen> {
   }
 
   Future<void> _onRecommend() async {
-    await _goToRecommendations();
+    _showLoadingAndNavigate();
   }
 
   Future<void> _onSubmitHave() async {
     _sideJobFocusNode.unfocus();
-    await _goToRecommendations();
+    _showLoadingAndNavigate();
+  }
+
+  void _showLoadingAndNavigate() {
+    setState(() => _isLoading = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _goToRecommendations();
+      }
+    });
   }
 
   Future<void> _goToRecommendations() async {

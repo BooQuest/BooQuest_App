@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
+import 'package:booquest/core/storage/local_storage_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,6 +11,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _stageExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

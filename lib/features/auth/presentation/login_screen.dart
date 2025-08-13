@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         color: Colors.black.withValues(alpha: 0.1),
         shape: BoxShape.circle,
       ),
-      child: const Icon(Icons.person, size: 48, color: Colors.grey),
+      child: const Icon(Icons.pets, size: 48, color: Colors.grey),
     );
   }
 
@@ -109,15 +109,15 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(builder: (_) => const MainScreen()),
           );
         } else {
-          // final Widget onboardingScreen = await _decideOnboardingScreen(storage);
-          // Navigator.pushReplacement(
-          //   context,
-          //   MaterialPageRoute(builder: (_) => onboardingScreen),
-          // );
+          final Widget onboardingScreen = await _decideOnboardingScreen(storage);
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const MainScreen()),
+            MaterialPageRoute(builder: (_) => onboardingScreen),
           );
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(builder: (_) => const MainScreen()),
+          // );
         }
       }
     } catch (e) {
