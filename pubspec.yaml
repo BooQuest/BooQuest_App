@@ -49,7 +49,8 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   
   # SVG 이미지 지원
-  flutter_svg: ^2.0.10
+  flutter_svg: ^2.0.10+1
+  lottie: ^3.1.2
   kakao_flutter_sdk: ^1.9.7+3
 
 dev_dependencies:
