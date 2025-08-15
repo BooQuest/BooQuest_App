@@ -3,6 +3,7 @@ import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
+import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
 
 /// 부업 추천 화면
 class SideJobRecommendationsScreen extends StatefulWidget {
@@ -70,7 +71,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
                         _buildTitle(),
                         const SizedBox(height: 48),
                         _buildCardList(),
-                        const SizedBox(height: 100),
+                        const SizedBox(height: 50),
                       ],
                     ),
                   ),
@@ -169,7 +170,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
               scale: scale,
               child: Stack(
                 children: [
-                  _SideJobCard(item: items[index]),
+                  _SideJobCard(item: items[index], isSelected: isSelected),
                   if (isSelected) ...[
                     // Glowing border
                     Positioned.fill(
@@ -260,6 +261,8 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   }
 
   Widget _buildBottomBar() {
+    final bool hasSelection = _selectedCardIndex != null;
+    
     return SafeArea(
       top: false,
       child: Padding(
@@ -268,187 +271,49 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
           right: _horizontalPadding,
           bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 46,
-          child: Stack(
-            children: [
-              AbsorbPointer(
-                absorbing: true, // 클릭 이벤트 제거 요청에 따라 항상 비활성화
-                child: ElevatedButton(
-                  onPressed: null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonActive,
-                    foregroundColor: AppColors.buttonText,
-                    disabledBackgroundColor: AppColors.buttonInactive,
-                    disabledForegroundColor: AppColors.buttonText,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.refresh, size: 20, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text('다시 추천해줘', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                    ],
-                  ),
+        child: Stack(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton(
+                onPressed: hasSelection ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const QuestStepsScreen()),
+                  );
+                } : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: hasSelection ? AppColors.buttonActive : AppColors.buttonInactive,
+                  foregroundColor: AppColors.buttonText,
+                  disabledBackgroundColor: AppColors.buttonInactive,
+                  disabledForegroundColor: AppColors.buttonText,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
                 ),
+                child: const Text('다음', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               ),
-              if (_isLoading)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showConfirmationPopup() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildConfirmationPopup(),
-    );
-  }
-
-  Widget _buildConfirmationPopup() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // drag handle
-              Align(
-                alignment: Alignment.center,
+            ),
+            if (_isLoading)
+              Positioned.fill(
                 child: Container(
-                  width: 75,
-                  height: 5,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD9D9D9),
-                    borderRadius: BorderRadius.circular(100),
+                    color: Colors.black.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              // progress (e.g., 8/10)
-              const Text(
-                '8/10',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                '메인 퀘스트 생성완료',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '맘에 안 드시면 재생성 해드릴게요',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 20),
-              // steps
-              const _StepRow(stepLabel: '1단계', title: '블로그 기반 구축 & 운영준비', difficulty: '매우 쉬움'),
-              const SizedBox(height: 12),
-              const _StepRow(stepLabel: '2단계', title: '키워드 & 콘텐츠 전략 설계', difficulty: '쉬움'),
-              const SizedBox(height: 12),
-              const _StepRow(stepLabel: '3단계', title: '콘텐츠 1차 생산 & 초기 유입 확보', difficulty: '보통'),
-              const SizedBox(height: 12),
-              const _StepRow(stepLabel: '4단계', title: '콘텐츠 지속 생산 & 유입 확대', difficulty: '어려움'),
-              const SizedBox(height: 12),
-              Stack(
-                children: [
-                  const _StepRow(stepLabel: '5단계', title: '수익화 & 비즈니스 확장', difficulty: '매우 어려움'),
-                  // again button overlaid on bottom center of 5th step card
-                  Positioned(
-                    bottom: 8,
-                    left: 0,
-                    right: 0,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        height: 46,
-                        width: 156,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFBFBFBF).withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(100),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.white,
-                            shadowColor: Colors.transparent,
-                            elevation: 0,
-                          ),
-                          child: const Text('다시 추천해줘', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // primary CTA
-              SizedBox(
-                height: 46,
-                child: ElevatedButton(
-                  onPressed: _onConfirmRecommendations,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonActive,
-                    foregroundColor: AppColors.buttonText,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: const Text('이대로 진행하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 
-  void _onConfirmRecommendations() async {
-    // 온보딩 데이터 초기화 및 메인(Home) 이동
-    try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.clearOnboardingDetailsOnly();
-      await storage.setOnboardingCompleted(true);
-    } catch (_) {}
 
-    if (!mounted) return;
-    Navigator.pop(context); // 팝업 닫기
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const MainScreen()),
-      (_) => false,
-    );
-  }
+
+
+
+
 
   @override
   void dispose() {
@@ -459,24 +324,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   void _handleCardTap(int index) {
     setState(() {
       _selectedCardIndex = index;
-    });
-
-    // AI 선택 애니메이션 시작
-    _selectionController.forward().then((_) {
-      // 애니메이션 완료 후 로딩 시작
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate AI processing delay
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() {
-          _isLoading = false;
-          _selectedCardIndex = null;
-        });
-        _selectionController.reset();
-        _showConfirmationPopup();
-      });
     });
   }
 
@@ -492,16 +339,27 @@ class _SideJobItem {
 
 class _SideJobCard extends StatelessWidget {
   final _SideJobItem item;
+  final bool isSelected;
   
-  const _SideJobCard({required this.item});
+  const _SideJobCard({required this.item, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isSelected ? const Color(0xFFF0F0F0) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder, width: 1),
+        border: Border.all(
+          color: isSelected ? const Color(0xFFD0D0D0) : AppColors.cardBorder, 
+          width: isSelected ? 2 : 1
+        ),
+        boxShadow: isSelected ? [
+          BoxShadow(
+            color: const Color(0xFFD0D0D0).withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ] : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -511,13 +369,16 @@ class _SideJobCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 24,
+                  height: 24,
                   decoration: BoxDecoration(
                     color: AppColors.overlayLight.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey, width: 1),
                   ),
-                  child: const Icon(Icons.pets, size: 24, color: Colors.orange),
+                  child: isSelected 
+                    ? const Icon(Icons.check, size: 16, color: Colors.white)
+                    : const SizedBox.shrink(),
                 ),
                 const Spacer(),
                 const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
@@ -526,19 +387,19 @@ class _SideJobCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               item.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: isSelected ? const Color(0xFF4A4A4A) : AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               item.subtitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
+                color: isSelected ? const Color(0xFF666666) : AppColors.textSecondary,
                 height: 1.4,
               ),
             ),
@@ -549,6 +410,46 @@ class _SideJobCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 _buildButton('실제 수익화 사례'),
               ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSelected 
+                    ? AppColors.buttonActive
+                    : const Color(0xFFE0E0E0),
+                  foregroundColor: isSelected 
+                    ? Colors.white 
+                    : const Color(0xFF333333),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
+                  side: isSelected 
+                    ? BorderSide(color: AppColors.buttonActive, width: 1) 
+                    : BorderSide(color: const Color(0xFFCCCCCC), width: 1),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.refresh, 
+                      size: 20, 
+                      color: isSelected ? Colors.white : const Color(0xFF333333)
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '다시 추천해줘', 
+                      style: TextStyle(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? Colors.white : const Color(0xFF333333),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -576,83 +477,4 @@ class _SideJobCard extends StatelessWidget {
   }
 }
 
-class _StepRow extends StatelessWidget {
-  final String stepLabel;
-  final String title;
-  final String difficulty;
-  const _StepRow({required this.stepLabel, required this.title, required this.difficulty});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.black, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top row: step label and difficulty
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE7E7E7),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    stepLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  difficulty,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
-                ),
-                const Spacer(),
-                const Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 20,
-                  color: Colors.black,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Bottom row: title with underline
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Color(0xFF87CEEB), // Light blue underline
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
