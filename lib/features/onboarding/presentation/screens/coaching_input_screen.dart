@@ -2,38 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
-import 'package:booquest/features/onboarding/presentation/screens/hobby_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/coaching_question_screen.dart';
 import 'package:booquest/core/utils/debouncer.dart';
+import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
+import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
 
-/// 온보딩 1단계 - 직업 질문 화면
-class JobQuestionScreen extends StatefulWidget {
-  const JobQuestionScreen({super.key});
+/// 온보딩 3단계 - 코칭 받고 싶은 부업 입력 화면
+class CoachingInputScreen extends StatefulWidget {
+  const CoachingInputScreen({super.key});
 
   @override
-  State<JobQuestionScreen> createState() => _JobQuestionScreenState();
+  State<CoachingInputScreen> createState() => _CoachingInputScreenState();
 }
 
-class _JobQuestionScreenState extends State<JobQuestionScreen> {
-  final TextEditingController _jobController = TextEditingController();
-  final FocusNode _jobFocusNode = FocusNode();
+class _CoachingInputScreenState extends State<CoachingInputScreen> {
+  static const double _horizontalPadding = 20.0;
+  static const double _topSpacing = 80.0;
+  static const double _inputToButtonSpacing = 15.0;
+  static const double _topRowCompensation = 24.0;
+
+  bool _isLoading = false;
+  final TextEditingController _sideJobController = TextEditingController();
+  final FocusNode _sideJobFocusNode = FocusNode();
   final Debouncer _saveDebouncer = Debouncer(350);
   LocalStorageService? _storage;
   bool _isValid = false;
-
-  static const double _horizontalPadding = 20.0;
-  static const double _topSpacing = 80.0;  // 상단 여백 줄임
-  static const double _titleToInputSpacing = 120.0;
-  static const double _inputToButtonSpacing = 15.0;
-  static const double _topRowCompensation = 16.0;
 
   @override
   void initState() {
     super.initState();
     _initStorage();
-    _jobController.addListener(_validateJob);
-    _loadSavedJob();
-    _setStage(1);
+    _sideJobController.addListener(_validateInput);
+    _loadSaved();
+    _setStage(3);
   }
 
   Future<void> _initStorage() async {
@@ -47,38 +48,35 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
     } catch (_) {}
   }
 
-  void _validateJob() {
-    final valid = _jobController.text.trim().length >= 2;
+  void _validateInput() {
+    final valid = _sideJobController.text.trim().length >= 2;
     if (_isValid != valid) {
       setState(() => _isValid = valid);
     }
   }
 
-  Future<void> _loadSavedJob() async {
+  Future<void> _loadSaved() async {
     try {
       final storage = _storage ?? await LocalStorageService.getInstance();
-      final saved = storage.getJob();
-      setState(() {
-        if (saved != null && saved.isNotEmpty) {
-          _jobController.text = saved;
+      final saved = storage.getCoachingSideJob();
+      if (saved != null && saved.isNotEmpty) {
+        setState(() {
+          _sideJobController.text = saved;
           _isValid = true;
-        } else {
-          _jobController.text = ''; // 명시적으로 지우기
-          _isValid = false;
-        }
-      });
+        });
+      }
     } catch (_) {}
   }
 
   @override
   void dispose() {
     _saveDebouncer.dispose();
-    final job = _jobController.text.trim();
-    if (job.isNotEmpty) {
-      _storage?.saveJob(job);
+    final text = _sideJobController.text.trim();
+    if (text.isNotEmpty) {
+      _storage?.saveCoachingSideJob(text);
     }
-    _jobController.dispose();
-    _jobFocusNode.dispose();
+    _sideJobController.dispose();
+    _sideJobFocusNode.dispose();
     super.dispose();
   }
 
@@ -86,25 +84,39 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: () => _jobFocusNode.unfocus(),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+      body: Stack(
+        children: [
+          SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
-                _buildTopRow(),
-                const SizedBox(height: _topSpacing - 40 - _topRowCompensation),
-                _buildTitle(),
-                const SizedBox(height: _titleToInputSpacing),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _sideJobFocusNode.unfocus(),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 40),
+                          _buildTopRow(),
+                          const SizedBox(height: _topSpacing - 40 - _topRowCompensation),
+                          _buildTitle(),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                _buildBottomBar(),
               ],
             ),
           ),
-        ),
+          if (_isLoading) const AILoadingOverlay(
+            title: 'AI가 당신에게 맞는\n부업을 분석하고 있어요...',
+            subtitle: '',
+          ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
@@ -118,7 +130,7 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
           onPressed: () => _goBack(),
         ),
         const Expanded(
-          child: Center(child: OnboardingProgress(currentStep: 0)),  // 4단계 중 첫 번째
+          child: Center(child: OnboardingProgress(currentStep: 3)),  // 4단계 중 네번째
         ),
         const SizedBox(width: 40),
       ],
@@ -129,7 +141,7 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
     return const Align(
       alignment: Alignment.centerLeft,
       child: Text(
-        '직업이 뭐야?',
+        '코칭 받고 싶은 부업을 알려줘!',
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -175,19 +187,15 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: TextField(
-          controller: _jobController,
-          focusNode: _jobFocusNode,
+          controller: _sideJobController,
+          focusNode: _sideJobFocusNode,
           onChanged: (v) {
             final trimmed = v.trim();
             _saveDebouncer.run(() async {
+              if (trimmed.isEmpty) return;
               try {
                 final storage = _storage ?? await LocalStorageService.getInstance();
-                if (trimmed.isEmpty) {
-                  await storage.removeJob();
-                  _jobController.clear();
-                } else {
-                  await storage.saveJob(trimmed);
-                }
+                await storage.saveCoachingSideJob(trimmed);
               } catch (_) {}
             });
           },
@@ -198,15 +206,15 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
           ),
           decoration: const InputDecoration(
             border: InputBorder.none,
-            hintText: '마케팅 어시스턴트',
+            hintText: '마케팅 프리랜서',
             hintStyle: TextStyle(
               color: AppColors.textHint,
               fontSize: 18,
             ),
           ),
-          onTapOutside: (_) => FocusScope.of(context).unfocus(),
           textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _onConfirm(),
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          onSubmitted: (_) => _onSubmit(),
         ),
       ),
     );
@@ -217,7 +225,7 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
       width: double.infinity,
       height: 46,
       child: ElevatedButton(
-        onPressed: _isValid ? _onConfirm : null,
+        onPressed: _isValid ? _onSubmit : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: _isValid ? AppColors.buttonActive : AppColors.buttonInactive,
           foregroundColor: AppColors.buttonText,
@@ -232,34 +240,31 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
     );
   }
 
-  Future<void> _goBack() async {
-    await _setStage(0);
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(PageRouteBuilder(
-      pageBuilder: (_, a, sa) => const CharacterCreationScreen(),
-      transitionsBuilder: (_, animation, __, child) {
-        final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOutCubic));
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 280),
-    ));
+  Future<void> _onSubmit() async {
+    _sideJobFocusNode.unfocus();
+    _showLoadingAndNavigate();
   }
 
-  Future<void> _onConfirm() async {
-    _jobFocusNode.unfocus();
-    final job = _jobController.text.trim();
-    try {
-      final storage = _storage ?? await LocalStorageService.getInstance();
-      await storage.saveJob(job);
-    } catch (_) {}
+  void _showLoadingAndNavigate() {
+    setState(() => _isLoading = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _goToRecommendations();
+      }
+    });
+  }
 
-    await _setStage(2);
-
+  Future<void> _goToRecommendations() async {
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const HobbyQuestionScreen()),
+      MaterialPageRoute(builder: (_) => const SideJobRecommendationsScreen()),
     );
+  }
+
+  Future<void> _goBack() async {
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
 }

@@ -1,5 +1,6 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:math' as math;
 
 /// AI 로딩 오버레이 공용 위젯
 class AILoadingOverlay extends StatefulWidget {
@@ -22,95 +23,72 @@ class AILoadingOverlay extends StatefulWidget {
   State<AILoadingOverlay> createState() => _AILoadingOverlayState();
 }
 
-class _AILoadingOverlayState extends State<AILoadingOverlay> with SingleTickerProviderStateMixin {
-  late final AnimationController _loaderController;
+class _AILoadingOverlayState extends State<AILoadingOverlay> with TickerProviderStateMixin {
+  late final AnimationController _animationController;
+  static const double _spinnerSize = 60.0;
 
   @override
   void initState() {
     super.initState();
-    _loaderController = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat();
   }
 
   @override
   void dispose() {
-    _loaderController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: widget.backgroundColor ?? Colors.black.withValues(alpha: 0.6),
+      color: widget.backgroundColor ?? Colors.black.withOpacity(0.85),
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-          decoration: BoxDecoration(
-            color: widget.cardColor ?? Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // SVG 로딩 스피너 (회전 애니메이션 추가)
+            AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _animationController.value * 2 * math.pi,
+                  child: SvgPicture.asset(
+                    'assets/images/characters/Loading_spinner.svg',
+                    width: _spinnerSize,
+                    height: _spinnerSize,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            // Text
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Sleek pulsing dots loader
-              AnimatedBuilder(
-                animation: _loaderController,
-                builder: (context, _) {
-                  final t = _loaderController.value;
-                  double scaleFor(int i) {
-                    return 0.6 + 0.4 * (0.5 * (1 + math.sin(2 * math.pi * (t + i / 3))));
-                  }
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (int i = 0; i < 3; i++) ...[
-                        Transform.scale(
-                          scale: scaleFor(i),
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: widget.dotColor ?? const Color(0xFF5B86E5),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        if (i < 2) const SizedBox(width: 10),
-                      ]
-                    ],
-                  );
-                },
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              widget.subtitle,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.white70,
               ),
-              const SizedBox(height: 14),
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                widget.subtitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.black54,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+
