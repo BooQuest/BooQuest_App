@@ -34,7 +34,7 @@
         <!-- 카카오 앱 키 -->
         <meta-data
             android:name="com.kakao.sdk.AppKey"
-            android:value="kakaoYOUR_ANDROID_APP_KEY" />
+            android:value="635d855eae5acd47eaaaf28fc6b49ca8" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -46,5 +46,7 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- KakaoTalk package visibility for Android 11+ -->
+        <package android:name="com.kakao.talk"/>
     </queries>
 </manifest>

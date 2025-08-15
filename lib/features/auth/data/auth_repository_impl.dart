@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:booquest/features/auth/domain/auth_repository.dart';
 import 'package:booquest/core/network/network_client.dart';
 import 'package:booquest/core/constants.dart';
+import 'package:booquest/core/storage/token_storage.dart';
 
 /// AuthRepository 인터페이스의 실제 구현체
 /// 
@@ -30,13 +31,26 @@ class AuthRepositoryImpl implements AuthRepository {
       // final loginResponse = LoginResponse.fromJson(response.data!);
       // return Success(loginResponse.userInfo);
       
-      // 임시 구현: 성공 응답 반환
+      // 임시 구현: 성공 응답 반환 + JWT 토큰 생성 및 저장
       await Future.delayed(const Duration(seconds: 1)); // API 호출 시뮬레이션
       
+      // 임시 JWT 토큰 생성 (실제로는 백엔드에서 받아옴)
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final tempJwtToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.temp_jwt_${timestamp}_booquest';
+      final tempRefreshToken = 'refresh_token_${timestamp}_booquest';
+      
+      // JWT 토큰을 보안 저장소에 저장
+      await TokenStorage.saveAccessToken(tempJwtToken);
+      await TokenStorage.saveRefreshToken(tempRefreshToken);
+      
+      print('✅ JWT 토큰 저장 완료:');
+      print('   - Access Token: $tempJwtToken');
+      print('   - Refresh Token: $tempRefreshToken');
+      
       final userInfo = UserInfo(
-        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        id: 'temp_${timestamp}',
         email: 'user@example.com',
-        name: '테스트 사용자',
+        name: '소현',
         profileImage: null,
         provider: provider,
       );
@@ -57,8 +71,11 @@ class AuthRepositoryImpl implements AuthRepository {
       // TODO: Spring API가 구현되면 실제 로그아웃 API 호출
       // await _networkClient.post('/api/auth/logout');
       
-      // 임시 구현: 성공 응답 반환
+      // 임시 구현: 로그아웃 시 토큰 삭제
       await Future.delayed(const Duration(milliseconds: 500));
+      await TokenStorage.clearAll();
+      
+      print('✅ 로그아웃 완료 - JWT 토큰 삭제됨');
       
       return const Success(null);
       
@@ -83,9 +100,25 @@ class AuthRepositoryImpl implements AuthRepository {
       // 
       // return const Success(null);
       
-      // 임시 구현: 로그인된 사용자가 없다고 가정
+      // 임시 구현: 저장된 JWT 토큰이 있으면 사용자 정보 반환
       await Future.delayed(const Duration(milliseconds: 300));
       
+      final accessToken = await TokenStorage.getAccessToken();
+      if (accessToken != null) {
+        print('✅ 저장된 JWT 토큰 발견: ${accessToken.substring(0, 30)}...');
+        
+        // 토큰이 있으면 기존 사용자 정보 반환 (임시)
+        final userInfo = UserInfo(
+          id: 'temp_existing_user',
+          email: 'user@example.com',
+          name: '소현',
+          profileImage: null,
+          provider: 'kakao',
+        );
+        return Success(userInfo);
+      }
+      
+      print('✅ 저장된 JWT 토큰 없음 - 미인증 상태');
       return const Success(null);
       
     } on DioException catch (e) {

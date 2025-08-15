@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:booquest/core/network/network_client.dart';
 import 'package:booquest/features/auth/data/auth_repository_impl.dart';
 import 'package:booquest/features/auth/presentation/auth_provider.dart';
@@ -19,6 +20,12 @@ void main() async {
   // if (const String.fromEnvironment('FLUTTER_ENV') != 'production') {
   //   await dotenv.load(fileName: ".env");
   // }
+  
+  // 카카오 SDK 초기화
+  KakaoSdk.init(
+    nativeAppKey: '635d855eae5acd47eaaaf28fc6b49ca8',
+    javaScriptAppKey: '635d855eae5acd47eaaaf28fc6b49ca8',
+  );
   
   // NetworkClient 초기화
   NetworkClient().initialize();

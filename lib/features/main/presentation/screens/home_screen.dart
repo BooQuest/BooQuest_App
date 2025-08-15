@@ -39,11 +39,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       width: 220,
                       height: 220,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF0F0F0),
-                        shape: BoxShape.circle,
+                      child: Image.asset(
+                        'assets/images/characters/boo.png',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('이미지 로드 에러: $error');
+                          return const Icon(Icons.pets, size: 100, color: AppColors.textHint);
+                        },
                       ),
-                      child: const Icon(Icons.pets, size: 100, color: AppColors.textHint),
                     ),
                     const SizedBox(height: 12),
                     // Level badge and name
