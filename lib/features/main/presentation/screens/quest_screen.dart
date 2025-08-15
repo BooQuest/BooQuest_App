@@ -279,42 +279,91 @@ class _Stage1Detail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF0F0F0),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.article, color: AppColors.textHint),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                '블로그 플랫폼 선택 & 기본 설정',
+        // 목표, 완료조건, 보상 정보
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F8F8),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '목표: 블로그 글 1편 작성',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.textPrimary,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              const Text(
+                '완료 조건: 1,000자 이상·사진 3장 첨부',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '보상: 경험치 50점',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
-        _SkeletonBar(widthFactor: 0.8),
-        const SizedBox(height: 8),
-        _SkeletonBar(widthFactor: 0.6),
-        const SizedBox(height: 8),
-        _SkeletonBar(widthFactor: 0.9),
         const SizedBox(height: 16),
-        _QuestItemTile(index: 1, title: '블로그 플랫폼 선택'),
-        const SizedBox(height: 12),
-        _QuestItemTile(index: 2, title: '도메인 설정'),
-        const SizedBox(height: 12),
-        _QuestItemTile(index: 3, title: '기본 레이아웃 구성'),
+        // 부퀘스트 이름 입력 필드
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          ),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  '부퀘스트 이름',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              const Icon(Icons.keyboard_arrow_down, color: AppColors.textPrimary),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 완료하기 버튼
+        SizedBox(
+          width: double.infinity,
+          height: 46,
+          child: ElevatedButton(
+            onPressed: () {
+              // 완료하기 버튼 클릭 시 동작
+              print('1단계 완료하기 버튼 클릭됨');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF666666),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            child: const Text('완료하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          ),
+        ),
       ],
     );
   }
@@ -328,42 +377,91 @@ class _Stage2Detail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF0F0F0),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.image, color: AppColors.textHint),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                '100만명이 선택한 핵심 키워드 Top3',
+        // 목표, 완료조건, 보상 정보
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F8F8),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '목표: 키워드 분석 보고서 작성',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.textPrimary,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              const Text(
+                '완료 조건: Top3 키워드 선정·검색량 분석',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '보상: 경험치 70점',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
-        _SkeletonBar(widthFactor: 0.7),
-        const SizedBox(height: 8),
-        _SkeletonBar(widthFactor: 0.9),
-        const SizedBox(height: 8),
-        _SkeletonBar(widthFactor: 0.6),
         const SizedBox(height: 16),
-        _QuestItemTile(index: 1, title: '핵심 키워드 분석'),
-        const SizedBox(height: 12),
-        _QuestItemTile(index: 2, title: '콘텐츠 주제 선정'),
-        const SizedBox(height: 12),
-        _QuestItemTile(index: 3, title: '콘텐츠 캘린더 작성'),
+        // 부퀘스트 이름 입력 필드
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          ),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  '부퀘스트 이름',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              const Icon(Icons.keyboard_arrow_down, color: AppColors.textPrimary),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // 완료하기 버튼
+        SizedBox(
+          width: double.infinity,
+          height: 46,
+          child: ElevatedButton(
+            onPressed: () {
+              // 완료하기 버튼 클릭 시 동작
+              print('2단계 완료하기 버튼 클릭됨');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF666666),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            child: const Text('완료하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          ),
+        ),
       ],
     );
   }
