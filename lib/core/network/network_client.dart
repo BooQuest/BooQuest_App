@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import '../constants.dart';
-import 'package:booquest/core/storage/token_storage.dart';
+import 'package:booquest/core/storage/local_storage_service.dart';
 
 /// HTTP 네트워크 클라이언트
 /// 
@@ -42,10 +42,15 @@ class NetworkClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // JWT 토큰이 있으면 헤더에 추가
-          final token = await TokenStorage.getAccessToken();
-          if (token != null && token.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $token';
+          // LocalStorageService에서 JWT 토큰을 가져와서 헤더에 추가
+          try {
+            final storage = await LocalStorageService.getInstance();
+            final token = storage.getAccessToken();
+            if (token != null && token.isNotEmpty) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+          } catch (e) {
+            print('❌ 토큰 가져오기 실패: $e');
           }
           handler.next(options);
         },

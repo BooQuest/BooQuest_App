@@ -237,18 +237,21 @@ class _MyScreenState extends State<MyScreen> {
   Future<void> _handleLogout(BuildContext context) async {
     try {
       final storage = await LocalStorageService.getInstance();
+      // 온보딩 완료 상태 초기화
       await storage.setOnboardingCompleted(false);
+      // 사용자 인증 정보 초기화
+      await storage.setAccessToken('');
+      await storage.setRefreshToken('');
+      await storage.removeUserId();
+      await storage.setEmail('');
+      await storage.setProfileImageUrl('');
     } catch (_) {}
 
-    try {
-      await context.read<AuthProvider>().logout();
-    } finally {
-      if (!context.mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    }
+    if (!context.mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
 

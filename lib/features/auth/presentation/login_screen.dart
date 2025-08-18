@@ -120,9 +120,6 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // 카카오 액세스 토큰 획득 성공
-      print('✅ 카카오 액세스 토큰 획득 성공: $kakaoAccessToken');
-
       // 2) 앱 인증 진행
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final bool loginOk = await authProvider.loginWithSocial(
