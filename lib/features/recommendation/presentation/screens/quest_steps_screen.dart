@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/recommendation/presentation/screens/tutorial_completion_screen.dart';
+import 'package:booquest/core/storage/local_storage_service.dart';
 
 class QuestStepsScreen extends StatelessWidget {
   const QuestStepsScreen({super.key});
@@ -54,45 +56,107 @@ class QuestStepsScreen extends StatelessWidget {
   }
 
   Widget _buildTitle() {
-    return const Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        '메인/부 퀘스트 생성 완료\n이렇게 진행하면 될까요?',
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-          height: 1.4,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '메인/부 퀘스트 생성 완료',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '이렇게 진행하면 될까요?',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 39,
+          height: 39,
+          child: SvgPicture.asset(
+            'assets/images/characters/basic_icon_1.svg',
+            fit: BoxFit.contain,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildQuestSteps() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildQuestStep(1, isActive: true),
-        _buildQuestStep(2, isActive: false),
-        _buildQuestStep(3, isActive: false),
-        _buildQuestStep(4, isActive: false),
-        _buildQuestStep(5, isActive: false),
+        // 메인 퀘스트 섹션
+        const Text(
+          '메인 퀘스트',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildMainQuestSection(),
+        const SizedBox(height: 32),
+        
+        // 부 퀘스트 섹션
+        const Text(
+          '부 퀘스트',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildSubQuestSection(),
       ],
     );
   }
 
-  Widget _buildQuestStep(int stepNumber, {required bool isActive}) {
-    final stepData = _getStepData(stepNumber);
-    
+  Widget _buildMainQuestSection() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildMainQuestCard(1, 'SNS 계정 설정 & 브랜딩', '매우 쉬움'),
+          const SizedBox(width: 12),
+          _buildMainQuestCard(2, '콘텐츠 전략 & 해시태그 설계', '쉬움'),
+          const SizedBox(width: 12),
+          _buildMainQuestCard(3, '콘텐츠 제작 & 일정 관리', '보통'),
+          const SizedBox(width: 12),
+          _buildMainQuestCard(4, '팔로워 확보 & 커뮤니티 구축', '어려움'),
+          const SizedBox(width: 12),
+          _buildMainQuestCard(5, '수익화 & 브랜드 확장', '매우 어려움'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainQuestCard(int stepNumber, String title, String difficulty) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      width: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isActive ? Colors.black : const Color(0xFFCCCCCC),
-          width: 1,
-        ),
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,149 +166,66 @@ class QuestStepsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isActive ? const Color(0xFFE7E7E7) : const Color(0xFFE0E0E0),
+                  color: const Color(0xFFE7E7E7),
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
-                  '$stepNumber단계',
-                  style: TextStyle(
+                  '${stepNumber}단계',
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: isActive ? Colors.black : const Color(0xFF999999),
+                    color: Colors.black,
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Text(
-                stepData.difficulty,
-                style: TextStyle(
+                difficulty,
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: isActive ? Colors.black : const Color(0xFF999999),
+                  color: Colors.black,
                 ),
               ),
               const Spacer(),
-              Icon(
+              const Icon(
                 Icons.keyboard_arrow_down,
                 size: 20,
-                color: isActive ? Colors.black : const Color(0xFF999999),
+                color: Colors.black,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E0E0),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.landscape, size: 20, color: Colors.grey),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: isActive ? const Color(0xFF87CEEB) : const Color(0xFFCCCCCC),
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Text(
-              stepData.title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: isActive ? AppColors.textPrimary : const Color(0xFF999999),
-              ),
-            ),
-          ),
-          // 1단계에만 부퀘스트 표시
-          if (stepNumber == 1 && isActive) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F8F8),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE7E7E7),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          '부퀘스트',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      const Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 16,
-                        color: Colors.black,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSubQuest('1단계', '인스타그램 계정 설정 & 프로필 완성', '매우 쉬움'),
-                  const SizedBox(height: 8),
-                  _buildSubQuest('2단계', '첫 게시물 3개 작성 & 해시태그 연습', '쉬움'),
-                  const SizedBox(height: 8),
-                  _buildSubQuest('3단계', '팔로워 10명 확보 & 댓글 소통 시작', '보통'),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubQuest(String step, String title, String difficulty) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F0F0),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              step,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
           Text(
-            difficulty,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
+            '메인 퀘스트에 대한 간단 설명 문구',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
               color: AppColors.textSecondary,
             ),
           ),
@@ -253,22 +234,160 @@ class QuestStepsScreen extends StatelessWidget {
     );
   }
 
-  _StepData _getStepData(int stepNumber) {
-    switch (stepNumber) {
-      case 1:
-        return _StepData('매우 쉬움', '인스타그램 기반 구축 & 운영준비');
-      case 2:
-        return _StepData('쉬움', '콘텐츠 전략 & 해시태그 설계');
-      case 3:
-        return _StepData('보통', '콘텐츠 1차 생산 & 초기 팔로워 확보');
-      case 4:
-        return _StepData('어려움', '콘텐츠 지속 생산 & 팔로워 확대');
-      case 5:
-        return _StepData('매우 어려움', '수익화 & 브랜드 확장');
-      default:
-        return _StepData('보통', '퀘스트 설명');
-    }
+  Widget _buildSubQuestSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 첫 번째 박스 (1단계 메인 퀘스트와 동일한 내용)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE7E7E7),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: const Text(
+                      '1단계',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    '매우 쉬움',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0E0E0),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.landscape, size: 20, color: Colors.grey),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'SNS 계정 설정 & 브랜딩',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '메인 퀘스트에 대한 간단 설명 문구',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        // 5개 부퀘스트 리스트
+        _buildSubQuestItem(1, '부 퀘스트 이름'),
+        const SizedBox(height: 8),
+        _buildSubQuestItem(2, '부 퀘스트 이름'),
+        const SizedBox(height: 8),
+        _buildSubQuestItem(3, '부 퀘스트 이름'),
+        const SizedBox(height: 8),
+        _buildSubQuestItem(4, '부 퀘스트 이름'),
+        const SizedBox(height: 8),
+        _buildSubQuestItem(5, '부 퀘스트 이름'),
+      ],
+    );
   }
+
+  Widget _buildSubQuestItem(int number, String title) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+      ),
+      child: Row(
+        children: [
+          Text(
+            '$number',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFFE0E0E0),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0E0E0),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.landscape, size: 16, color: Colors.grey),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const Icon(
+            Icons.keyboard_arrow_down,
+            size: 20,
+            color: Colors.black,
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+
 
   Widget _buildBottomBar(BuildContext context) {
     return SafeArea(
@@ -283,11 +402,17 @@ class QuestStepsScreen extends StatelessWidget {
           width: double.infinity,
           height: 46,
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TutorialCompletionScreen()),
-              );
+            onPressed: () async {
+              // 온보딩 완료 상태로 설정
+              await _markOnboardingCompleted();
+              
+              // 다음 화면으로 이동
+              if (context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TutorialCompletionScreen()),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonActive,
@@ -301,11 +426,18 @@ class QuestStepsScreen extends StatelessWidget {
       ),
     );
   }
+
+  /// 온보딩 완료 상태 설정
+  Future<void> _markOnboardingCompleted() async {
+    try {
+      final storage = await LocalStorageService.getInstance();
+      await storage.setIsOnboardingCompleted(true);
+      await storage.removeCurrentOnboardingStep(); // 현재 온보딩 단계 정보 삭제
+      print('✅ 온보딩 완료 상태 업데이트 완료');
+    } catch (error) {
+      print('❌ 온보딩 완료 상태 업데이트 실패: $error');
+    }
+  }
 }
 
-class _StepData {
-  final String difficulty;
-  final String title;
 
-  _StepData(this.difficulty, this.title);
-}
