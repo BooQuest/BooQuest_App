@@ -209,13 +209,22 @@ class LocalStorageService {
   }
 
   /// 사용자 ID 저장
-  Future<void> setUserId(int userId) async {
-    await _preferences?.setInt(_userIdKey, userId);
+  Future<void> setUserId(int? userId) async {
+    if (userId != null) {
+      await _preferences?.setInt(_userIdKey, userId);
+    } else {
+      await _preferences?.remove(_userIdKey);
+    }
   }
 
   /// 사용자 ID 조회
   int? getUserId() {
     return _preferences?.getInt(_userIdKey);
+  }
+
+  /// 사용자 ID 삭제
+  Future<void> removeUserId() async {
+    await _preferences?.remove(_userIdKey);
   }
 
   /// 이메일 저장
@@ -226,6 +235,16 @@ class LocalStorageService {
   /// 이메일 조회
   String? getEmail() {
     return _preferences?.getString(_emailKey);
+  }
+
+  /// 닉네임 저장
+  Future<void> setNickname(String nickname) async {
+    await _preferences?.setString('nickname', nickname);
+  }
+
+  /// 닉네임 조회
+  String? getNickname() {
+    return _preferences?.getString('nickname');
   }
 
   /// Access Token 저장

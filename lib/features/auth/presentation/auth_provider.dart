@@ -1,25 +1,27 @@
 import 'package:flutter/foundation.dart';
-import 'package:booquest/features/auth/domain/auth_repository.dart';
+import 'package:booquest/features/auth/data/auth_api_service.dart';
+import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:dio/dio.dart';
 
 /// 인증 상태를 관리하는 Provider
 ///
 /// 로그인/로그아웃 상태, 사용자 정보, 로딩 상태 등을 관리합니다.
 /// UI에서 이 Provider를 통해 인증 상태를 구독하고 변경할 수 있습니다.
 class AuthProvider extends ChangeNotifier {
-  final AuthRepository _authRepository;
+  final AuthApiService _authApiService;
   
-  AuthProvider(this._authRepository);
+  AuthProvider(this._authApiService);
 
   // 상태 변수들
   bool _isLoading = false;
   bool _isAuthenticated = false;
-  UserInfo? _currentUser;
+  Map<String, dynamic>? _currentUser;
   String? _errorMessage;
 
   // Getter들
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _isAuthenticated;
-  UserInfo? get currentUser => _currentUser;
+  Map<String, dynamic>? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
 
   /// 앱 시작 시 현재 사용자 상태 확인
@@ -28,18 +30,25 @@ class AuthProvider extends ChangeNotifier {
     _clearError();
     
     try {
-      final result = await _authRepository.getCurrentUser();
+      final response = await _authApiService.getUserInfo();
       
-      result.when(
-        success: (userInfo) {
-          _currentUser = userInfo;
-          _isAuthenticated = userInfo != null;
-        },
-        failure: (message, error) {
-          _setError(message);
-          _isAuthenticated = false;
-        },
-      );
+      if (response.statusCode == 200 && response.data != null && response.data!['success'] == true) {
+        final userData = response.data!['data'] as Map<String, dynamic>;
+        
+        // 사용자 정보를 LocalStorage에 저장
+        final storage = await LocalStorageService.getInstance();
+        await storage.setUserId(userData['id'] as int);
+        await storage.setEmail(userData['email'] ?? '');
+        if (userData['profileImageUrl'] != null) {
+          await storage.setProfileImageUrl(userData['profileImageUrl'] as String);
+        }
+        
+        _currentUser = userData;
+        _isAuthenticated = true;
+      } else {
+        _setError('인증 상태 확인에 실패했습니다.');
+        _isAuthenticated = false;
+      }
     } catch (e) {
       _setError('인증 상태 확인 중 오류가 발생했습니다.');
       _isAuthenticated = false;
@@ -57,52 +66,51 @@ class AuthProvider extends ChangeNotifier {
     _clearError();
     
     try {
-      final result = await _authRepository.loginWithSocial(
+      final response = await _authApiService.loginWithSocial(
         accessToken: accessToken,
         provider: provider,
       );
       
-      return result.when(
-        success: (userInfo) {
-          _currentUser = userInfo;
-          _isAuthenticated = true;
-          _setLoading(false);
-          return true;
-        },
-        failure: (message, error) {
-          _setError(message);
-          _setLoading(false);
-          return false;
-        },
-      );
+      if (response.statusCode == 200 && response.data != null && response.data!['success'] == true) {
+        final responseData = response.data!['data'] as Map<String, dynamic>;
+        
+        // 사용자 정보와 토큰 정보를 LocalStorage에 저장
+        final storage = await LocalStorageService.getInstance();
+        
+        // userInfo 저장
+        if (responseData['userInfo'] != null) {
+          final userInfo = responseData['userInfo'] as Map<String, dynamic>;
+          await storage.setUserId(userInfo['userId'] as int);
+          await storage.setEmail(userInfo['email'] ?? '');
+          if (userInfo['nickname'] != null) {
+            await storage.setNickname(userInfo['nickname'] as String);
+          }
+          if (userInfo['profileImageUrl'] != null) {
+            await storage.setProfileImageUrl(userInfo['profileImageUrl'] as String);
+          }
+        }
+        
+        // tokenInfo 저장
+        if (responseData['tokenInfo'] != null) {
+          final tokenInfo = responseData['tokenInfo'] as Map<String, dynamic>;
+          await storage.setAccessToken(tokenInfo['accessToken'] as String);
+          await storage.setRefreshToken(tokenInfo['refreshToken'] as String);
+        }
+        
+        _currentUser = responseData;
+        _isAuthenticated = true;
+        _setLoading(false);
+        return true;
+      } else {
+        final message = response.data?['message'] ?? '로그인에 실패했습니다.';
+        _setError(message);
+        _setLoading(false);
+        return false;
+      }
     } catch (e) {
       _setError('로그인 중 오류가 발생했습니다.');
       _setLoading(false);
       return false;
-    }
-  }
-
-  /// 로그아웃 수행
-  Future<void> logout() async {
-    _setLoading(true);
-    _clearError();
-    
-    try {
-      final result = await _authRepository.logout();
-      
-      result.when(
-        success: (_) {
-          _currentUser = null;
-          _isAuthenticated = false;
-        },
-        failure: (message, error) {
-          _setError(message);
-        },
-      );
-    } catch (e) {
-      _setError('로그아웃 중 오류가 발생했습니다.');
-    } finally {
-      _setLoading(false);
     }
   }
 
