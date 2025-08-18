@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
@@ -65,11 +66,11 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 12),
                         _buildTopBar(),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 16),
                         _buildTitle(),
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 20),
                         _buildCardList(),
                         const SizedBox(height: 50),
                       ],
@@ -92,49 +93,60 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   Widget _buildTopBar() {
     return Row(
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppColors.overlayLight.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.pets, size: 20, color: Colors.orange),
+        IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.textPrimary),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        const SizedBox(width: 10),
-        const Text(
-          'Boo',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+        const Expanded(
+          child: Center(child: Text('부업 추천 3가지', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
         ),
+        const SizedBox(width: 40),
       ],
     );
   }
 
   Widget _buildTitle() {
-    return Center(
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textPrimary,
-            height: 1.35,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${_characterName.isNotEmpty ? _characterName : '사용자'} 에게 딱 맞는\n부업을 3가지 추천할게',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '재생성을 원하거나 맘에드는 부업을 선택해 주세요.',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textPrimary.withOpacity(0.6),
+                  height: 1.4,
+                ),
+              ),
+            ],
           ),
-          children: [
-            TextSpan(
-              text: _characterName.isNotEmpty ? _characterName : '사용자',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            const TextSpan(text: ' 에게 딱 맞는 '),
-            const TextSpan(
-              text: '부업을 3가지 추천',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-            const TextSpan(text: '할게'),
-          ],
         ),
-      ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 39,
+          height: 39,
+          child: SvgPicture.asset(
+            'assets/images/characters/basic_icon_1.svg',
+            fit: BoxFit.contain,
+          ),
+        ),
+      ],
     );
   }
 

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:booquest/features/onboarding/presentation/screens/character_creation_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/job_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/hobby_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/coaching_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step0_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step1_job_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step2_hobby_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step3_preferred_method_screen.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 import 'package:booquest/main.dart';
 import 'package:provider/provider.dart';
 import 'package:booquest/features/auth/presentation/auth_provider.dart';
 import 'package:booquest/features/auth/presentation/kakao_login_service.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step0_character_selection_screen.dart';
 
 /// 로그인 화면
 class LoginScreen extends StatefulWidget {
@@ -138,10 +139,6 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // 앱 인증 성공
-      print('✅ 앱 인증 성공!');
-      print('   - 인증 상태: ${authProvider.isAuthenticated}');
-      
       // 3) 온보딩 완료 여부에 따라 화면 전환
       final storage = await LocalStorageService.getInstance();
       final isOnboardingCompleted = storage.isOnboardingCompleted();
@@ -149,13 +146,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (isOnboardingCompleted) {
-        print('✅ 온보딩 완료됨 → 메인 화면으로 이동');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       } else {
-        print('✅ 온보딩 미완료 → 온보딩 화면으로 이동');
         final Widget onboardingScreen = await _decideOnboardingScreen(storage);
         if (!mounted) return;
         Navigator.pushReplacement(
@@ -176,34 +171,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<Widget> _decideOnboardingScreen(LocalStorageService storage) async {
-    final int? stage = storage.getOnboardingStage();
-    if (stage != null) {
-      switch (stage) {
-        case 0:
-          return const CharacterCreationScreen();
-        case 1:
-          return const JobQuestionScreen();
-        case 2:
-          return const HobbyQuestionScreen();
-        case 3:
-          return const CoachingQuestionScreen();
-      }
-    }
+    // final int? stage = storage.getOnboardingStage();
+    // if (stage != null) {
+    //   switch (stage) {
+    //     case 0:
+    //       return const Step0CharacterSelectionScreen();
+    //     case 1:
+    //       return const Step0CharacterCreationScreen();
+    //     case 2:
+    //       return const Step1JobQuestionScreen();
+    //     case 3:
+    //       return const Step2HobbyQuestionScreen();
+    //     case 4:
+    //       return const Step3PreferredMethodScreen();
+    //   }
+    // }
 
-    final String? characterName = storage.getCharacterName();
-    final String? job = storage.getJob();
-    final List<String> hobbies = storage.getHobbies();
-
-    if (characterName == null || characterName.isEmpty) {
-      return const CharacterCreationScreen();
-    }
-    if (job == null || job.isEmpty) {
-      return const JobQuestionScreen();
-    }
-    if (hobbies.isEmpty) {
-      return const HobbyQuestionScreen();
-    }
-
-    return const CoachingQuestionScreen();
+    return const Step0CharacterSelectionScreen();
   }
 }

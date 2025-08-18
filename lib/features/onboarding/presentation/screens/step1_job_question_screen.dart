@@ -1,85 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step2_hobby_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step0_character_creation_screen.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
-import 'package:booquest/features/onboarding/presentation/screens/hobby_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/character_creation_screen.dart';
 import 'package:booquest/core/utils/debouncer.dart';
 
 /// 온보딩 1단계 - 직업 질문 화면
-class JobQuestionScreen extends StatefulWidget {
-  const JobQuestionScreen({super.key});
+class Step1JobQuestionScreen extends StatefulWidget {
+  const Step1JobQuestionScreen({super.key});
 
   @override
-  State<JobQuestionScreen> createState() => _JobQuestionScreenState();
+  State<Step1JobQuestionScreen> createState() => _Step1JobQuestionScreenState();
 }
 
-class _JobQuestionScreenState extends State<JobQuestionScreen> {
+class _Step1JobQuestionScreenState extends State<Step1JobQuestionScreen> {
+  static const double _horizontalPadding = 20.0;
+  static const double _topSpacing = 80.0;
+  static const double _topRowCompensation = 16.0;
+  static const double _titleToInputSpacing = 120.0; // 제목과 입력 필드 사이 간격
+  static const double _inputToButtonSpacing = 15.0; // 입력 필드와 버튼 사이 간격
+
   final TextEditingController _jobController = TextEditingController();
   final FocusNode _jobFocusNode = FocusNode();
-  final Debouncer _saveDebouncer = Debouncer(350);
-  LocalStorageService? _storage;
   bool _isValid = false;
-
-  static const double _horizontalPadding = 20.0;
-  static const double _topSpacing = 80.0;  // 상단 여백 줄임
-  static const double _titleToInputSpacing = 120.0;
-  static const double _inputToButtonSpacing = 15.0;
-  static const double _topRowCompensation = 16.0;
+  
+  // Debouncer 추가
+  late final Debouncer _saveDebouncer;
 
   @override
   void initState() {
     super.initState();
-    _initStorage();
-    _jobController.addListener(_validateJob);
-    _loadSavedJob();
-    _setStage(1);
-  }
-
-  Future<void> _initStorage() async {
-    _storage = await LocalStorageService.getInstance();
-  }
-
-  Future<void> _setStage(int stage) async {
-    try {
-      final storage = _storage ?? await LocalStorageService.getInstance();
-      await storage.setOnboardingStage(stage);
-    } catch (_) {}
-  }
-
-  void _validateJob() {
-    final valid = _jobController.text.trim().length >= 2;
-    if (_isValid != valid) {
-      setState(() => _isValid = valid);
-    }
-  }
-
-  Future<void> _loadSavedJob() async {
-    try {
-      final storage = _storage ?? await LocalStorageService.getInstance();
-      final saved = storage.getJob();
-      setState(() {
-        if (saved != null && saved.isNotEmpty) {
-          _jobController.text = saved;
-          _isValid = true;
-        } else {
-          _jobController.text = ''; // 명시적으로 지우기
-          _isValid = false;
-        }
-      });
-    } catch (_) {}
+    _saveDebouncer = Debouncer(OnboardingDebouncer.inputDelay);
+    _jobController.addListener(_onJobChanged);
+    _saveCurrentStep();
+    _loadSavedJob(); 
   }
 
   @override
   void dispose() {
-    _saveDebouncer.dispose();
-    final job = _jobController.text.trim();
-    if (job.isNotEmpty) {
-      _storage?.saveJob(job);
-    }
+    _jobController.removeListener(_onJobChanged);
     _jobController.dispose();
     _jobFocusNode.dispose();
+    _saveDebouncer.dispose();
     super.dispose();
+  }
+
+  void _onJobChanged() {
+    final isValid = _jobController.text.trim().length >= 2;
+    if (_isValid != isValid) {
+      setState(() => _isValid = isValid);
+    }
+    
+    // 실시간 저장 (Debouncer 적용) - 빈 상태도 저장
+    _saveDebouncer.run(() => _saveJobRealtime());
   }
 
   @override
@@ -118,7 +93,7 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
           onPressed: () => _goBack(),
         ),
         const Expanded(
-          child: Center(child: OnboardingProgress(currentStep: 0)),  // 4단계 중 첫 번째
+          child: Center(child: OnboardingProgress(currentStep: 0)),  // 5단계 중 첫 번째
         ),
         const SizedBox(width: 40),
       ],
@@ -126,17 +101,42 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
   }
 
   Widget _buildTitle() {
-    return const Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        '직업이 뭐야?',
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-          height: 1.4,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '혹시 지금 어떤 일을\n하고 계신가요?',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '더 잘 맞는 부업과 가이드를 준비해 드릴 수 있어요',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textPrimary.withOpacity(0.6),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+        const SizedBox(width: 16),
+        SvgPicture.asset(
+          'assets/images/characters/basic_icon_1.svg',
+          width: 39,
+          height: 39,
+        ),
+      ],
     );
   }
 
@@ -177,20 +177,6 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
         child: TextField(
           controller: _jobController,
           focusNode: _jobFocusNode,
-          onChanged: (v) {
-            final trimmed = v.trim();
-            _saveDebouncer.run(() async {
-              try {
-                final storage = _storage ?? await LocalStorageService.getInstance();
-                if (trimmed.isEmpty) {
-                  await storage.removeJob();
-                  _jobController.clear();
-                } else {
-                  await storage.saveJob(trimmed);
-                }
-              } catch (_) {}
-            });
-          },
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -232,11 +218,11 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
     );
   }
 
-  Future<void> _goBack() async {
-    await _setStage(0);
-    if (!mounted) return;
+  void _goBack() async {
+    await _saveCurrentStep();
+    
     Navigator.of(context).pushReplacement(PageRouteBuilder(
-      pageBuilder: (_, a, sa) => const CharacterCreationScreen(),
+      pageBuilder: (_, a, sa) => const Step0CharacterCreationScreen(),
       transitionsBuilder: (_, animation, __, child) {
         final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
             .chain(CurveTween(curve: Curves.easeOutCubic));
@@ -246,20 +232,65 @@ class _JobQuestionScreenState extends State<JobQuestionScreen> {
     ));
   }
 
-  Future<void> _onConfirm() async {
+  void _onConfirm() async {
     _jobFocusNode.unfocus();
-    final job = _jobController.text.trim();
-    try {
-      final storage = _storage ?? await LocalStorageService.getInstance();
-      await storage.saveJob(job);
-    } catch (_) {}
-
-    await _setStage(2);
-
+    
+    // 직업 데이터를 local storage에 저장
+    await _saveJob();
+    
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const HobbyQuestionScreen()),
+      MaterialPageRoute(builder: (_) => const Step2HobbyQuestionScreen()),
     );
+  }
+
+  /// 직업 데이터 저장
+  Future<void> _saveJob() async {
+    try {
+      final storage = await LocalStorageService.getInstance();
+      final job = _jobController.text.trim();
+      await storage.saveJob(job);
+    } catch (error) {
+      print('❌ 직업 저장 실패: $error');
+    }
+  }
+
+  /// 실시간 저장 (Debouncer 적용)
+  Future<void> _saveJobRealtime() async {
+    try {
+      final storage = await LocalStorageService.getInstance();
+      final job = _jobController.text.trim();
+      await storage.saveJob(job);
+      print('💾 직업 저장됨: "${job.isEmpty ? "(빈 값)" : job}"');
+    } catch (error) {
+      print('❌ 직업 실시간 저장 실패: $error');
+    }
+  }
+
+  /// 현재 온보딩 단계 저장
+  Future<void> _saveCurrentStep() async {
+    try {
+      final storage = await LocalStorageService.getInstance();
+      await storage.setCurrentOnboardingStep(1);
+    } catch (error) {
+      print('❌ 현재 온보딩 단계 저장 실패: $error');
+    }
+  }
+
+  /// 저장된 직업 데이터 불러오기
+  Future<void> _loadSavedJob() async {
+    try {
+      final storage = await LocalStorageService.getInstance();
+      final savedJob = storage.getJob();
+      if (savedJob != null && savedJob.isNotEmpty) {
+        _jobController.text = savedJob;
+        setState(() {
+          _isValid = true;
+        });
+      }
+    } catch (error) {
+      print('❌ 저장된 직업 데이터 불러오기 실패: $error');
+    }
   }
 }

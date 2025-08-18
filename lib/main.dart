@@ -2,24 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:booquest/core/network/network_client.dart';
+import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/features/auth/data/auth_repository_impl.dart';
 import 'package:booquest/features/auth/presentation/auth_provider.dart';
 import 'package:booquest/features/auth/presentation/login_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/character_creation_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/job_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/hobby_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/coaching_question_screen.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step0_character_selection_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step0_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step1_job_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step2_hobby_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step3_preferred_method_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step4_method_selection_screen.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 
 void main() async {
   // Flutter 바인딩 초기화
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 개발 환경일 때만 .env 파일 로드
-  // if (const String.fromEnvironment('FLUTTER_ENV') != 'production') {
-  //   await dotenv.load(fileName: ".env");
-  // }
   
   // 카카오 SDK 초기화
   KakaoSdk.init(
@@ -96,43 +93,78 @@ class _OnboardingRouter extends StatelessWidget {
   Future<Widget> _decideStartScreen() async {
     final storage = await LocalStorageService.getInstance();
 
+    // 앱 시작 시 LocalStorage 데이터 출력
+    _printLocalStorageData(storage);
+
     // 온보딩 완료면 메인으로
     if (storage.isOnboardingCompleted()) {
       return const MainScreen();
     }
 
-    // 스테이지가 저장되어 있다면 스테이지 기준으로 복귀
-    final int? stage = storage.getOnboardingStage();
-    if (stage != null) {
-      switch (stage) {
-        case 0:
-          return const CharacterCreationScreen();
-        case 1:
-          return const JobQuestionScreen();
-        case 2:
-          return const HobbyQuestionScreen();
-        case 3:
-          return const CoachingQuestionScreen();
-      }
+    // 현재 온보딩 단계를 확인하여 해당 화면으로 복귀
+    final int currentStep = storage.getCurrentOnboardingStep();
+    switch (currentStep) {
+      case 0:
+        final String? screenType = storage.getCharacterScreenType();
+        if (screenType == 'creation') {
+          return const Step0CharacterCreationScreen();
+        } else {
+          return const Step0CharacterSelectionScreen();
+        }
+      case 1:
+        return const Step1JobQuestionScreen();
+      case 2:
+        return const Step2HobbyQuestionScreen();
+      case 3:
+        return const Step3PreferredMethodScreen();
+      case 4:
+        return const Step4MethodSelectionScreen();
+      default:
+        return const Step0CharacterSelectionScreen();
     }
+  }
 
-    // 스테이지가 없으면 데이터 기준으로 추정
+  /// LocalStorage의 모든 온보딩 관련 데이터 출력
+  void _printLocalStorageData(LocalStorageService storage) {
+    print('🔍 === 앱 시작 시 LocalStorage 데이터 확인 ===');
+    
+    // 온보딩 완료 상태
+    final bool isCompleted = storage.isOnboardingCompleted();
+    print('📋 온보딩 완료 상태: $isCompleted');
+    
+    // 현재 온보딩 단계
+    final int currentStep = storage.getCurrentOnboardingStep();
+    print('📍 현재 온보딩 단계: $currentStep');
+    
+    // 캐릭터 관련 데이터
     final String? characterName = storage.getCharacterName();
+    final String? characterType = storage.getCharacterType();
+    final String? characterScreenType = storage.getCharacterScreenType();
+    print('🎭 캐릭터 이름: ${characterName ?? "(없음)"}');
+    print('🎨 캐릭터 타입: ${characterType ?? "(없음)"}');
+    print('🖥️ 캐릭터 화면 타입: ${characterScreenType ?? "(없음)"}');
+    
+    // 온보딩 입력 데이터
     final String? job = storage.getJob();
     final List<String> hobbies = storage.getHobbies();
-
-    if (characterName == null || characterName.isEmpty) {
-      return const CharacterCreationScreen();
-    }
-    if (job == null || job.isEmpty) {
-      return const JobQuestionScreen();
-    }
-    if (hobbies.isEmpty) {
-      return const HobbyQuestionScreen();
-    }
-
-    // 앞 단계가 모두 채워져 있으면 마지막 단계(코칭 여부)로
-    return const CoachingQuestionScreen();
+    final String? expressionStyle = storage.getExpressionStyle();
+    print('💼 직업: ${job ?? "(없음)"}');
+    print('🎯 취미: ${hobbies.isEmpty ? "(없음)" : hobbies}');
+    print('✍️ 표현 방식: ${expressionStyle ?? "(없음)"}');
+    
+    // 사용자 인증 데이터
+    final int? userId = storage.getUserId();
+    final String? email = storage.getEmail();
+    final String? accessToken = storage.getAccessToken();
+    final String? refreshToken = storage.getRefreshToken();
+    final String? profileImageUrl = storage.getProfileImageUrl();
+    print('👤 사용자 ID: ${userId ?? "(없음)"}');
+    print('📧 이메일: ${email ?? "(없음)"}');
+    print('🔑 Access Token: ${accessToken != null ? "${accessToken.substring(0, 20)}..." : "(없음)"}');
+    print('🔄 Refresh Token: ${refreshToken != null ? "${refreshToken.substring(0, 20)}..." : "(없음)"}');
+    print('🖼️ 프로필 이미지: ${profileImageUrl ?? "(없음)"}');
+    
+    print('🔍 === LocalStorage 데이터 확인 완료 ===');
   }
 
   @override

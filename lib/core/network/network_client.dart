@@ -30,6 +30,7 @@ class NetworkClient {
 
     // 인터셉터 추가
     _setupInterceptors();
+    
   }
 
   /// Dio 인스턴스 가져오기
@@ -142,6 +143,5 @@ class NetworkClient {
         return AppConstants.unknownErrorMessage;
     }
   }
-
 
 }
