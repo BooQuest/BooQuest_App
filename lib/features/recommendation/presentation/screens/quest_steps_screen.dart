@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/recommendation/presentation/screens/tutorial_completion_screen.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 
 class QuestStepsScreen extends StatelessWidget {
   const QuestStepsScreen({super.key});
@@ -430,9 +431,14 @@ class QuestStepsScreen extends StatelessWidget {
   /// 온보딩 완료 상태 설정
   Future<void> _markOnboardingCompleted() async {
     try {
+      // LocalStorageService: 온보딩 완료 상태 설정
       final storage = await LocalStorageService.getInstance();
-      await storage.setIsOnboardingCompleted(true);
-      await storage.removeCurrentOnboardingStep(); // 현재 온보딩 단계 정보 삭제
+      await storage.setOnboardingCompleted(true);
+      
+      // OnboardingStorageService: 현재 온보딩 단계 정보 삭제
+      final onboardingStorage = await OnboardingStorageService.getInstance();
+      await onboardingStorage.removeCurrentStep();
+      
       print('✅ 온보딩 완료 상태 업데이트 완료');
     } catch (error) {
       print('❌ 온보딩 완료 상태 업데이트 실패: $error');

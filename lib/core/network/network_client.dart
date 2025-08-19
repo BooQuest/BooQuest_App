@@ -1,20 +1,23 @@
 import 'package:dio/dio.dart';
 import '../constants.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 
-/// HTTP 네트워크 클라이언트
+/// Infrastructure 계층: HTTP 네트워크 클라이언트
 /// 
-/// Dio를 사용하여 Spring API와의 통신을 담당합니다.
-/// 인터셉터, 타임아웃, 에러 처리 등을 설정합니다.
+/// Clean Architecture의 Infrastructure 계층에서 외부 API와의 통신을 담당합니다.
+/// Dio를 사용하여 Spring API와의 통신을 처리하고, 인터셉터를 통해
+/// JWT 토큰 자동 추가, 에러 처리 등을 수행합니다.
 class NetworkClient {
-  static final NetworkClient _instance = NetworkClient._internal();
-  factory NetworkClient() => _instance;
-  NetworkClient._internal();
-
+  final AuthStorageService _authStorageService;
   late final Dio _dio;
 
+  /// 생성자에서 AuthStorageService를 주입받아 의존성을 명확히 합니다.
+  NetworkClient(this._authStorageService) {
+    _initializeDio();
+  }
+
   /// Dio 인스턴스 초기화
-  void initialize() {
+  void _initializeDio() {
     _dio = Dio(
       BaseOptions(
         baseUrl: AppConstants.baseUrl,
@@ -28,9 +31,8 @@ class NetworkClient {
       ),
     );
 
-    // 인터셉터 추가
+    // 인터셉터 설정
     _setupInterceptors();
-    
   }
 
   /// Dio 인스턴스 가져오기
@@ -42,22 +44,42 @@ class NetworkClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // LocalStorageService에서 JWT 토큰을 가져와서 헤더에 추가
+          // AuthStorageService에서 JWT 토큰을 가져와서 헤더에 추가
           try {
-            final storage = await LocalStorageService.getInstance();
-            final token = storage.getAccessToken();
+            final token = _authStorageService.getAccessToken();
             if (token != null && token.isNotEmpty) {
               options.headers['Authorization'] = 'Bearer $token';
             }
           } catch (e) {
             print('❌ 토큰 가져오기 실패: $e');
           }
+          
+          // 디버깅용 로그 (개발 환경에서만)
+          print('🌐 API 요청: ${options.method} ${options.path}');
+          if (options.headers['Authorization'] != null) {
+            final token = options.headers['Authorization'] as String;
+            
+            print('🔐 Authorization: $token');
+          }
+          
           handler.next(options);
         },
         onResponse: (response, handler) {
+          // 응답 로그
+          print('✅ API 응답: ${response.statusCode} ${response.requestOptions.path}');
           handler.next(response);
         },
         onError: (error, handler) {
+          // 에러 로그
+          print('❌ API 에러: ${error.response?.statusCode} ${error.requestOptions.path}');
+          print('❌ 에러 메시지: ${error.message}');
+          
+          // 401 에러 시 토큰 만료 처리
+          if (error.response?.statusCode == 401) {
+            print('🔒 토큰 만료 감지, 인증 데이터 초기화 필요');
+            // TODO: AuthNotifier를 통해 로그아웃 처리
+          }
+          
           handler.next(error);
         },
       ),

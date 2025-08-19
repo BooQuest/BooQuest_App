@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step3_preferred_method_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
-import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
-import 'package:booquest/core/network/network_client.dart';
+import 'package:booquest/core/presentation/widgets/common_widgets.dart';
+import 'package:booquest/core/navigation/transitions.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/utils/user_data_utils.dart';
+import 'package:booquest/features/sidejob/infrastructure/sidejob_providers.dart';
+import 'package:booquest/features/sidejob/application/sidejob_state.dart';
+import 'package:booquest/features/sidejob/domain/sidejob_failure.dart';
+import 'package:booquest/features/sidejob/domain/sidejob_entity.dart';
 
 /// 온보딩 4단계 - 자신 있는 방식 선택 화면
-class Step4MethodSelectionScreen extends StatefulWidget {
+class Step4MethodSelectionScreen extends ConsumerStatefulWidget {
   const Step4MethodSelectionScreen({super.key});
 
   @override
-  State<Step4MethodSelectionScreen> createState() => _Step4MethodSelectionScreenState();
+  ConsumerState<Step4MethodSelectionScreen> createState() => _Step4MethodSelectionScreenState();
 }
 
-class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen> {
+class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectionScreen> {
   static const double _horizontalPadding = 20.0;
   static const double _topSpacing = 80.0;
   static const double _titleToOptionsSpacing = 40.0;
@@ -24,7 +31,6 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
   static const double _topRowCompensation = 16.0;
 
   String? _selectedOption;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -41,8 +47,8 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
   /// 현재 온보딩 단계 저장
   Future<void> _saveCurrentStep() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.setCurrentOnboardingStep(4);
+      final storage = await OnboardingStorageService.getInstance();
+      await storage.setCurrentStep(4);
     } catch (error) {
       print('❌ 현재 온보딩 단계 저장 실패: $error');
     }
@@ -51,8 +57,7 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
   /// 저장된 자신 있는 방식 타입 불러오기
   Future<void> _loadSavedStrengthType() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      final savedStrengthType = storage.getStrengthType();
+      final savedStrengthType = await UserDataUtils.instance.getStrengthType();
       if (savedStrengthType != null) {
         setState(() {
           _selectedOption = savedStrengthType;
@@ -66,6 +71,39 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Riverpod 상태 관찰
+    final sideJobState = ref.watch(sideJobNotifierProvider);
+    
+    // 상태 변화를 감지하여 자동 처리
+    ref.listen<SideJobState>(sideJobNotifierProvider, (previous, next) {
+      next.when(
+        initial: () {
+          // 초기 상태 - 아무것도 하지 않음
+        },
+        loading: () {
+          // 로딩 상태 - 아무것도 하지 않음
+        },
+        success: (recommendations) async {
+          // 성공 시 온보딩 완료 처리 후 다음 화면으로 이동
+          await _completeOnboarding();
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => SideJobRecommendationsScreen(
+                  recommendations: _convertToMap(recommendations),
+                ),
+              ),
+            );
+          }
+        },
+        failure: (failure) {
+          // 실패 시 에러는 이미 UI에서 표시됨
+          print('❌ 부업 추천 실패: ${failure.debugMessage}');
+        },
+      );
+    });
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -85,6 +123,17 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
                     const SizedBox(height: _titleToOptionsSpacing),
                     _buildOptions(),
                     const SizedBox(height: _optionsToButtonSpacing),
+                    
+                    // 에러 메시지 표시
+                    if (sideJobState.isFailure) ...[
+                      const SizedBox(height: 20),
+                      CommonErrorMessage(
+                        message: sideJobState.failure!.userMessage,
+                        onRetry: _onNext,
+                        retryText: '다시 시도',
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                   ],
                 ),
               ),
@@ -96,7 +145,7 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
             bottom: 0,
             child: _buildBottomBar(),
           ),
-          if (_isLoading) const AILoadingOverlay(
+          if (sideJobState.isLoading) const AILoadingOverlay(
             title: 'AI가 당신에게 맞는\n부업을 분석하고 있어요...',
             subtitle: '',
           ),
@@ -181,7 +230,11 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
     
     return GestureDetector(
       onTap: () async {
-        setState(() => _selectedOption = value);
+        setState(() {
+          _selectedOption = value;
+        });
+        // 에러 상태 클리어
+        ref.read(sideJobNotifierProvider.notifier).clearError();
         // 선택 시 즉시 저장
         await _saveStrengthTypeRealtime(value);
       },
@@ -234,7 +287,10 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
   }
 
   Widget _buildBottomBar() {
+    final sideJobState = ref.watch(sideJobNotifierProvider);
     final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bool canProceed = _selectedOption != null && !sideJobState.isLoading;
+    
     return SafeArea(
       top: false,
       child: Padding(
@@ -246,114 +302,37 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
         child: SizedBox(
           width: double.infinity,
           height: 46,
-                      child: ElevatedButton(
-              onPressed: (_selectedOption != null && !_isLoading) ? _onNext : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: (_selectedOption != null && !_isLoading) ? AppColors.buttonActive : AppColors.buttonInactive,
-                foregroundColor: AppColors.buttonText,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
-              ),
-              child: const Text(
-                '다음',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
+          child: ElevatedButton(
+            onPressed: canProceed ? _onNext : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: canProceed ? AppColors.buttonActive : AppColors.buttonInactive,
+              foregroundColor: AppColors.buttonText,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
             ),
+            child: const Text(
+              '다음',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ),
         ),
       ),
     );
   }
 
-
-
   Future<void> _onNext() async {
-    if (_selectedOption != null) {
-      setState(() {
-        _isLoading = true;
-      });
+    if (_selectedOption == null) return;
 
-      try {
-        // 부업 추천 API 호출
-        await _callSideJobRecommendationAPI();
-        
-        // API 호출 성공 시 다음 화면으로 이동
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SideJobRecommendationsScreen()),
-          );
-        }
-      } catch (error) {
-        print('❌ 부업 추천 API 호출 실패: $error');
-        // 에러 발생 시에도 다음 화면으로 이동 (임시)
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SideJobRecommendationsScreen()),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    }
-  }
-
-  /// 부업 추천 API 호출
-  Future<void> _callSideJobRecommendationAPI() async {
-    try {
-      
-      // local storage에서 필요한 데이터 가져오기
-      final storage = await LocalStorageService.getInstance();
-      final userId = storage.getUserId();
-      final job = storage.getJob();
-      final hobbies = storage.getHobbies();
-      final expressionStyle = storage.getExpressionStyle(); // step3에서 선택한 값
-      
-      // Request parameter 구성
-      final requestData = {
-        'userId': userId,
-        'job': job ?? '',
-        'hobbies': hobbies,
-        'expressionStyle': expressionStyle,
-        'strengthType': _selectedOption,
-        'desiredSideJob': '',
-      };
-
-      print('📤 실제 전송될 JSON 데이터:');
-      print('  ${requestData.toString()}');
-      
-      final response = await NetworkClient().post('/api/onboarding', data: requestData);
-      
-      print('📥 부업 추천 API 응답:');
-      print('  - 상태 코드: ${response.statusCode}');
-      print('  - 응답 데이터: ${response.data}');
-      
-      // 응답 구조에 따른 처리
-      final responseData = response.data;
-      if (responseData['success'] == true) {
-        print('✅ 부업 추천 API 성공!');
-        print('📦 추천 데이터: ${responseData['data']}');
-        
-      } else {
-        print('❌ 부업 추천 API 실패');
-        print('🚨 에러 메시지: ${responseData['message']}');
-        print('🚨 상태 코드: ${responseData['status']}');
-      }
-      
-    } catch (error) {
-      print('❌ 부업 추천 API 호출 중 에러: $error');
-      rethrow;
-    }
+    // 단순히 부업 추천 액션만 트리거
+    // 나머지는 ref.listen에서 자동 처리됨
+    ref.read(sideJobNotifierProvider.notifier)
+        .getSideJobRecommendations(_selectedOption!);
   }
 
   /// 자신 있는 방식 타입 실시간 저장
   Future<void> _saveStrengthTypeRealtime(String strengthType) async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       await storage.setStrengthType(strengthType);
       print('💾 자신 있는 방식 타입 실시간 저장 성공: $strengthType');
     } catch (error) {
@@ -361,27 +340,39 @@ class _Step4MethodSelectionScreenState extends State<Step4MethodSelectionScreen>
     }
   }
 
-
-  Future<void> _goToRecommendations() async {
-    if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SideJobRecommendationsScreen()),
-    );
+  /// 온보딩 완료 처리 (LocalStorageService 사용)
+  Future<void> _completeOnboarding() async {
+    try {
+      final storage = await LocalStorageService.getInstance();
+      await storage.setOnboardingCompleted(true);
+      print('✅ 온보딩 완료 상태 설정됨');
+      
+      // 온보딩 데이터 정리 (OnboardingStorageService)
+      final onboardingStorage = await OnboardingStorageService.getInstance();
+      onboardingStorage.printOnboardingData(); // 디버깅용 출력
+      
+    } catch (error) {
+      print('❌ 온보딩 완료 처리 실패: $error');
+    }
   }
 
   Future<void> _goBack() async {
     await _saveCurrentStep();
     
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(PageRouteBuilder(
-      pageBuilder: (_, a, sa) => const Step3PreferredMethodScreen(),
-      transitionsBuilder: (_, animation, __, child) {
-        final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOutCubic));
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 280),
-    ));
+    Navigator.of(context).pushReplacement(
+      SlideFromLeftPageRoute(
+        builder: (_) => const Step3PreferredMethodScreen(),
+      ),
+    );
+  }
+
+  /// SideJobEntity를 Map으로 변환하는 헬퍼 메서드
+  List<Map<String, dynamic>> _convertToMap(List<SideJobEntity> entities) {
+    return entities.map((entity) => {
+      'id': entity.id,
+      'title': entity.title,
+      'description': entity.description,
+    }).toList();
   }
 }

@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
 
 /// 부업 추천 화면
 class SideJobRecommendationsScreen extends StatefulWidget {
-  const SideJobRecommendationsScreen({super.key});
+  final List<Map<String, dynamic>> recommendations;
+  
+  const SideJobRecommendationsScreen({
+    super.key,
+    required this.recommendations,
+  });
 
   @override
   State<SideJobRecommendationsScreen> createState() => _SideJobRecommendationsScreenState();
@@ -43,7 +48,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
 
   Future<void> _loadCharacterName() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final name = storage.getCharacterName();
       if (name != null && name.isNotEmpty) {
         setState(() => _characterName = name);
@@ -151,124 +156,131 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   }
 
   Widget _buildCardList() {
-    const items = [
-      _SideJobItem(
-        title: '제테크 릴스 인스타',
-        subtitle: '적은 시간과 자본으로 시작해 수익을 창출할 수 있는 유연한 부업',
-      ),
-      _SideJobItem(
-        title: '노션 템플릿 판매',
-        subtitle: '생산성/가계부 템플릿 제작 및 판매로 지속적인 수익 창출',
-      ),
-      _SideJobItem(
-        title: '블로그 SEO 글쓰기',
-        subtitle: '키워드 분석 후 주 2회 포스팅으로 장기적 수익 모델 구축',
-      ),
-    ];
+    // 전달받은 recommendations 데이터 사용
+    if (widget.recommendations.isEmpty) {
+      return const Center(
+        child: Text(
+          '부업 추천 데이터가 없습니다.',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
 
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (_, index) => GestureDetector(
-        onTap: () => _handleCardTap(index),
-        child: AnimatedBuilder(
-          animation: _selectionController,
-          builder: (context, child) {
-            final isSelected = _selectedCardIndex == index;
-            final scale = isSelected ? _selectionScale.value : 1.0;
-            final opacity = isSelected ? _selectionOpacity.value : 0.0;
-            
-            return Transform.scale(
-              scale: scale,
-              child: Stack(
-                children: [
-                  _SideJobCard(item: items[index], isSelected: isSelected),
-                  if (isSelected) ...[
-                    // Glowing border
-                    Positioned.fill(
-                      child: IgnorePointer(
+      itemBuilder: (_, index) {
+        final rec = widget.recommendations[index];
+        return GestureDetector(
+          onTap: () => _handleCardTap(index),
+          child: AnimatedBuilder(
+            animation: _selectionController,
+            builder: (context, child) {
+              final isSelected = _selectedCardIndex == index;
+              final scale = isSelected ? _selectionScale.value : 1.0;
+              final opacity = isSelected ? _selectionOpacity.value : 0.0;
+              
+              return Transform.scale(
+                scale: scale,
+                child: Stack(
+                  children: [
+                    _SideJobCard(
+                      item: _SideJobItem(
+                        title: rec['title'] ?? '제목 없음',
+                        subtitle: rec['description'] ?? '설명 없음',
+                      ),
+                      isSelected: isSelected,
+                    ),
+                    if (isSelected) ...[
+                      // Glowing border
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Opacity(
+                            opacity: opacity,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFF7BA8FF),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF7BA8FF).withValues(alpha: 0.45 * opacity),
+                                    blurRadius: 22,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Soft highlight overlay
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Opacity(
+                            opacity: 0.06 * opacity,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF7BA8FF),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Sparkle star (top-right)
+                      Positioned(
+                        right: 12,
+                        top: 12,
                         child: Opacity(
                           opacity: opacity,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF7BA8FF),
-                                width: 2,
+                          child: Transform.translate(
+                            offset: Offset(6 * _selectionController.value, -6 * _selectionController.value),
+                            child: Transform.scale(
+                              scale: 0.8 + 0.4 * _selectionController.value,
+                              child: const Icon(
+                                Icons.star_rounded,
+                                size: 14,
+                                color: Color(0xFF7BA8FF),
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF7BA8FF).withValues(alpha: 0.45 * opacity),
-                                  blurRadius: 22,
-                                  spreadRadius: 2,
-                                ),
-                              ],
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    // Soft highlight overlay
-                    Positioned.fill(
-                      child: IgnorePointer(
+                      // Small sparkle (bottom-left)
+                      Positioned(
+                        left: 10,
+                        bottom: 10,
                         child: Opacity(
-                          opacity: 0.06 * opacity,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF7BA8FF),
-                              borderRadius: BorderRadius.circular(12),
+                          opacity: opacity * 0.8,
+                          child: Transform.translate(
+                            offset: Offset(-5 * _selectionController.value, 5 * _selectionController.value),
+                            child: Transform.rotate(
+                              angle: 0.6 * _selectionController.value,
+                              child: const Icon(
+                                Icons.star_rate_rounded,
+                                size: 10,
+                                color: Color(0xFFB2C7FF),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    // Sparkle star (top-right)
-                    Positioned(
-                      right: 12,
-                      top: 12,
-                      child: Opacity(
-                        opacity: opacity,
-                        child: Transform.translate(
-                          offset: Offset(6 * _selectionController.value, -6 * _selectionController.value),
-                          child: Transform.scale(
-                            scale: 0.8 + 0.4 * _selectionController.value,
-                            child: const Icon(
-                              Icons.star_rounded,
-                              size: 14,
-                              color: Color(0xFF7BA8FF),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Small sparkle (bottom-left)
-                    Positioned(
-                      left: 10,
-                      bottom: 10,
-                      child: Opacity(
-                        opacity: opacity * 0.8,
-                        child: Transform.translate(
-                          offset: Offset(-5 * _selectionController.value, 5 * _selectionController.value),
-                          child: Transform.rotate(
-                            angle: 0.6 * _selectionController.value,
-                            child: const Icon(
-                              Icons.star_rate_rounded,
-                              size: 10,
-                              color: Color(0xFFB2C7FF),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    ],
                   ],
-                ],
-              ),
-            );
-          },
-        ),
-      ),
+                ),
+              );
+            },
+          ),
+        );
+      },
       separatorBuilder: (_, __) => const SizedBox(height: _cardSpacing),
-      itemCount: items.length,
+      itemCount: widget.recommendations.length,
     );
   }
 

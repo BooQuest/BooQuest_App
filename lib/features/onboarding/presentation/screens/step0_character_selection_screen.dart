@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step0_character_creation_screen.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 
 /// 온보딩 0단계 - 캐릭터 선택 화면
 class Step0CharacterSelectionScreen extends StatefulWidget {
@@ -36,9 +36,9 @@ class _Step0CharacterSelectionScreenState extends State<Step0CharacterSelectionS
   /// 현재 온보딩 단계 저장
   Future<void> _saveCurrentStep() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.setCurrentOnboardingStep(0);
-      await storage.saveCharacterScreenType('selection');
+      final storage = await OnboardingStorageService.getInstance();
+      await storage.setCurrentStep(0);
+      await storage.setCharacterScreenType('selection');
     } catch (error) {
       print('❌ 현재 온보딩 단계 저장 실패: $error');
     }
@@ -47,7 +47,7 @@ class _Step0CharacterSelectionScreenState extends State<Step0CharacterSelectionS
   /// 저장된 캐릭터 타입 불러오기
   Future<void> _loadSavedCharacterType() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final savedCharacterType = storage.getCharacterType();
       if (savedCharacterType != null) {
         // 저장된 캐릭터 타입에 따라 페이지 설정
@@ -86,9 +86,9 @@ class _Step0CharacterSelectionScreenState extends State<Step0CharacterSelectionS
   /// 캐릭터 타입 저장
   Future<void> _saveCharacterType() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final type = _currentPage == 0 ? 'BLACK' : 'WHITE';
-      await storage.saveCharacterType(type);
+      await storage.setCharacterType(type);
     } catch (error) {
       print('❌ 캐릭터 타입 저장 실패: $error');
     }

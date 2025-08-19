@@ -4,8 +4,9 @@ import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step3_preferred_method_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step1_job_question_screen.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/utils/debouncer.dart';
+import 'package:booquest/core/navigation/transitions.dart';
 
 /// 온보딩 2단계 - 취미 질문 화면 (선택지 방식)
 class Step2HobbyQuestionScreen extends StatefulWidget {
@@ -76,8 +77,8 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
   /// 현재 온보딩 단계 저장
   Future<void> _saveCurrentStep() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.setCurrentOnboardingStep(2);
+      final storage = await OnboardingStorageService.getInstance();
+      await storage.setCurrentStep(2);
     } catch (error) {
       print('❌ 현재 온보딩 단계 저장 실패: $error');
     }
@@ -86,7 +87,7 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
   /// 저장된 취미 데이터 불러오기
   Future<void> _loadSavedHobbies() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final savedHobbies = storage.getHobbies();
       if (savedHobbies.isNotEmpty) {
         
@@ -404,15 +405,11 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
     await _saveCurrentStep();
     
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(PageRouteBuilder(
-      pageBuilder: (_, a, sa) => const Step1JobQuestionScreen(),
-      transitionsBuilder: (_, animation, __, child) {
-        final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOutCubic));
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 280),
-    ));
+    Navigator.of(context).pushReplacement(
+      SlideFromLeftPageRoute(
+        builder: (_) => const Step1JobQuestionScreen(),
+      ),
+    );
   }
 
   Future<void> _onNext() async {
@@ -429,7 +426,7 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
   /// 취미 데이터 저장
   Future<void> _saveHobbies() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       List<String> hobbies = [];
       
       if (_isDirectInputMode) {
@@ -443,7 +440,7 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
         hobbies = _selected.toList();
       }
       
-      await storage.saveHobbies(hobbies);
+      await storage.setHobbies(hobbies);
     } catch (error) {
       print('❌ 취미 저장 실패: $error');
     }
@@ -452,7 +449,7 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
   /// 실시간 저장 (Debouncer 적용)
   Future<void> _saveHobbiesRealtime() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       List<String> hobbies = [];
       
       if (_isDirectInputMode) {
@@ -465,7 +462,7 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
         print('💾 선택 모드 - 취미 실시간 저장: $hobbies');
       }
       
-      await storage.saveHobbies(hobbies);
+      await storage.setHobbies(hobbies);
     } catch (error) {
       print('❌ 실시간 취미 저장 실패: $error');
     }

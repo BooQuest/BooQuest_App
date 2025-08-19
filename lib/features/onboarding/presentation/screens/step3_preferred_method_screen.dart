@@ -4,7 +4,8 @@ import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step2_hobby_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step4_method_selection_screen.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
+import 'package:booquest/core/navigation/transitions.dart';
 
 /// 온보딩 3단계 - 표현 방식 선택 화면
 class Step3PreferredMethodScreen extends StatefulWidget {
@@ -228,7 +229,7 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
   /// 표현 방식 저장
   Future<void> _saveExpressionStyle() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       await storage.setExpressionStyle(_selectedOption!);
     } catch (error) {
       print('❌ 표현 방식 저장 실패: $error');
@@ -238,7 +239,7 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
   /// 표현 방식 실시간 저장
   Future<void> _saveExpressionStyleRealtime(String value) async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       await storage.setExpressionStyle(value);
     } catch (error) {
       print('❌ 표현 방식 실시간 저장 실패: $error');
@@ -248,8 +249,8 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
   /// 현재 온보딩 단계를 저장
   Future<void> _saveCurrentStep() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.setCurrentOnboardingStep(3); // 3단계
+      final storage = await OnboardingStorageService.getInstance();
+      await storage.setCurrentStep(3); // 3단계
     } catch (error) {
       print('❌ 현재 온보딩 단계 저장 실패: $error');
     }
@@ -258,8 +259,8 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
   /// 저장된 표현 방식을 불러와서 선택 상태로 설정
   Future<void> _loadSavedExpressionStyle() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      final savedExpressionStyle = await storage.getExpressionStyle();
+      final storage = await OnboardingStorageService.getInstance();
+      final savedExpressionStyle = storage.getExpressionStyle();
       if (savedExpressionStyle != null) {
         setState(() {
           _selectedOption = savedExpressionStyle;
@@ -275,14 +276,10 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
     await _saveCurrentStep();
     
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(PageRouteBuilder(
-      pageBuilder: (_, a, sa) => const Step2HobbyQuestionScreen(),
-      transitionsBuilder: (_, animation, __, child) {
-        final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOutCubic));
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 280),
-    ));
+    Navigator.of(context).pushReplacement(
+      SlideFromLeftPageRoute(
+        builder: (_) => const Step2HobbyQuestionScreen(),
+      ),
+    );
   }
 }
