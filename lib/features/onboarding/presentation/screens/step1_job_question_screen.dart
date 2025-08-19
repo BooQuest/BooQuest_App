@@ -4,8 +4,9 @@ import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step2_hobby_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step0_character_creation_screen.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/utils/debouncer.dart';
+import 'package:booquest/core/navigation/transitions.dart';
 
 /// 온보딩 1단계 - 직업 질문 화면
 class Step1JobQuestionScreen extends StatefulWidget {
@@ -221,15 +222,11 @@ class _Step1JobQuestionScreenState extends State<Step1JobQuestionScreen> {
   void _goBack() async {
     await _saveCurrentStep();
     
-    Navigator.of(context).pushReplacement(PageRouteBuilder(
-      pageBuilder: (_, a, sa) => const Step0CharacterCreationScreen(),
-      transitionsBuilder: (_, animation, __, child) {
-        final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOutCubic));
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 280),
-    ));
+    Navigator.of(context).pushReplacement(
+      SlideFromLeftPageRoute(
+        builder: (_) => const Step0CharacterCreationScreen(),
+      ),
+    );
   }
 
   void _onConfirm() async {
@@ -248,9 +245,9 @@ class _Step1JobQuestionScreenState extends State<Step1JobQuestionScreen> {
   /// 직업 데이터 저장
   Future<void> _saveJob() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final job = _jobController.text.trim();
-      await storage.saveJob(job);
+      await storage.setJob(job);
     } catch (error) {
       print('❌ 직업 저장 실패: $error');
     }
@@ -259,9 +256,9 @@ class _Step1JobQuestionScreenState extends State<Step1JobQuestionScreen> {
   /// 실시간 저장 (Debouncer 적용)
   Future<void> _saveJobRealtime() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final job = _jobController.text.trim();
-      await storage.saveJob(job);
+      await storage.setJob(job);
       print('💾 직업 저장됨: "${job.isEmpty ? "(빈 값)" : job}"');
     } catch (error) {
       print('❌ 직업 실시간 저장 실패: $error');
@@ -271,8 +268,8 @@ class _Step1JobQuestionScreenState extends State<Step1JobQuestionScreen> {
   /// 현재 온보딩 단계 저장
   Future<void> _saveCurrentStep() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.setCurrentOnboardingStep(1);
+      final storage = await OnboardingStorageService.getInstance();
+      await storage.setCurrentStep(1);
     } catch (error) {
       print('❌ 현재 온보딩 단계 저장 실패: $error');
     }
@@ -281,7 +278,7 @@ class _Step1JobQuestionScreenState extends State<Step1JobQuestionScreen> {
   /// 저장된 직업 데이터 불러오기
   Future<void> _loadSavedJob() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final savedJob = storage.getJob();
       if (savedJob != null && savedJob.isNotEmpty) {
         _jobController.text = savedJob;

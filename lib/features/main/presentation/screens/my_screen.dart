@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
-import 'package:booquest/core/constants.dart';
-import 'package:booquest/features/auth/presentation/auth_provider.dart';
-import 'package:booquest/features/auth/presentation/login_screen.dart';
+import 'package:booquest/features/auth/presentation/auth_wrapper.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 
-class MyScreen extends StatefulWidget {
+class MyScreen extends ConsumerStatefulWidget {
   const MyScreen({super.key});
 
   @override
-  State<MyScreen> createState() => _MyScreenState();
+  ConsumerState<MyScreen> createState() => _MyScreenState();
 }
 
-class _MyScreenState extends State<MyScreen> {
+class _MyScreenState extends ConsumerState<MyScreen> {
   static const double _horizontalPadding = 20.0;
   static const double _sectionSpacing = 32.0;
 
   Future<String> _loadDisplayName() async {
-    final storage = await LocalStorageService.getInstance();
+    final storage = await OnboardingStorageService.getInstance();
     final name = storage.getCharacterName();
     return (name == null || name.isEmpty) ? '김소현' : name;
   }
@@ -236,20 +236,31 @@ class _MyScreenState extends State<MyScreen> {
 
   Future<void> _handleLogout(BuildContext context) async {
     try {
+      // JWT 토큰과 사용자 정보 삭제 (AuthStorageService)
+      final authStorage = await AuthStorageService.getInstance();
+      await authStorage.setAccessToken('');
+      await authStorage.setRefreshToken('');
+      await authStorage.removeUserId();
+      await authStorage.setEmail('');
+      await authStorage.setProfileImageUrl('');
+      
+      // 온보딩 완료 상태 초기화 (LocalStorageService)
       final storage = await LocalStorageService.getInstance();
-      // 온보딩 완료 상태 초기화
       await storage.setOnboardingCompleted(false);
-      // 사용자 인증 정보 초기화
-      await storage.setAccessToken('');
-      await storage.setRefreshToken('');
-      await storage.removeUserId();
-      await storage.setEmail('');
-      await storage.setProfileImageUrl('');
-    } catch (_) {}
+      
+      // 온보딩 데이터 초기화 (OnboardingStorageService)
+      final onboardingStorage = await OnboardingStorageService.getInstance();
+      await onboardingStorage.clearAllData();
+      
+    } catch (e) {
+      print('로그아웃 중 오류: $e');
+    }
 
     if (!context.mounted) return;
+    
+    // AuthWrapper로 이동 (AuthWrapper에서 인증 상태를 확인하여 LoginPage로 라우팅)
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      MaterialPageRoute(builder: (_) => const AuthWrapper()),
       (route) => false,
     );
   }

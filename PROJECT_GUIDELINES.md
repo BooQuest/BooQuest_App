@@ -101,8 +101,15 @@ Do not write unit tests
 
 Simple key-value storage: SharedPreferences
 Sensitive information: flutter_secure_storage
-Add Hive/Isar when necessary
-Apply caching only for complex logic
+
+ 9.1 OnboardingStorageService (온보딩 전용)
+  - 역할: 온보딩 과정에서 수집되는 사용자 데이터 저장
+  - 데이터: 캐릭터 이름, 타입, 직업, 취미, 표현 방식, 강점 타입, 현재 단계
+  - 사용처: 모든 온보딩 화면 (step0~step4)
+ 9.2 LocalStorageService (앱 전반 설정)
+  - 역할: 앱의 전반적인 설정과 상태 정보 관리 
+  - 데이터: 온보딩 완료 여부, 앱 버전, 첫 실행 여부
+  - 사용처: 앱 시작 시 라우팅 결정, 앱 설정 관리
 
 10. Internationalization (i18n)
 
@@ -146,3 +153,71 @@ Common Utilities
 Create PlatformUtils class for platform-specific value selection
 Manage responsive breakpoints with Breakpoints constants
 Create DeviceUtils for screen size information helpers
+
+
+
+
+12. 구조
+
+- Auth
+
+┌─────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                      │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐ │
+│  │   AuthWrapper   │  │   LoginPage     │  │  MyScreen   │ │
+│  │                 │  │                 │  │             │ │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   APPLICATION LAYER                        │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                AuthNotifier                         │   │
+│  │  - StateNotifier<AuthState>                        │   │
+│  │  - 비즈니스 로직 처리                               │   │
+│  │  - Infrastructure 계층 조합                         │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  INFRASTRUCTURE LAYER                      │
+│  ┌─────────────────┐  ┌─────────────────────────────────┐ │
+│  │ AuthApiService  │  │      AuthStorageService         │ │
+│  │                 │  │                                 │ │
+│  │ - HTTP API 호출  │  │ - SharedPreferences 관리        │ │
+│  │ - Dio 기반       │  │ - JWT 토큰 저장/삭제           │ │
+│  └─────────────────┘  └─────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     DOMAIN LAYER                           │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                  AuthState                          │   │
+│  │  - isLoading: bool                                 │   │
+│  │  - isAuthenticated: bool                           │   │
+│  │  - user: Map<String, dynamic>?                     │   │
+│  │  - errorMessage: String?                           │   │
+│  │  - copyWith() 메서드                                │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+
+- Sidejob
+
+lib/features/sidejob/
+├── domain/                           ✅ 완료
+│   ├── sidejob_entity.dart          # 부업 추천 결과 모델
+│   ├── sidejob_failure.dart         # 실패/에러 모델  
+│   └── sidejob_repository.dart      # 추상 Repository 인터페이스
+├── application/                      ✅ 완료
+│   ├── sidejob_state.dart           # 상태 클래스
+│   ├── sidejob_notifier.dart        # StateNotifier (UI 상태 + 로직)
+│   └── get_sidejob_recommendations.dart # UseCase (실행 단위)
+└── infrastructure/                   ✅ 완료
+    ├── sidejob_repository_impl.dart # 실제 Repository 구현체
+    ├── sidejob_api_service.dart     # API 호출 담당
+    ├── user_data_service.dart       # UserDataUtils 역할
+    └── sidejob_providers.dart       # Riverpod Provider 설정
+

@@ -3,8 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step1_job_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step0_character_selection_screen.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/utils/debouncer.dart';
+import 'package:booquest/core/navigation/transitions.dart';
 
 /// 온보딩 0단계 - 캐릭터 생성 화면
 class Step0CharacterCreationScreen extends StatefulWidget {
@@ -51,9 +52,9 @@ class _Step0CharacterCreationScreenState extends State<Step0CharacterCreationScr
   /// 현재 온보딩 단계 저장
   Future<void> _saveCurrentStep() async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.setCurrentOnboardingStep(0);
-      await storage.saveCharacterScreenType('creation');
+      final storage = await OnboardingStorageService.getInstance();
+      await storage.setCurrentStep(0);
+      await storage.setCharacterScreenType('creation');
     } catch (error) {
       print('❌ 현재 온보딩 단계 저장 실패: $error');
     }
@@ -62,7 +63,7 @@ class _Step0CharacterCreationScreenState extends State<Step0CharacterCreationScr
   /// 저장된 캐릭터 이름 불러오기
   Future<void> _loadSavedCharacterName() async {
     try {
-      final storage = await LocalStorageService.getInstance();
+      final storage = await OnboardingStorageService.getInstance();
       final savedName = storage.getCharacterName();
       if (savedName != null && savedName.isNotEmpty) {
         _nameController.text = savedName;
@@ -88,15 +89,11 @@ class _Step0CharacterCreationScreenState extends State<Step0CharacterCreationScr
   void _goBack() async {
     await _saveCurrentStep();
     
-    Navigator.of(context).pushReplacement(PageRouteBuilder(
-      pageBuilder: (_, a, sa) => const Step0CharacterSelectionScreen(),
-      transitionsBuilder: (_, animation, __, child) {
-        final tween = Tween(begin: const Offset(-1, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOutCubic));
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 280),
-    ));
+    Navigator.of(context).pushReplacement(
+      SlideFromLeftPageRoute(
+        builder: (_) => const Step0CharacterSelectionScreen(),
+      ),
+    );
   }
 
   void _onConfirmPressed() async {
@@ -126,8 +123,8 @@ class _Step0CharacterCreationScreenState extends State<Step0CharacterCreationScr
   /// 캐릭터 이름 저장
   Future<void> _saveCharacterName(String name) async {
     try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.saveCharacterName(name);
+      final storage = await OnboardingStorageService.getInstance();
+      await storage.setCharacterName(name);
     } catch (error) {
       print('❌ 캐릭터 이름 저장 실패: $error');
     }

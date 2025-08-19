@@ -42,7 +42,14 @@ dependencies:
   dio: ^5.4.0
   
   # 상태 관리
-  provider: ^6.1.2
+  flutter_riverpod: ^2.4.9
+  
+  # 함수형 프로그래밍
+  dartz: ^0.10.1
+  
+  # 불변 데이터 클래스
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.9.0
   
   # 로컬 스토리지
   shared_preferences: ^2.2.2
@@ -63,6 +70,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  
+  # 코드 생성
+  build_runner: ^2.4.7
+  freezed: ^2.4.6
+  json_annotation: ^4.8.1
+  json_serializable: ^6.7.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

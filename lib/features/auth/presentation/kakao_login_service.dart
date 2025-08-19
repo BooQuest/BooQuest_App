@@ -1,6 +1,4 @@
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:booquest/core/network/network_client.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
 
 /// 카카오 로그인 서비스
 ///
@@ -27,86 +25,11 @@ class KakaoLoginService {
       }
 
       print('🔑 카카오 액세스 토큰: ${token.accessToken}');
-      
-      // 서버에 로그인 요청
-      await _sendLoginToServer(token.accessToken);
-      
+
       return token.accessToken;
     } catch (error) {
       print('❌ 카카오 로그인 실패: $error');
       return null;
-    }
-  }
-
-  /// 서버에 로그인 요청
-  Future<void> _sendLoginToServer(String accessToken) async {
-    try {
-      final response = await NetworkClient().post('/api/auth/login', data: {
-        'accessToken': accessToken,
-        'provider': 'kakao',
-      });
-      
-      final responseData = response.data;
-      if (responseData['success'] == true) {
-        print('📦 응답 데이터: ${responseData['data']}');
-        
-        // userInfo를 local storage에 저장
-        if (responseData['data'] != null) {
-          final data = responseData['data'];
-          
-          // tokenInfo 저장
-          if (data['tokenInfo'] != null) {
-            final tokenInfo = data['tokenInfo'];
-            final storage = await LocalStorageService.getInstance();
-            
-            // JWT 토큰 저장
-            if (tokenInfo['accessToken'] != null) {
-              await storage.setAccessToken(tokenInfo['accessToken']);
-            }
-            if (tokenInfo['refreshToken'] != null) {
-              await storage.setRefreshToken(tokenInfo['refreshToken']);
-            }
-          } else {
-            print('❌ data에 tokenInfo가 없음');
-          }
-          
-          // userInfo 저장
-          if (data['userInfo'] != null) {
-            final userInfo = data['userInfo'];
-            final storage = await LocalStorageService.getInstance();
-            
-            // userId 저장
-            if (userInfo['userId'] != null) {
-              await storage.setUserId(userInfo['userId']);
-            } else {
-              print('❌ userInfo에 userId가 없음');
-            }
-            
-            // 기타 사용자 정보 저장
-            if (userInfo['nickname'] != null) {
-              storage.saveCharacterName(userInfo['nickname']);
-            }
-            if (userInfo['email'] != null) {
-              storage.setEmail(userInfo['email']);
-            }
-            if (userInfo['profileImageUrl'] != null) {
-              storage.setProfileImageUrl(userInfo['profileImageUrl']);
-            }
-
-          } else {
-            print('❌ data에 userInfo가 없음');
-          }
-        }
-        
-      } else {
-        print('❌ 서버 로그인 실패');
-        print('🚨 에러 메시지: ${responseData['message']}');
-        print('🚨 상태 코드: ${responseData['status']}');
-      }
-      
-    } catch (error) {
-      print('❌ 서버 로그인 실패: $error');
-      // 서버 로그인 실패해도 카카오 로그인은 성공한 것으로 처리
     }
   }
 
