@@ -3,8 +3,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
-import 'package:booquest/features/main/presentation/screens/main_screen.dart';
+import 'package:booquest/core/navigation/transitions.dart';
+
 import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step4_method_selection_screen.dart';
 
 /// 부업 추천 화면
 class SideJobRecommendationsScreen extends StatefulWidget {
@@ -19,30 +21,16 @@ class SideJobRecommendationsScreen extends StatefulWidget {
   State<SideJobRecommendationsScreen> createState() => _SideJobRecommendationsScreenState();
 }
 
-class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScreen> with TickerProviderStateMixin {
+class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScreen> {
   static const double _horizontalPadding = 20.0;
   static const double _cardSpacing = 12.0;
 
   String _characterName = '';
   bool _isLoading = false;
-  int? _selectedCardIndex;
-  late final AnimationController _selectionController;
-  late final Animation<double> _selectionScale;
-  late final Animation<double> _selectionOpacity;
 
   @override
   void initState() {
     super.initState();
-    _selectionController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _selectionScale = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(parent: _selectionController, curve: Curves.easeInOut),
-    );
-    _selectionOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _selectionController, curve: Curves.easeInOut),
-    );
     _loadCharacterName();
   }
 
@@ -83,6 +71,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
                   ),
                 ),
                 _buildBottomBar(),
+
               ],
             ),
           ),
@@ -102,7 +91,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.textPrimary),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: _handleBack,
         ),
         const Expanded(
           child: Center(child: Text('부업 추천 3가지', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
@@ -174,109 +163,13 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (_, index) {
         final rec = widget.recommendations[index];
-        return GestureDetector(
-          onTap: () => _handleCardTap(index),
-          child: AnimatedBuilder(
-            animation: _selectionController,
-            builder: (context, child) {
-              final isSelected = _selectedCardIndex == index;
-              final scale = isSelected ? _selectionScale.value : 1.0;
-              final opacity = isSelected ? _selectionOpacity.value : 0.0;
-              
-              return Transform.scale(
-                scale: scale,
-                child: Stack(
-                  children: [
-                    _SideJobCard(
-                      item: _SideJobItem(
-                        title: rec['title'] ?? '제목 없음',
-                        subtitle: rec['description'] ?? '설명 없음',
-                      ),
-                      isSelected: isSelected,
-                    ),
-                    if (isSelected) ...[
-                      // Glowing border
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: Opacity(
-                            opacity: opacity,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: const Color(0xFF7BA8FF),
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF7BA8FF).withValues(alpha: 0.45 * opacity),
-                                    blurRadius: 22,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Soft highlight overlay
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: Opacity(
-                            opacity: 0.06 * opacity,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF7BA8FF),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Sparkle star (top-right)
-                      Positioned(
-                        right: 12,
-                        top: 12,
-                        child: Opacity(
-                          opacity: opacity,
-                          child: Transform.translate(
-                            offset: Offset(6 * _selectionController.value, -6 * _selectionController.value),
-                            child: Transform.scale(
-                              scale: 0.8 + 0.4 * _selectionController.value,
-                              child: const Icon(
-                                Icons.star_rounded,
-                                size: 14,
-                                color: Color(0xFF7BA8FF),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Small sparkle (bottom-left)
-                      Positioned(
-                        left: 10,
-                        bottom: 10,
-                        child: Opacity(
-                          opacity: opacity * 0.8,
-                          child: Transform.translate(
-                            offset: Offset(-5 * _selectionController.value, 5 * _selectionController.value),
-                            child: Transform.rotate(
-                              angle: 0.6 * _selectionController.value,
-                              child: const Icon(
-                                Icons.star_rate_rounded,
-                                size: 10,
-                                color: Color(0xFFB2C7FF),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              );
-            },
+        return _SideJobCard(
+          item: _SideJobItem(
+            title: rec['title'] ?? '제목 없음',
+            subtitle: rec['description'] ?? '설명 없음',
           ),
+          onSelect: () => _handleCardSelect(index),
+          onRecommendAgain: () => _handleRecommendAgain(index),
         );
       },
       separatorBuilder: (_, __) => const SizedBox(height: _cardSpacing),
@@ -284,9 +177,35 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     );
   }
 
+
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _handleCardSelect(int index) {
+    // 선택하기 버튼 클릭 시 다음 화면으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const QuestStepsScreen()),
+    );
+  }
+
+  void _handleRecommendAgain(int index) {
+    print('다시 추천받기: $index');
+  }
+
+  Future<void> _handleBack() async {
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      SlideFromLeftPageRoute(
+        builder: (_) => const Step4MethodSelectionScreen(),
+      ),
+    );
+  }
+
   Widget _buildBottomBar() {
-    final bool hasSelection = _selectedCardIndex != null;
-    
     return SafeArea(
       top: false,
       child: Padding(
@@ -295,60 +214,25 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
           right: _horizontalPadding,
           bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: Stack(
-          children: [
-            SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton(
-                onPressed: hasSelection ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const QuestStepsScreen()),
-                  );
-                } : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: hasSelection ? AppColors.buttonActive : AppColors.buttonInactive,
-                  foregroundColor: AppColors.buttonText,
-                  disabledBackgroundColor: AppColors.buttonInactive,
-                  disabledForegroundColor: AppColors.buttonText,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-                child: const Text('다음', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-              ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 46,
+          child: ElevatedButton(
+            onPressed: () {
+              // TODO: 전체 재생성 로직 구현
+              print('전체 재생성하기');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.buttonActive,
+              foregroundColor: AppColors.buttonText,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
             ),
-            if (_isLoading)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-          ],
+            child: const Text('전체 재생성하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          ),
         ),
       ),
     );
-  }
-
-
-
-
-
-
-
-  @override
-  void dispose() {
-    _selectionController.dispose();
-    super.dispose();
-  }
-
-  void _handleCardTap(int index) {
-    setState(() {
-      _selectedCardIndex = index;
-    });
   }
 
 
@@ -363,117 +247,107 @@ class _SideJobItem {
 
 class _SideJobCard extends StatelessWidget {
   final _SideJobItem item;
-  final bool isSelected;
+  final VoidCallback onSelect;
+  final VoidCallback onRecommendAgain;
   
-  const _SideJobCard({required this.item, required this.isSelected});
+  const _SideJobCard({
+    required this.item, 
+    required this.onSelect, 
+    required this.onRecommendAgain,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFFF0F0F0) : Colors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected ? const Color(0xFFD0D0D0) : AppColors.cardBorder, 
-          width: isSelected ? 2 : 1
+          color: AppColors.cardBorder, 
+          width: 1
         ),
-        boxShadow: isSelected ? [
+        boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD0D0D0).withOpacity(0.2),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
             offset: const Offset(0, 2),
           ),
-        ] : null,
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: AppColors.overlayLight.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.grey, width: 1),
-                  ),
-                  child: isSelected 
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
-                    : const SizedBox.shrink(),
-                ),
-                const Spacer(),
-                const Icon(Icons.keyboard_arrow_down, size: 24, color: Colors.black),
-              ],
-            ),
-            const SizedBox(height: 12),
             Text(
               item.title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: isSelected ? const Color(0xFF4A4A4A) : AppColors.textPrimary,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               item.subtitle,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: isSelected ? const Color(0xFF666666) : AppColors.textSecondary,
+                color: AppColors.textSecondary,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Row(
               children: [
-                _buildButton('빠른 수익'),
-                const SizedBox(width: 12),
-                _buildButton('실제 수익화 사례'),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected 
-                    ? AppColors.buttonActive
-                    : const Color(0xFFE0E0E0),
-                  foregroundColor: isSelected 
-                    ? Colors.white 
-                    : const Color(0xFF333333),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                  side: isSelected 
-                    ? BorderSide(color: AppColors.buttonActive, width: 1) 
-                    : BorderSide(color: const Color(0xFFCCCCCC), width: 1),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.refresh, 
-                      size: 20, 
-                      color: isSelected ? Colors.white : const Color(0xFF333333)
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '다시 추천해줘', 
-                      style: TextStyle(
-                        fontSize: 16, 
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : const Color(0xFF333333),
+                Expanded(
+                  child: SizedBox(
+                    height: 40,
+                    child: OutlinedButton(
+                      onPressed: onRecommendAgain,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF5F5F5),
+                        foregroundColor: const Color(0xFF666666),
+                        side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        '다시 추천받기',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: onSelect,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.buttonActive,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        '선택하기',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -481,24 +355,7 @@ class _SideJobCard extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black, width: 1),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: Colors.black,
-        ),
-      ),
-    );
-  }
+
 }
 
 

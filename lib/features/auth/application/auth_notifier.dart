@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:booquest/core/network/network_client.dart';
 import 'package:booquest/features/auth/domain/auth_state.dart';
 import 'package:booquest/features/auth/infrastructure/auth_api_service.dart';
@@ -15,6 +16,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier(this._apiService, this._storageService) : super(const AuthState());
 
   // ========== 초기화 ==========
+
+  /// 현재 상태 반환
+  AuthState getCurrentState() {
+    return state;
+  }
 
   /// 앱 시작 시 저장된 인증 상태 확인
   /// 
@@ -52,6 +58,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
         print('  - Nickname: ${userData['nickname']}');
         print('  - Profile Image: ${userData['profileImageUrl']}');
         
+        // 온보딩 진행 정보 확인
+        final onboardingProgressInfo = userData['onboardingProgressInfo'] as Map<String, dynamic>?;
+        if (onboardingProgressInfo != null) {
+          print('📊 온보딩 진행 정보:');
+          print('  - sideJobRecommended: ${onboardingProgressInfo['sideJobRecommended']}');
+          print('  - missionRecommended: ${onboardingProgressInfo['missionRecommended']}');
+          print('  - sideJobCreated: ${onboardingProgressInfo['sideJobCreated']}');
+        }
+        
         // 3. 로컬 스토리지 업데이트
         await _storageService.saveUserInfo(
           userId: userData['id'] as int,
@@ -60,17 +75,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
           profileImageUrl: userData['profileImageUrl'],
         );
 
-        // 4. 인증 성공 상태로 전환
+        // 4. 인증 성공 상태로 전환 (onboardingProgressInfo 포함)
         state = state.authenticated(userData);
       } else {
         // 토큰이 유효하지 않은 경우
         print('❌ 사용자 정보 인증 실패:');
         print('  - Status Code: ${response.statusCode}');
         print('  - Response Data: ${response.data}');
-        await _storageService.clearAuthData();
-        state = state.unauthenticated('인증이 만료되었습니다.');
+        
+        // 401 에러인 경우 로그인 페이지로 이동
+        if (response.statusCode == 401) {
+          print('🚫 401 Unauthorized - 로그인 페이지로 이동');
+          await _storageService.clearAuthData();
+          state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
+        } else {
+          await _storageService.clearAuthData();
+          state = state.unauthenticated('인증이 만료되었습니다.');
+        }
       }
     } catch (e) {
+      // 401 에러인 경우 로그인 페이지로 이동
+      if (e is DioException && e.response?.statusCode == 401) {
+        print('🚫 401 Unauthorized (catch) - 로그인 페이지로 이동');
+        await _storageService.clearAuthData();
+        state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
+        return;
+      }
+      
       // 네트워크 오류 등의 경우, 로컬 데이터로 인증 상태 유지
       print('⚠️ getUserInfo API 호출 중 에러 발생: $e');
       final localUserData = _storageService.getUserInfo();
@@ -110,7 +141,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
         
         final responseData = response.data!['data'] as Map<String, dynamic>;
         
+        // 온보딩 진행 정보 (login 응답에도 추가됨)
+        final onboardingProgressInfo = responseData['onboardingProgressInfo'] as Map<String, dynamic>?;
+        if (onboardingProgressInfo != null) {
+          print('📊 로그인 응답 - 온보딩 진행 정보:');
+          print('  - sideJobRecommended: ${onboardingProgressInfo['sideJobRecommended']}');
+          print('  - missionRecommended: ${onboardingProgressInfo['missionRecommended']}');
+          print('  - sideJobCreated: ${onboardingProgressInfo['sideJobCreated']}');
+        }
+
         // 1. 사용자 정보 저장
+        Map<String, dynamic> userForState = {};
         if (responseData['userInfo'] != null) {
           final userInfo = responseData['userInfo'] as Map<String, dynamic>;
           await _storageService.saveUserInfo(
@@ -119,6 +160,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
             nickname: userInfo['nickname'],
             profileImageUrl: userInfo['profileImageUrl'],
           );
+          userForState = Map<String, dynamic>.from(userInfo);
+        }
+        // userForState에 onboardingProgressInfo 병합 (AuthState가 인지할 수 있도록)
+        if (onboardingProgressInfo != null) {
+          userForState['onboardingProgressInfo'] = onboardingProgressInfo;
         }
 
         // 2. 토큰 정보 저장
@@ -130,8 +176,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           );
         }
 
-        // 3. 인증 성공 상태로 전환
-        state = state.authenticated(responseData['userInfo'] ?? {});
+        // 3. 인증 성공 상태로 전환 (onboardingProgressInfo 포함)
+        state = state.authenticated(userForState);
         return true;
       } else {
         final message = response.data?['message'] ?? '로그인에 실패했습니다.';

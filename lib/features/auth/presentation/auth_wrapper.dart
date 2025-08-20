@@ -12,6 +12,8 @@ import 'package:booquest/features/onboarding/presentation/screens/step1_job_ques
 import 'package:booquest/features/onboarding/presentation/screens/step2_hobby_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step3_preferred_method_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step4_method_selection_screen.dart';
+import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
+import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
 
 /// Presentation 계층: 인증 상태에 따른 화면 분기 래퍼
 /// 
@@ -94,7 +96,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
         }
 
         // 인증됨 → 온보딩 상태 확인 후 적절한 화면으로 분기
-        return const _OnboardingRouter();
+        return _OnboardingRouter(authNotifier: _authNotifier!);
       },
     );
   }
@@ -105,10 +107,50 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
 /// 인증된 사용자의 온보딩 진행 상황을 확인하고
 /// 완료되지 않은 단계부터 시작하도록 합니다.
 class _OnboardingRouter extends StatelessWidget {
-  const _OnboardingRouter();
+  final AuthNotifier authNotifier;
+  
+  const _OnboardingRouter({required this.authNotifier});
 
   /// 사용자의 온보딩 진행 상황에 따라 시작 화면을 결정합니다.
-  Future<Widget> _decideStartScreen() async {
+  Future<Widget> _decideStartScreen(BuildContext context) async {
+    // AuthNotifier에서 onboardingProgressInfo 확인
+    final authState = authNotifier.getCurrentState();
+    
+    if (authState.onboardingProgressInfo != null) {
+      final onboardingProgressInfo = authState.onboardingProgressInfo!;
+      final sideJobCreated = onboardingProgressInfo['sideJobCreated'] as bool? ?? false;
+      final missionRecommended = onboardingProgressInfo['missionRecommended'] as bool? ?? false;
+      final sideJobRecommended = onboardingProgressInfo['sideJobRecommended'] as bool? ?? false;
+      
+      print('📊 온보딩 진행 정보 기반 라우팅:');
+      print('  - sideJobCreated: $sideJobCreated');
+      print('  - missionRecommended: $missionRecommended');
+      print('  - sideJobRecommended: $sideJobRecommended');
+      
+      // sideJobCreated가 true면 메인 페이지
+      if (sideJobCreated) {
+        print('🏠 sideJobCreated = true → MainScreen');
+        return const MainScreen();
+      }
+      
+      // missionRecommended가 true면 퀘스트 스텝 화면
+      if (missionRecommended) {
+        print('📋 missionRecommended = true → QuestStepsScreen');
+        return const QuestStepsScreen();
+      }
+      
+      // sideJobRecommended가 true면 부업 추천 화면
+      if (sideJobRecommended) {
+        print('💼 sideJobRecommended = true → SideJobRecommendationsScreen');
+        // 부업 추천 데이터는 빈 배열로 전달 (실제로는 API에서 가져와야 함)
+        return const SideJobRecommendationsScreen(recommendations: []);
+      }
+    }
+    
+    // onboardingProgressInfo가 없거나 모든 값이 false인 경우
+    // 기존 로직대로 storage data 기준으로 화면 결정
+    print('🔄 onboardingProgressInfo 없음 → storage data 기준으로 화면 결정');
+    
     // 온보딩 완료 여부 확인 (LocalStorageService)
     final localStorage = await LocalStorageService.getInstance();
     if (localStorage.isOnboardingCompleted()) {
@@ -153,7 +195,7 @@ class _OnboardingRouter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Widget>(
-      future: _decideStartScreen(),
+      future: _decideStartScreen(context),
       builder: (context, snapshot) {
         // 로딩 중
         if (snapshot.connectionState != ConnectionState.done) {

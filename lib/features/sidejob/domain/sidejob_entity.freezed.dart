@@ -225,7 +225,6 @@ mixin _$SideJobRequestData {
   String get strengthType => throw _privateConstructorUsedError;
   String get characterType => throw _privateConstructorUsedError;
   String get characterName => throw _privateConstructorUsedError;
-  String? get desiredSideJob => throw _privateConstructorUsedError;
 
   /// Serializes this SideJobRequestData to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -253,7 +252,6 @@ abstract class $SideJobRequestDataCopyWith<$Res> {
     String strengthType,
     String characterType,
     String characterName,
-    String? desiredSideJob,
   });
 }
 
@@ -280,7 +278,6 @@ class _$SideJobRequestDataCopyWithImpl<$Res, $Val extends SideJobRequestData>
     Object? strengthType = null,
     Object? characterType = null,
     Object? characterName = null,
-    Object? desiredSideJob = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -316,10 +313,6 @@ class _$SideJobRequestDataCopyWithImpl<$Res, $Val extends SideJobRequestData>
                 ? _value.characterName
                 : characterName // ignore: cast_nullable_to_non_nullable
                       as String,
-            desiredSideJob: freezed == desiredSideJob
-                ? _value.desiredSideJob
-                : desiredSideJob // ignore: cast_nullable_to_non_nullable
-                      as String?,
           )
           as $Val,
     );
@@ -344,7 +337,6 @@ abstract class _$$SideJobRequestDataImplCopyWith<$Res>
     String strengthType,
     String characterType,
     String characterName,
-    String? desiredSideJob,
   });
 }
 
@@ -370,7 +362,6 @@ class __$$SideJobRequestDataImplCopyWithImpl<$Res>
     Object? strengthType = null,
     Object? characterType = null,
     Object? characterName = null,
-    Object? desiredSideJob = freezed,
   }) {
     return _then(
       _$SideJobRequestDataImpl(
@@ -406,10 +397,6 @@ class __$$SideJobRequestDataImplCopyWithImpl<$Res>
             ? _value.characterName
             : characterName // ignore: cast_nullable_to_non_nullable
                   as String,
-        desiredSideJob: freezed == desiredSideJob
-            ? _value.desiredSideJob
-            : desiredSideJob // ignore: cast_nullable_to_non_nullable
-                  as String?,
       ),
     );
   }
@@ -427,7 +414,6 @@ class _$SideJobRequestDataImpl implements _SideJobRequestData {
     required this.strengthType,
     required this.characterType,
     required this.characterName,
-    this.desiredSideJob,
   }) : _hobbies = hobbies;
 
   factory _$SideJobRequestDataImpl.fromJson(Map<String, dynamic> json) =>
@@ -455,12 +441,10 @@ class _$SideJobRequestDataImpl implements _SideJobRequestData {
   final String characterType;
   @override
   final String characterName;
-  @override
-  final String? desiredSideJob;
 
   @override
   String toString() {
-    return 'SideJobRequestData(userId: $userId, nickname: $nickname, job: $job, hobbies: $hobbies, expressionStyle: $expressionStyle, strengthType: $strengthType, characterType: $characterType, characterName: $characterName, desiredSideJob: $desiredSideJob)';
+    return 'SideJobRequestData(userId: $userId, nickname: $nickname, job: $job, hobbies: $hobbies, expressionStyle: $expressionStyle, strengthType: $strengthType, characterType: $characterType, characterName: $characterName)';
   }
 
   @override
@@ -480,9 +464,7 @@ class _$SideJobRequestDataImpl implements _SideJobRequestData {
             (identical(other.characterType, characterType) ||
                 other.characterType == characterType) &&
             (identical(other.characterName, characterName) ||
-                other.characterName == characterName) &&
-            (identical(other.desiredSideJob, desiredSideJob) ||
-                other.desiredSideJob == desiredSideJob));
+                other.characterName == characterName));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -497,7 +479,6 @@ class _$SideJobRequestDataImpl implements _SideJobRequestData {
     strengthType,
     characterType,
     characterName,
-    desiredSideJob,
   );
 
   /// Create a copy of SideJobRequestData
@@ -527,7 +508,6 @@ abstract class _SideJobRequestData implements SideJobRequestData {
     required final String strengthType,
     required final String characterType,
     required final String characterName,
-    final String? desiredSideJob,
   }) = _$SideJobRequestDataImpl;
 
   factory _SideJobRequestData.fromJson(Map<String, dynamic> json) =
@@ -549,8 +529,6 @@ abstract class _SideJobRequestData implements SideJobRequestData {
   String get characterType;
   @override
   String get characterName;
-  @override
-  String? get desiredSideJob;
 
   /// Create a copy of SideJobRequestData
   /// with the given fields replaced by the non-null parameter values.

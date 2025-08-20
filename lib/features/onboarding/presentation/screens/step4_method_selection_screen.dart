@@ -36,7 +36,7 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
   void initState() {
     super.initState();
     _saveCurrentStep();
-    _loadSavedStrengthType(); // 저장된 자신 있는 방식 타입 불러오기
+    _loadAllSavedData(); // 모든 저장된 데이터 불러오기
   }
 
   @override
@@ -54,7 +54,24 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
     }
   }
 
-  /// 저장된 자신 있는 방식 타입 불러오기
+  /// 모든 저장된 온보딩 데이터 불러오기
+  Future<void> _loadAllSavedData() async {
+    try {
+      // 1. strengthType 불러오기
+      final savedStrengthType = await UserDataUtils.instance.getStrengthType();
+      if (savedStrengthType != null) {
+        setState(() {
+          _selectedOption = savedStrengthType;
+        });
+        print('📖 저장된 자신 있는 방식 타입 불러옴: $savedStrengthType');
+      }
+      
+    } catch (error) {
+      print('❌ 저장된 온보딩 데이터 불러오기 실패: $error');
+    }
+  }
+
+  /// 저장된 자신 있는 방식 타입 불러오기 (기존 메서드 - 호환성 유지)
   Future<void> _loadSavedStrengthType() async {
     try {
       final savedStrengthType = await UserDataUtils.instance.getStrengthType();
@@ -214,13 +231,13 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
   Widget _buildOptions() {
     return Column(
       children: [
-        _buildOptionButton('창작하기', Icons.auto_awesome, '창작하기'),
+        _buildOptionButton('창작하기', Icons.auto_awesome, 'CREATE'),
         const SizedBox(height: 12),
-        _buildOptionButton('정리·전달하기', Icons.article, '정리·전달하기'),
+        _buildOptionButton('정리·전달하기', Icons.article, 'ORGANIZE'),
         const SizedBox(height: 12),
-        _buildOptionButton('일상 공유하기', Icons.share, '일상 공유하기'),
+        _buildOptionButton('일상 공유하기', Icons.share, 'SHARE'),
         const SizedBox(height: 12),
-        _buildOptionButton('트렌드 파악하기', Icons.trending_up, '트렌드 파악하기'),
+        _buildOptionButton('트렌드 파악하기', Icons.trending_up, 'TREND'),
       ],
     );
   }
@@ -254,7 +271,7 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
             Icon(
               icon,
               size: 20,
-              color: isSelected ? Colors.white : _getIconColor(value),
+              color: isSelected ? Colors.white : _getIconColor(label), // label(한글)로 아이콘 색상 결정
             ),
             const SizedBox(width: 12),
             Text(
