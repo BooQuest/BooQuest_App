@@ -12,6 +12,9 @@ class AuthState {
   /// 현재 사용자 정보
   final Map<String, dynamic>? user;
   
+  /// 온보딩 진행 정보
+  final Map<String, dynamic>? onboardingProgressInfo;
+  
   /// 에러 메시지
   final String? errorMessage;
 
@@ -19,6 +22,7 @@ class AuthState {
     this.isLoading = false,
     this.isAuthenticated = false,
     this.user,
+    this.onboardingProgressInfo,
     this.errorMessage,
   });
 
@@ -28,12 +32,14 @@ class AuthState {
     bool? isLoading,
     bool? isAuthenticated,
     Map<String, dynamic>? user,
+    Map<String, dynamic>? onboardingProgressInfo,
     String? errorMessage,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       user: user ?? this.user,
+      onboardingProgressInfo: onboardingProgressInfo ?? this.onboardingProgressInfo,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -54,6 +60,7 @@ class AuthState {
       isLoading: false,
       isAuthenticated: true,
       user: userData,
+      onboardingProgressInfo: userData['onboardingProgressInfo'],
       errorMessage: null,
     );
   }
@@ -71,7 +78,7 @@ class AuthState {
   @override
   String toString() {
     return 'AuthState(isLoading: $isLoading, isAuthenticated: $isAuthenticated, '
-           'user: $user, errorMessage: $errorMessage)';
+           'user: $user, onboardingProgressInfo: $onboardingProgressInfo, errorMessage: $errorMessage)';
   }
 
   @override
@@ -81,6 +88,7 @@ class AuthState {
         other.isLoading == isLoading &&
         other.isAuthenticated == isAuthenticated &&
         other.user == user &&
+        other.onboardingProgressInfo == onboardingProgressInfo &&
         other.errorMessage == errorMessage;
   }
 
@@ -89,6 +97,7 @@ class AuthState {
     return isLoading.hashCode ^
         isAuthenticated.hashCode ^
         user.hashCode ^
+        onboardingProgressInfo.hashCode ^
         errorMessage.hashCode;
   }
 }

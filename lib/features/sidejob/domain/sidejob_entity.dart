@@ -28,7 +28,6 @@ class SideJobRequestData with _$SideJobRequestData {
     required String strengthType,
     required String characterType,
     required String characterName,
-    String? desiredSideJob,
   }) = _SideJobRequestData;
 
   factory SideJobRequestData.fromJson(Map<String, dynamic> json) =>

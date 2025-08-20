@@ -119,11 +119,11 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
   Widget _buildOptions() {
     return Column(
       children: [
-        _buildOptionButton('글쓰기', Icons.edit, '글쓰기'),
+        _buildOptionButton('글쓰기', Icons.edit, 'TEXT'),
         const SizedBox(height: 12),
-        _buildOptionButton('그림 그리기', Icons.brush, '그림 그리기'),
+        _buildOptionButton('그림 그리기', Icons.brush, 'IMAGE'),
         const SizedBox(height: 12),
-        _buildOptionButton('영상', Icons.videocam, '영상'),
+        _buildOptionButton('영상', Icons.videocam, 'VIDEO'),
       ],
     );
   }
@@ -153,11 +153,11 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
             Icon(
               icon,
               size: 20,
-              color: isSelected ? Colors.white : _getIconColor(value),
+              color: isSelected ? Colors.white : _getIconColor(label), // label(한글)로 아이콘 색상 결정
             ),
             const SizedBox(width: 12),
             Text(
-              label,
+              label, // 한글로 표시
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -216,7 +216,7 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
 
   void _onNext() {
     if (_selectedOption != null) {
-      // 선택한 값을 local storage에 저장
+      // 선택한 값을 local storage에 저장 (영어 값으로 저장)
       _saveExpressionStyle();
       
       Navigator.push(

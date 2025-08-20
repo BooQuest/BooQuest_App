@@ -61,7 +61,6 @@ class UserDataService {
         strengthType: strengthType,
         characterType: characterType ?? '',
         characterName: characterName ?? '',
-        desiredSideJob: '',
       );
 
       print('✅ 사용자 데이터 수집 완료:');

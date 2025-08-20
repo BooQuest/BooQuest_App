@@ -5,8 +5,33 @@ import 'package:booquest/features/recommendation/presentation/screens/tutorial_c
 import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 
-class QuestStepsScreen extends StatelessWidget {
+class QuestStepsScreen extends StatefulWidget {
   const QuestStepsScreen({super.key});
+
+  @override
+  State<QuestStepsScreen> createState() => _QuestStepsScreenState();
+}
+
+class _QuestStepsScreenState extends State<QuestStepsScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  int _currentTabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        _currentTabIndex = _tabController.index;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +45,17 @@ class QuestStepsScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                  const SizedBox(height: 12),
-                  _buildTopRow(context),
-                  const SizedBox(height: 16),
-                  _buildTitle(),
-                  const SizedBox(height: 20),
-                  _buildQuestSteps(),
-                  const SizedBox(height: 50), // 하단 여백 추가
-                ],
+                  children: [
+                    const SizedBox(height: 12),
+                    _buildTopRow(context),
+                    const SizedBox(height: 16),
+                    _buildTitle(),
+                    const SizedBox(height: 20),
+                    _buildTabs(),
+                    const SizedBox(height: 20),
+                    _buildTabContent(),
+                    const SizedBox(height: 50), // 하단 여백 추가
+                  ],
                 ),
               ),
             ),
@@ -99,60 +126,68 @@ class QuestStepsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuestSteps() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTabs() {
+    return Row(
       children: [
-        // 메인 퀘스트 섹션
-        const Text(
-          '메인 퀘스트',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+        GestureDetector(
+          onTap: () {
+            _tabController.animateTo(0);
+          },
+          child: Container(
+            padding: const EdgeInsets.only(right: 32),
+            child: Text(
+              '메인 퀘스트',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: _currentTabIndex == 0 
+                    ? AppColors.textPrimary 
+                    : AppColors.textPrimary.withOpacity(0.3),
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+        GestureDetector(
+          onTap: () {
+            _tabController.animateTo(1);
+          },
+          child: Text(
+            '부 퀘스트',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: _currentTabIndex == 1 
+                  ? AppColors.textPrimary 
+                  : AppColors.textPrimary.withOpacity(0.3),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabContent() {
+    return IndexedStack(
+      index: _currentTabIndex,
+      children: [
         _buildMainQuestSection(),
-        const SizedBox(height: 32),
-        
-        // 부 퀘스트 섹션
-        const Text(
-          '부 퀘스트',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 16),
         _buildSubQuestSection(),
       ],
     );
   }
 
   Widget _buildMainQuestSection() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _buildMainQuestCard(1, 'SNS 계정 설정 & 브랜딩', '매우 쉬움'),
-          const SizedBox(width: 12),
-          _buildMainQuestCard(2, '콘텐츠 전략 & 해시태그 설계', '쉬움'),
-          const SizedBox(width: 12),
-          _buildMainQuestCard(3, '콘텐츠 제작 & 일정 관리', '보통'),
-          const SizedBox(width: 12),
-          _buildMainQuestCard(4, '팔로워 확보 & 커뮤니티 구축', '어려움'),
-          const SizedBox(width: 12),
-          _buildMainQuestCard(5, '수익화 & 브랜드 확장', '매우 어려움'),
-        ],
-      ),
+    return Column(
+      children: [
+        _buildMainQuestListItem('키워드 & 콘텐츠 전략 설계', '매우 쉬움'),
+        const SizedBox(height: 12),
+        _buildMainQuestListItem('키워드 & 콘텐츠 전략 설계', '매우 쉬움'),
+      ],
     );
   }
 
-  Widget _buildMainQuestCard(int stepNumber, String title, String difficulty) {
+  Widget _buildMainQuestListItem(String title, String difficulty) {
     return Container(
-      width: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
@@ -170,9 +205,9 @@ class QuestStepsScreen extends StatelessWidget {
                   color: const Color(0xFFE7E7E7),
                   borderRadius: BorderRadius.circular(100),
                 ),
-                child: Text(
-                  '${stepNumber}단계',
-                  style: const TextStyle(
+                child: const Text(
+                  '1단계',
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
@@ -200,35 +235,40 @@ class QuestStepsScreen extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
                   color: const Color(0xFFE0E0E0),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.landscape, size: 20, color: Colors.grey),
+                child: const Icon(Icons.image, size: 24, color: Colors.grey),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '메인 퀘스트에 대한 간단 설명 문구',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '메인 퀘스트에 대한 간단 설명 문구',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-            ),
           ),
         ],
       ),

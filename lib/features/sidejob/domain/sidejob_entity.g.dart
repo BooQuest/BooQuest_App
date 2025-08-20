@@ -31,7 +31,6 @@ _$SideJobRequestDataImpl _$$SideJobRequestDataImplFromJson(
   strengthType: json['strengthType'] as String,
   characterType: json['characterType'] as String,
   characterName: json['characterName'] as String,
-  desiredSideJob: json['desiredSideJob'] as String?,
 );
 
 Map<String, dynamic> _$$SideJobRequestDataImplToJson(
@@ -45,5 +44,4 @@ Map<String, dynamic> _$$SideJobRequestDataImplToJson(
   'strengthType': instance.strengthType,
   'characterType': instance.characterType,
   'characterName': instance.characterName,
-  'desiredSideJob': instance.desiredSideJob,
 };
