@@ -136,7 +136,10 @@ class _OnboardingRouter extends StatelessWidget {
       // missionRecommended가 true면 퀘스트 스텝 화면
       if (missionRecommended) {
         print('📋 missionRecommended = true → QuestStepsScreen');
-        return const QuestStepsScreen();
+        // selectedSideJobId가 있으면 전달
+        final selectedSideJobId = onboardingProgressInfo['selectedSideJobId'] as int?;
+        print('📋 selectedSideJobId: $selectedSideJobId');
+        return QuestStepsScreen(selectedSideJobId: selectedSideJobId);
       }
       
       // sideJobRecommended가 true면 부업 추천 화면

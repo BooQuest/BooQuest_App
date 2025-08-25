@@ -8,6 +8,7 @@ import '../application/get_sidejob_recommendations.dart';
 import 'sidejob_repository_impl.dart';
 import 'sidejob_api_service.dart';
 import 'user_data_service.dart';
+import 'package:booquest/features/sidejob/application/select_user_sidejob.dart';
 
 // ========== Infrastructure Providers ==========
 
@@ -36,9 +37,32 @@ final getSideJobRecommendationsProvider = Provider<GetSideJobRecommendations>((r
   return GetSideJobRecommendations(ref.read(sideJobRepositoryProvider));
 });
 
-/// SideJobNotifier Provider
+/// RegenerateSideJobs UseCase Provider
+final regenerateSideJobsProvider = Provider<RegenerateSideJobs>((ref) {
+  return RegenerateSideJobs(ref.read(sideJobRepositoryProvider));
+});
+
+/// RegenerateSingleSideJob UseCase Provider
+final regenerateSingleSideJobProvider = Provider<RegenerateSingleSideJob>((ref) {
+  return RegenerateSingleSideJob(ref.read(sideJobRepositoryProvider));
+});
+
+/// GetExistingSideJobs UseCase Provider
+final getExistingSideJobsProvider = Provider<GetExistingSideJobs>((ref) {
+  return GetExistingSideJobs(ref.read(sideJobRepositoryProvider));
+});
+
+/// 사용자 부업 선택 Use Case Provider
+final selectUserSideJobProvider = Provider<SelectUserSideJob>((ref) {
+  final repository = ref.watch(sideJobRepositoryProvider);
+  return SelectUserSideJob(repository);
+});
+
+/// SideJob Notifier Provider (업데이트)
 final sideJobNotifierProvider = StateNotifierProvider<SideJobNotifier, SideJobState>((ref) {
-  return SideJobNotifier(ref.read(getSideJobRecommendationsProvider));
+  final getRecommendations = ref.watch(getSideJobRecommendationsProvider);
+  final selectUserSideJob = ref.watch(selectUserSideJobProvider);
+  return SideJobNotifier(getRecommendations, selectUserSideJob);
 });
 
 // ========== Convenience Providers ==========

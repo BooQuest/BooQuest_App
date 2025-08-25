@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import '../domain/sidejob_entity.dart';
 import '../domain/sidejob_failure.dart';
 import '../domain/sidejob_repository.dart';
+import '../domain/user_sidejob_entity.dart';
 import 'sidejob_api_service.dart';
 import 'user_data_service.dart';
 
@@ -65,6 +66,79 @@ class SideJobRepositoryImpl implements SideJobRepository {
       );
     } catch (error, stackTrace) {
       print('❌ Repository: collectUserData 예외 발생: $error');
+      print('Stack trace: $stackTrace');
+      return Left(SideJobFailure.unknownError(error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<SideJobFailure, List<SideJobEntity>>> regenerateSideJobs(
+    List<int> sideJobIds,
+    SideJobRequestData generateSideJobRequest,
+  ) async {
+    try {
+      print('🔄 Repository: 부업 재생성 요청 처리 중...');
+      final result = await _apiService.regenerateSideJobs(
+        sideJobIds: sideJobIds,
+        generateSideJobRequest: generateSideJobRequest,
+      );
+      return result;
+    } catch (e, st) {
+      print('❌ Repository: regenerateSideJobs 예외 발생: $e');
+      print(st);
+      return Left(SideJobFailure.unknownError(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<SideJobFailure, SideJobEntity>> regenerateSingleSideJob({
+    required int sideJobId,
+    required List<String> reasons,
+    required String etcFeedback,
+    required SideJobRequestData generateSideJobRequest,
+  }) async {
+    try {
+      print('🔄 Repository: 단일 부업 재생성 요청 처리 중...');
+      final result = await _apiService.regenerateSingleSideJob(
+        sideJobId: sideJobId,
+        reasons: reasons,
+        etcFeedback: etcFeedback,
+        generateSideJobRequest: generateSideJobRequest,
+      );
+      return result;
+    } catch (e, st) {
+      print('❌ Repository: regenerateSingleSideJob 예외 발생: $e');
+      print(st);
+      return Left(SideJobFailure.unknownError(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<SideJobFailure, UserSideJobEntity>> selectUserSideJob(int sideJobId) {
+    return _apiService.selectUserSideJob(sideJobId);
+  }
+
+  @override
+  /// 기존 추천된 부업 목록 조회
+  ///
+  /// GET /api/sideJob/{userId}
+  /// 성공 시 서버에 저장된 최근 추천 목록을 반환
+  Future<Either<SideJobFailure, List<SideJobEntity>>> getExistingSideJobs(int userId) async {
+    try {
+      print('🔄 Repository: 기존 부업 추천 목록 조회 요청 처리 중...');
+      final result = await _apiService.getExistingSideJobs(userId);
+      return result.fold(
+        (failure) {
+          print('❌ Repository: 기존 부업 추천 목록 조회 실패 - ${failure.debugMessage}');
+          return Left(failure);
+        },
+        (entities) {
+          print('✅ Repository: 기존 부업 추천 목록 조회 성공 - ${entities.length}개');
+          return Right(entities);
+        },
+      );
+    } catch (error, stackTrace) {
+      print('❌ Repository: getExistingSideJobs 예외 발생: $error');
       print('Stack trace: $stackTrace');
       return Left(SideJobFailure.unknownError(error.toString()));
     }

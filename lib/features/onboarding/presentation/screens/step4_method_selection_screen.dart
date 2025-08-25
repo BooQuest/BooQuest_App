@@ -114,6 +114,9 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
             );
           }
         },
+        userSideJobSelected: (userSideJob) {
+          // 사용자 부업 선택 완료 - 이 화면에서는 처리하지 않음
+        },
         failure: (failure) {
           // 실패 시 에러는 이미 UI에서 표시됨
           print('❌ 부업 추천 실패: ${failure.debugMessage}');
