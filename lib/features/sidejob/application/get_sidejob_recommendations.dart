@@ -52,3 +52,47 @@ class GetSideJobRecommendations {
     }
   }
 }
+
+/// 부업 재생성 UseCase
+class RegenerateSideJobs {
+  final SideJobRepository _repository;
+  const RegenerateSideJobs(this._repository);
+
+  Future<Either<SideJobFailure, List<SideJobEntity>>> call({
+    required List<int> sideJobIds,
+    required SideJobRequestData generateSideJobRequest,
+  }) async {
+    return _repository.regenerateSideJobs(sideJobIds, generateSideJobRequest);
+  }
+}
+
+/// 단일 부업 재생성 UseCase
+class RegenerateSingleSideJob {
+  final SideJobRepository _repository;
+  const RegenerateSingleSideJob(this._repository);
+
+  Future<Either<SideJobFailure, SideJobEntity>> call({
+    required int sideJobId,
+    required List<String> reasons,
+    required String etcFeedback,
+    required SideJobRequestData generateSideJobRequest,
+  }) {
+    return _repository.regenerateSingleSideJob(
+      sideJobId: sideJobId,
+      reasons: reasons,
+      etcFeedback: etcFeedback,
+      generateSideJobRequest: generateSideJobRequest,
+    );
+  }
+}
+
+/// 기존 추천된 부업 목록 조회 UseCase
+class GetExistingSideJobs {
+  final SideJobRepository _repository;
+  const GetExistingSideJobs(this._repository);
+
+  /// userId로 서버에 저장된 기존 추천 리스트를 조회합니다.
+  Future<Either<SideJobFailure, List<SideJobEntity>>> call(int userId) {
+    return _repository.getExistingSideJobs(userId);
+  }
+}

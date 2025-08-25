@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'sidejob_state.dart';
+part of 'mission_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -16,31 +16,27 @@ final _privateConstructorUsedError = UnsupportedError(
 );
 
 /// @nodoc
-mixin _$SideJobState {
+mixin _$MissionState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<SideJobEntity> recommendations) success,
-    required TResult Function(UserSideJobEntity userSideJob)
-    userSideJobSelected,
-    required TResult Function(SideJobFailure failure) failure,
+    required TResult Function(List<MissionStepEntity> steps) success,
+    required TResult Function(MissionFailure failure) failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<SideJobEntity> recommendations)? success,
-    TResult? Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult? Function(SideJobFailure failure)? failure,
+    TResult? Function(List<MissionStepEntity> steps)? success,
+    TResult? Function(MissionFailure failure)? failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<SideJobEntity> recommendations)? success,
-    TResult Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult Function(SideJobFailure failure)? failure,
+    TResult Function(List<MissionStepEntity> steps)? success,
+    TResult Function(MissionFailure failure)? failure,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -48,7 +44,6 @@ mixin _$SideJobState {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
-    required TResult Function(_UserSideJobSelected value) userSideJobSelected,
     required TResult Function(_Failure value) failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -56,7 +51,6 @@ mixin _$SideJobState {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
-    TResult? Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult? Function(_Failure value)? failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -64,31 +58,30 @@ mixin _$SideJobState {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
-    TResult Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $SideJobStateCopyWith<$Res> {
-  factory $SideJobStateCopyWith(
-    SideJobState value,
-    $Res Function(SideJobState) then,
-  ) = _$SideJobStateCopyWithImpl<$Res, SideJobState>;
+abstract class $MissionStateCopyWith<$Res> {
+  factory $MissionStateCopyWith(
+    MissionState value,
+    $Res Function(MissionState) then,
+  ) = _$MissionStateCopyWithImpl<$Res, MissionState>;
 }
 
 /// @nodoc
-class _$SideJobStateCopyWithImpl<$Res, $Val extends SideJobState>
-    implements $SideJobStateCopyWith<$Res> {
-  _$SideJobStateCopyWithImpl(this._value, this._then);
+class _$MissionStateCopyWithImpl<$Res, $Val extends MissionState>
+    implements $MissionStateCopyWith<$Res> {
+  _$MissionStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -102,14 +95,14 @@ abstract class _$$InitialImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$InitialImplCopyWithImpl<$Res>
-    extends _$SideJobStateCopyWithImpl<$Res, _$InitialImpl>
+    extends _$MissionStateCopyWithImpl<$Res, _$InitialImpl>
     implements _$$InitialImplCopyWith<$Res> {
   __$$InitialImplCopyWithImpl(
     _$InitialImpl _value,
     $Res Function(_$InitialImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -120,7 +113,7 @@ class _$InitialImpl implements _Initial {
 
   @override
   String toString() {
-    return 'SideJobState.initial()';
+    return 'MissionState.initial()';
   }
 
   @override
@@ -137,10 +130,8 @@ class _$InitialImpl implements _Initial {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<SideJobEntity> recommendations) success,
-    required TResult Function(UserSideJobEntity userSideJob)
-    userSideJobSelected,
-    required TResult Function(SideJobFailure failure) failure,
+    required TResult Function(List<MissionStepEntity> steps) success,
+    required TResult Function(MissionFailure failure) failure,
   }) {
     return initial();
   }
@@ -150,9 +141,8 @@ class _$InitialImpl implements _Initial {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<SideJobEntity> recommendations)? success,
-    TResult? Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult? Function(SideJobFailure failure)? failure,
+    TResult? Function(List<MissionStepEntity> steps)? success,
+    TResult? Function(MissionFailure failure)? failure,
   }) {
     return initial?.call();
   }
@@ -162,9 +152,8 @@ class _$InitialImpl implements _Initial {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<SideJobEntity> recommendations)? success,
-    TResult Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult Function(SideJobFailure failure)? failure,
+    TResult Function(List<MissionStepEntity> steps)? success,
+    TResult Function(MissionFailure failure)? failure,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -179,7 +168,6 @@ class _$InitialImpl implements _Initial {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
-    required TResult Function(_UserSideJobSelected value) userSideJobSelected,
     required TResult Function(_Failure value) failure,
   }) {
     return initial(this);
@@ -191,7 +179,6 @@ class _$InitialImpl implements _Initial {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
-    TResult? Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult? Function(_Failure value)? failure,
   }) {
     return initial?.call(this);
@@ -203,7 +190,6 @@ class _$InitialImpl implements _Initial {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
-    TResult Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {
@@ -214,7 +200,7 @@ class _$InitialImpl implements _Initial {
   }
 }
 
-abstract class _Initial implements SideJobState {
+abstract class _Initial implements MissionState {
   const factory _Initial() = _$InitialImpl;
 }
 
@@ -228,14 +214,14 @@ abstract class _$$LoadingImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$LoadingImplCopyWithImpl<$Res>
-    extends _$SideJobStateCopyWithImpl<$Res, _$LoadingImpl>
+    extends _$MissionStateCopyWithImpl<$Res, _$LoadingImpl>
     implements _$$LoadingImplCopyWith<$Res> {
   __$$LoadingImplCopyWithImpl(
     _$LoadingImpl _value,
     $Res Function(_$LoadingImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -246,7 +232,7 @@ class _$LoadingImpl implements _Loading {
 
   @override
   String toString() {
-    return 'SideJobState.loading()';
+    return 'MissionState.loading()';
   }
 
   @override
@@ -263,10 +249,8 @@ class _$LoadingImpl implements _Loading {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<SideJobEntity> recommendations) success,
-    required TResult Function(UserSideJobEntity userSideJob)
-    userSideJobSelected,
-    required TResult Function(SideJobFailure failure) failure,
+    required TResult Function(List<MissionStepEntity> steps) success,
+    required TResult Function(MissionFailure failure) failure,
   }) {
     return loading();
   }
@@ -276,9 +260,8 @@ class _$LoadingImpl implements _Loading {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<SideJobEntity> recommendations)? success,
-    TResult? Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult? Function(SideJobFailure failure)? failure,
+    TResult? Function(List<MissionStepEntity> steps)? success,
+    TResult? Function(MissionFailure failure)? failure,
   }) {
     return loading?.call();
   }
@@ -288,9 +271,8 @@ class _$LoadingImpl implements _Loading {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<SideJobEntity> recommendations)? success,
-    TResult Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult Function(SideJobFailure failure)? failure,
+    TResult Function(List<MissionStepEntity> steps)? success,
+    TResult Function(MissionFailure failure)? failure,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -305,7 +287,6 @@ class _$LoadingImpl implements _Loading {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
-    required TResult Function(_UserSideJobSelected value) userSideJobSelected,
     required TResult Function(_Failure value) failure,
   }) {
     return loading(this);
@@ -317,7 +298,6 @@ class _$LoadingImpl implements _Loading {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
-    TResult? Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult? Function(_Failure value)? failure,
   }) {
     return loading?.call(this);
@@ -329,7 +309,6 @@ class _$LoadingImpl implements _Loading {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
-    TResult Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {
@@ -340,7 +319,7 @@ class _$LoadingImpl implements _Loading {
   }
 }
 
-abstract class _Loading implements SideJobState {
+abstract class _Loading implements MissionState {
   const factory _Loading() = _$LoadingImpl;
 }
 
@@ -351,29 +330,29 @@ abstract class _$$SuccessImplCopyWith<$Res> {
     $Res Function(_$SuccessImpl) then,
   ) = __$$SuccessImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({List<SideJobEntity> recommendations});
+  $Res call({List<MissionStepEntity> steps});
 }
 
 /// @nodoc
 class __$$SuccessImplCopyWithImpl<$Res>
-    extends _$SideJobStateCopyWithImpl<$Res, _$SuccessImpl>
+    extends _$MissionStateCopyWithImpl<$Res, _$SuccessImpl>
     implements _$$SuccessImplCopyWith<$Res> {
   __$$SuccessImplCopyWithImpl(
     _$SuccessImpl _value,
     $Res Function(_$SuccessImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? recommendations = null}) {
+  $Res call({Object? steps = null}) {
     return _then(
       _$SuccessImpl(
-        null == recommendations
-            ? _value._recommendations
-            : recommendations // ignore: cast_nullable_to_non_nullable
-                  as List<SideJobEntity>,
+        null == steps
+            ? _value._steps
+            : steps // ignore: cast_nullable_to_non_nullable
+                  as List<MissionStepEntity>,
       ),
     );
   }
@@ -382,20 +361,19 @@ class __$$SuccessImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$SuccessImpl implements _Success {
-  const _$SuccessImpl(final List<SideJobEntity> recommendations)
-    : _recommendations = recommendations;
+  const _$SuccessImpl(final List<MissionStepEntity> steps) : _steps = steps;
 
-  final List<SideJobEntity> _recommendations;
+  final List<MissionStepEntity> _steps;
   @override
-  List<SideJobEntity> get recommendations {
-    if (_recommendations is EqualUnmodifiableListView) return _recommendations;
+  List<MissionStepEntity> get steps {
+    if (_steps is EqualUnmodifiableListView) return _steps;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_recommendations);
+    return EqualUnmodifiableListView(_steps);
   }
 
   @override
   String toString() {
-    return 'SideJobState.success(recommendations: $recommendations)';
+    return 'MissionState.success(steps: $steps)';
   }
 
   @override
@@ -403,19 +381,14 @@ class _$SuccessImpl implements _Success {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$SuccessImpl &&
-            const DeepCollectionEquality().equals(
-              other._recommendations,
-              _recommendations,
-            ));
+            const DeepCollectionEquality().equals(other._steps, _steps));
   }
 
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    const DeepCollectionEquality().hash(_recommendations),
-  );
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(_steps));
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
@@ -428,12 +401,10 @@ class _$SuccessImpl implements _Success {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<SideJobEntity> recommendations) success,
-    required TResult Function(UserSideJobEntity userSideJob)
-    userSideJobSelected,
-    required TResult Function(SideJobFailure failure) failure,
+    required TResult Function(List<MissionStepEntity> steps) success,
+    required TResult Function(MissionFailure failure) failure,
   }) {
-    return success(recommendations);
+    return success(steps);
   }
 
   @override
@@ -441,11 +412,10 @@ class _$SuccessImpl implements _Success {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<SideJobEntity> recommendations)? success,
-    TResult? Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult? Function(SideJobFailure failure)? failure,
+    TResult? Function(List<MissionStepEntity> steps)? success,
+    TResult? Function(MissionFailure failure)? failure,
   }) {
-    return success?.call(recommendations);
+    return success?.call(steps);
   }
 
   @override
@@ -453,13 +423,12 @@ class _$SuccessImpl implements _Success {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<SideJobEntity> recommendations)? success,
-    TResult Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult Function(SideJobFailure failure)? failure,
+    TResult Function(List<MissionStepEntity> steps)? success,
+    TResult Function(MissionFailure failure)? failure,
     required TResult orElse(),
   }) {
     if (success != null) {
-      return success(recommendations);
+      return success(steps);
     }
     return orElse();
   }
@@ -470,7 +439,6 @@ class _$SuccessImpl implements _Success {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
-    required TResult Function(_UserSideJobSelected value) userSideJobSelected,
     required TResult Function(_Failure value) failure,
   }) {
     return success(this);
@@ -482,7 +450,6 @@ class _$SuccessImpl implements _Success {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
-    TResult? Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult? Function(_Failure value)? failure,
   }) {
     return success?.call(this);
@@ -494,7 +461,6 @@ class _$SuccessImpl implements _Success {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
-    TResult Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {
@@ -505,182 +471,15 @@ class _$SuccessImpl implements _Success {
   }
 }
 
-abstract class _Success implements SideJobState {
-  const factory _Success(final List<SideJobEntity> recommendations) =
-      _$SuccessImpl;
+abstract class _Success implements MissionState {
+  const factory _Success(final List<MissionStepEntity> steps) = _$SuccessImpl;
 
-  List<SideJobEntity> get recommendations;
+  List<MissionStepEntity> get steps;
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SuccessImplCopyWith<_$SuccessImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class _$$UserSideJobSelectedImplCopyWith<$Res> {
-  factory _$$UserSideJobSelectedImplCopyWith(
-    _$UserSideJobSelectedImpl value,
-    $Res Function(_$UserSideJobSelectedImpl) then,
-  ) = __$$UserSideJobSelectedImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({UserSideJobEntity userSideJob});
-}
-
-/// @nodoc
-class __$$UserSideJobSelectedImplCopyWithImpl<$Res>
-    extends _$SideJobStateCopyWithImpl<$Res, _$UserSideJobSelectedImpl>
-    implements _$$UserSideJobSelectedImplCopyWith<$Res> {
-  __$$UserSideJobSelectedImplCopyWithImpl(
-    _$UserSideJobSelectedImpl _value,
-    $Res Function(_$UserSideJobSelectedImpl) _then,
-  ) : super(_value, _then);
-
-  /// Create a copy of SideJobState
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? userSideJob = null}) {
-    return _then(
-      _$UserSideJobSelectedImpl(
-        null == userSideJob
-            ? _value.userSideJob
-            : userSideJob // ignore: cast_nullable_to_non_nullable
-                  as UserSideJobEntity,
-      ),
-    );
-  }
-}
-
-/// @nodoc
-
-class _$UserSideJobSelectedImpl implements _UserSideJobSelected {
-  const _$UserSideJobSelectedImpl(this.userSideJob);
-
-  @override
-  final UserSideJobEntity userSideJob;
-
-  @override
-  String toString() {
-    return 'SideJobState.userSideJobSelected(userSideJob: $userSideJob)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$UserSideJobSelectedImpl &&
-            (identical(other.userSideJob, userSideJob) ||
-                other.userSideJob == userSideJob));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, userSideJob);
-
-  /// Create a copy of SideJobState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$UserSideJobSelectedImplCopyWith<_$UserSideJobSelectedImpl> get copyWith =>
-      __$$UserSideJobSelectedImplCopyWithImpl<_$UserSideJobSelectedImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(List<SideJobEntity> recommendations) success,
-    required TResult Function(UserSideJobEntity userSideJob)
-    userSideJobSelected,
-    required TResult Function(SideJobFailure failure) failure,
-  }) {
-    return userSideJobSelected(userSideJob);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? initial,
-    TResult? Function()? loading,
-    TResult? Function(List<SideJobEntity> recommendations)? success,
-    TResult? Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult? Function(SideJobFailure failure)? failure,
-  }) {
-    return userSideJobSelected?.call(userSideJob);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(List<SideJobEntity> recommendations)? success,
-    TResult Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult Function(SideJobFailure failure)? failure,
-    required TResult orElse(),
-  }) {
-    if (userSideJobSelected != null) {
-      return userSideJobSelected(userSideJob);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(_Initial value) initial,
-    required TResult Function(_Loading value) loading,
-    required TResult Function(_Success value) success,
-    required TResult Function(_UserSideJobSelected value) userSideJobSelected,
-    required TResult Function(_Failure value) failure,
-  }) {
-    return userSideJobSelected(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(_Initial value)? initial,
-    TResult? Function(_Loading value)? loading,
-    TResult? Function(_Success value)? success,
-    TResult? Function(_UserSideJobSelected value)? userSideJobSelected,
-    TResult? Function(_Failure value)? failure,
-  }) {
-    return userSideJobSelected?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(_Initial value)? initial,
-    TResult Function(_Loading value)? loading,
-    TResult Function(_Success value)? success,
-    TResult Function(_UserSideJobSelected value)? userSideJobSelected,
-    TResult Function(_Failure value)? failure,
-    required TResult orElse(),
-  }) {
-    if (userSideJobSelected != null) {
-      return userSideJobSelected(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class _UserSideJobSelected implements SideJobState {
-  const factory _UserSideJobSelected(final UserSideJobEntity userSideJob) =
-      _$UserSideJobSelectedImpl;
-
-  UserSideJobEntity get userSideJob;
-
-  /// Create a copy of SideJobState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$UserSideJobSelectedImplCopyWith<_$UserSideJobSelectedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -691,21 +490,19 @@ abstract class _$$FailureImplCopyWith<$Res> {
     $Res Function(_$FailureImpl) then,
   ) = __$$FailureImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({SideJobFailure failure});
-
-  $SideJobFailureCopyWith<$Res> get failure;
+  $Res call({MissionFailure failure});
 }
 
 /// @nodoc
 class __$$FailureImplCopyWithImpl<$Res>
-    extends _$SideJobStateCopyWithImpl<$Res, _$FailureImpl>
+    extends _$MissionStateCopyWithImpl<$Res, _$FailureImpl>
     implements _$$FailureImplCopyWith<$Res> {
   __$$FailureImplCopyWithImpl(
     _$FailureImpl _value,
     $Res Function(_$FailureImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -715,19 +512,9 @@ class __$$FailureImplCopyWithImpl<$Res>
         null == failure
             ? _value.failure
             : failure // ignore: cast_nullable_to_non_nullable
-                  as SideJobFailure,
+                  as MissionFailure,
       ),
     );
-  }
-
-  /// Create a copy of SideJobState
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $SideJobFailureCopyWith<$Res> get failure {
-    return $SideJobFailureCopyWith<$Res>(_value.failure, (value) {
-      return _then(_value.copyWith(failure: value));
-    });
   }
 }
 
@@ -737,11 +524,11 @@ class _$FailureImpl implements _Failure {
   const _$FailureImpl(this.failure);
 
   @override
-  final SideJobFailure failure;
+  final MissionFailure failure;
 
   @override
   String toString() {
-    return 'SideJobState.failure(failure: $failure)';
+    return 'MissionState.failure(failure: $failure)';
   }
 
   @override
@@ -755,7 +542,7 @@ class _$FailureImpl implements _Failure {
   @override
   int get hashCode => Object.hash(runtimeType, failure);
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
@@ -768,10 +555,8 @@ class _$FailureImpl implements _Failure {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<SideJobEntity> recommendations) success,
-    required TResult Function(UserSideJobEntity userSideJob)
-    userSideJobSelected,
-    required TResult Function(SideJobFailure failure) failure,
+    required TResult Function(List<MissionStepEntity> steps) success,
+    required TResult Function(MissionFailure failure) failure,
   }) {
     return failure(this.failure);
   }
@@ -781,9 +566,8 @@ class _$FailureImpl implements _Failure {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<SideJobEntity> recommendations)? success,
-    TResult? Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult? Function(SideJobFailure failure)? failure,
+    TResult? Function(List<MissionStepEntity> steps)? success,
+    TResult? Function(MissionFailure failure)? failure,
   }) {
     return failure?.call(this.failure);
   }
@@ -793,9 +577,8 @@ class _$FailureImpl implements _Failure {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<SideJobEntity> recommendations)? success,
-    TResult Function(UserSideJobEntity userSideJob)? userSideJobSelected,
-    TResult Function(SideJobFailure failure)? failure,
+    TResult Function(List<MissionStepEntity> steps)? success,
+    TResult Function(MissionFailure failure)? failure,
     required TResult orElse(),
   }) {
     if (failure != null) {
@@ -810,7 +593,6 @@ class _$FailureImpl implements _Failure {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
-    required TResult Function(_UserSideJobSelected value) userSideJobSelected,
     required TResult Function(_Failure value) failure,
   }) {
     return failure(this);
@@ -822,7 +604,6 @@ class _$FailureImpl implements _Failure {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
-    TResult? Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult? Function(_Failure value)? failure,
   }) {
     return failure?.call(this);
@@ -834,7 +615,6 @@ class _$FailureImpl implements _Failure {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
-    TResult Function(_UserSideJobSelected value)? userSideJobSelected,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {
@@ -845,12 +625,12 @@ class _$FailureImpl implements _Failure {
   }
 }
 
-abstract class _Failure implements SideJobState {
-  const factory _Failure(final SideJobFailure failure) = _$FailureImpl;
+abstract class _Failure implements MissionState {
+  const factory _Failure(final MissionFailure failure) = _$FailureImpl;
 
-  SideJobFailure get failure;
+  MissionFailure get failure;
 
-  /// Create a copy of SideJobState
+  /// Create a copy of MissionState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$FailureImplCopyWith<_$FailureImpl> get copyWith =>

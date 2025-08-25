@@ -52,20 +52,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           response.data!['success'] == true) {
         
         final userData = response.data!['data'] as Map<String, dynamic>;
-        print('✅ 사용자 정보 인증 성공:');
-        print('  - User ID: ${userData['id']}');
-        print('  - Email: ${userData['email']}');
-        print('  - Nickname: ${userData['nickname']}');
-        print('  - Profile Image: ${userData['profileImageUrl']}');
-        
-        // 온보딩 진행 정보 확인
-        final onboardingProgressInfo = userData['onboardingProgressInfo'] as Map<String, dynamic>?;
-        if (onboardingProgressInfo != null) {
-          print('📊 온보딩 진행 정보:');
-          print('  - sideJobRecommended: ${onboardingProgressInfo['sideJobRecommended']}');
-          print('  - missionRecommended: ${onboardingProgressInfo['missionRecommended']}');
-          print('  - sideJobCreated: ${onboardingProgressInfo['sideJobCreated']}');
-        }
         
         // 3. 로컬 스토리지 업데이트
         await _storageService.saveUserInfo(

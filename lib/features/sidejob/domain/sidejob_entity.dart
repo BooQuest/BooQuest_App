@@ -33,3 +33,5 @@ class SideJobRequestData with _$SideJobRequestData {
   factory SideJobRequestData.fromJson(Map<String, dynamic> json) =>
       _$SideJobRequestDataFromJson(json);
 }
+
+

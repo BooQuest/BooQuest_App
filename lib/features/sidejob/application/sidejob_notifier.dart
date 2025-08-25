@@ -2,12 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'sidejob_state.dart';
 import 'get_sidejob_recommendations.dart';
 import '../domain/sidejob_failure.dart';
+import 'package:booquest/features/sidejob/application/select_user_sidejob.dart';
+import 'package:booquest/features/sidejob/domain/sidejob_entity.dart';
+import 'package:booquest/features/sidejob/domain/user_sidejob_entity.dart';
 
 /// 부업 추천 StateNotifier
 class SideJobNotifier extends StateNotifier<SideJobState> {
   final GetSideJobRecommendations _getSideJobRecommendations;
+  final SelectUserSideJob _selectUserSideJob;
 
-  SideJobNotifier(this._getSideJobRecommendations) : super(const SideJobState.initial());
+  SideJobNotifier(this._getSideJobRecommendations, this._selectUserSideJob) : super(const SideJobState.initial());
 
   /// 부업 추천 가져오기
   /// 
@@ -29,6 +33,18 @@ class SideJobNotifier extends StateNotifier<SideJobState> {
         print('✅ 부업 추천 성공: ${recommendations.length}개');
         state = SideJobState.success(recommendations);
       },
+    );
+  }
+
+  /// 사용자 부업 선택
+  Future<void> selectUserSideJob(int sideJobId) async {
+    state = const SideJobState.loading();
+    
+    final result = await _selectUserSideJob(sideJobId);
+    
+    result.fold(
+      (failure) => state = SideJobState.failure(failure),
+      (userSideJob) => state = SideJobState.userSideJobSelected(userSideJob),
     );
   }
 

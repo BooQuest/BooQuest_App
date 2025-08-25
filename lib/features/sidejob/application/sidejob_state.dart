@@ -1,15 +1,16 @@
+import 'package:booquest/features/sidejob/domain/sidejob_entity.dart';
+import 'package:booquest/features/sidejob/domain/sidejob_failure.dart';
+import 'package:booquest/features/sidejob/domain/user_sidejob_entity.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../domain/sidejob_entity.dart';
-import '../domain/sidejob_failure.dart';
 
 part 'sidejob_state.freezed.dart';
 
-/// 부업 추천 상태 클래스
 @freezed
 class SideJobState with _$SideJobState {
   const factory SideJobState.initial() = _Initial;
   const factory SideJobState.loading() = _Loading;
   const factory SideJobState.success(List<SideJobEntity> recommendations) = _Success;
+  const factory SideJobState.userSideJobSelected(UserSideJobEntity userSideJob) = _UserSideJobSelected;
   const factory SideJobState.failure(SideJobFailure failure) = _Failure;
 }
 
