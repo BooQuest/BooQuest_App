@@ -35,8 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   
-  # 환경변수 관리를 위한 패키지
-  flutter_dotenv: ^5.1.0
+  # flutter_dotenv removed for release build simplicity
   
   # HTTP 클라이언트
   dio: ^5.4.0
@@ -90,7 +89,6 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - .env
     - assets/images/characters/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
