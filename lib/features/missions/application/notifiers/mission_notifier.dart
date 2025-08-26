@@ -1,10 +1,10 @@
 import 'package:state_notifier/state_notifier.dart';
-import '../domain/mission_repository.dart';
-import '../domain/mission_entity.dart';
-import '../domain/mission_failure.dart';
-import '../domain/subquest_entity.dart';
-import '../domain/subquest_request_data.dart';
-import 'mission_state.dart';
+import '../../domain/repositories/mission_repository.dart';
+import '../../domain/entities/mission_entity.dart';
+import '../../domain/failures/mission_failure.dart';
+import '../../domain/entities/subquest_entity.dart';
+import '../../domain/entities/subquest_request_data.dart';
+import '../states/mission_state.dart';
 
 class MissionNotifier extends StateNotifier<MissionState> {
   final MissionRepository repository;

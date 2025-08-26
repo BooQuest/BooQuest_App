@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:booquest/core/network/network_client.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
-import '../domain/mission_entity.dart';
-import '../domain/mission_failure.dart';
-import '../domain/subquest_entity.dart';
-import '../domain/subquest_request_data.dart';
+import '../../domain/entities/mission_entity.dart';
+import '../../domain/failures/mission_failure.dart';
+import '../../domain/entities/subquest_entity.dart';
+import '../../domain/entities/subquest_request_data.dart';
 
 class MissionApiService {
   static MissionApiService? _instance;

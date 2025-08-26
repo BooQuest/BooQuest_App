@@ -6,8 +6,8 @@ import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
 import 'package:booquest/core/navigation/transitions.dart';
-import 'package:booquest/features/missions/infrastructure/mission_providers.dart';
-import 'package:booquest/features/missions/application/mission_state.dart';
+import 'package:booquest/features/missions/infrastructure/providers/mission_providers.dart';
+import 'package:booquest/features/missions/application/states/mission_state.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
 import 'package:booquest/features/sidejob/infrastructure/sidejob_providers.dart';
 

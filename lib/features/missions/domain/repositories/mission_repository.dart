@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'mission_entity.dart';
-import 'mission_failure.dart';
-import 'subquest_entity.dart';
-import 'subquest_request_data.dart';
+import '../entities/mission_entity.dart';
+import '../failures/mission_failure.dart';
+import '../entities/subquest_entity.dart';
+import '../entities/subquest_request_data.dart';
 
 abstract class MissionRepository {
   Future<Either<MissionFailure, List<MissionStepEntity>>> createMissions(MissionCreateRequest request);

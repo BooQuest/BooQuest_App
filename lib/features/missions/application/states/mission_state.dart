@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../domain/mission_entity.dart';
-import '../domain/mission_failure.dart';
+import '../../domain/entities/mission_entity.dart';
+import '../../domain/failures/mission_failure.dart';
 
 part 'mission_state.freezed.dart';
 
