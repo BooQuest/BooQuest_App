@@ -9,6 +9,7 @@ class AuthStorageService {
   static const String _emailKey = 'auth_email';
   static const String _nicknameKey = 'auth_nickname';
   static const String _profileImageUrlKey = 'auth_profile_image_url';
+  static const String _sideJobIdKey = 'auth_side_job_id';
   static const String _accessTokenKey = 'auth_access_token';
   static const String _refreshTokenKey = 'auth_refresh_token';
   static const String _isAuthenticatedKey = 'auth_is_authenticated';
@@ -74,6 +75,21 @@ class AuthStorageService {
     return _preferences?.getString(_profileImageUrlKey);
   }
 
+  /// SideJob ID 저장
+  Future<void> setSideJobId(int sideJobId) async {
+    await _preferences?.setInt(_sideJobIdKey, sideJobId);
+  }
+
+  /// SideJob ID 조회
+  int? getSideJobId() {
+    return _preferences?.getInt(_sideJobIdKey);
+  }
+
+  /// SideJob ID 삭제
+  Future<void> removeSideJobId() async {
+    await _preferences?.remove(_sideJobIdKey);
+  }
+
   // ========== 토큰 관련 ==========
 
   /// Access Token 저장
@@ -110,17 +126,25 @@ class AuthStorageService {
 
   // ========== 사용자 정보 통합 관리 ==========
 
-  /// 사용자 정보 일괄 저장
+  /// 사용자 정보 저장 
   Future<void> saveUserInfo({
     required int userId,
     required String email,
-    String? nickname,
+    required String nickname,
     String? profileImageUrl,
+    int? sideJobId,
   }) async {
-    await setUserId(userId);
-    await setEmail(email);
-    if (nickname != null) await setNickname(nickname);
-    if (profileImageUrl != null) await setProfileImageUrl(profileImageUrl);
+    await _preferences?.setInt(_userIdKey, userId);
+    await _preferences?.setString(_emailKey, email);
+    await _preferences?.setString(_nicknameKey, nickname);
+    
+    if (profileImageUrl != null) {
+      await _preferences?.setString(_profileImageUrlKey, profileImageUrl);
+    }
+    
+    if (sideJobId != null) {
+      await _preferences?.setInt(_sideJobIdKey, sideJobId);
+    }
   }
 
   /// 사용자 정보 일괄 조회
@@ -135,6 +159,7 @@ class AuthStorageService {
       'email': email,
       'nickname': getNickname(),
       'profileImageUrl': getProfileImageUrl(),
+      'sideJobId': getSideJobId(),
     };
   }
 
@@ -164,6 +189,7 @@ class AuthStorageService {
     await _preferences?.remove(_emailKey);
     await _preferences?.remove(_nicknameKey);
     await _preferences?.remove(_profileImageUrlKey);
+    await _preferences?.remove(_sideJobIdKey);
     await _preferences?.remove(_accessTokenKey);
     await _preferences?.remove(_refreshTokenKey);
     await _preferences?.remove(_isAuthenticatedKey);

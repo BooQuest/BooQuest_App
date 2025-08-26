@@ -59,6 +59,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           email: userData['email'] ?? '',
           nickname: userData['nickname'],
           profileImageUrl: userData['profileImageUrl'],
+          sideJobId: _extractSideJobId(userData),
         );
 
         // 4. 인증 성공 상태로 전환 (onboardingProgressInfo 포함)
@@ -140,11 +141,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
         Map<String, dynamic> userForState = {};
         if (responseData['userInfo'] != null) {
           final userInfo = responseData['userInfo'] as Map<String, dynamic>;
+          
+          // onboardingProgressInfo에서 selectedSideJobId 추출
+          int? sideJobId;
+          if (onboardingProgressInfo != null) {
+            sideJobId = onboardingProgressInfo['selectedSideJobId'] as int?;
+            print('🔍 로그인 응답에서 selectedSideJobId 추출: $sideJobId');
+          }
+          
           await _storageService.saveUserInfo(
             userId: userInfo['userId'] as int,
             email: userInfo['email'] ?? '',
             nickname: userInfo['nickname'],
             profileImageUrl: userInfo['profileImageUrl'],
+            sideJobId: sideJobId,
           );
           userForState = Map<String, dynamic>.from(userInfo);
         }
@@ -265,6 +275,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           email: userData['email'] ?? '',
           nickname: userData['nickname'],
           profileImageUrl: userData['profileImageUrl'],
+          sideJobId: userData['sideJobId'] as int?,
         );
 
         state = state.authenticated(userData);
@@ -281,6 +292,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
     print('State: $state');
     _storageService.printAuthData();
     print('==================');
+  }
+
+  /// 사용자 데이터에서 sideJobId를 추출하는 헬퍼 메서드
+  int? _extractSideJobId(Map<String, dynamic> userData) {
+    try {
+      final onboardingInfo = userData['onboardingProgressInfo'] as Map<String, dynamic>?;
+      if (onboardingInfo != null) {
+        return onboardingInfo['selectedSideJobId'] as int?;
+      }
+      return null;
+    } catch (e) {
+      print('Error extracting sideJobId: $e');
+      return null;
+    }
   }
 }
 
