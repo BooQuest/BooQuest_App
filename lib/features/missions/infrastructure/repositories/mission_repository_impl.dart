@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import '../domain/mission_entity.dart';
-import '../domain/mission_failure.dart';
-import '../domain/mission_repository.dart';
-import '../domain/subquest_entity.dart';
-import '../domain/subquest_request_data.dart';
-import 'mission_api_service.dart';
+import '../../domain/entities/mission_entity.dart';
+import '../../domain/failures/mission_failure.dart';
+import '../../domain/repositories/mission_repository.dart';
+import '../../domain/entities/subquest_entity.dart';
+import '../../domain/entities/subquest_request_data.dart';
+import '../api/mission_api_service.dart';
 
 class MissionRepositoryImpl implements MissionRepository {
   final MissionApiService apiService;

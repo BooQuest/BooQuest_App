@@ -9,12 +9,12 @@ import 'package:booquest/core/navigation/transitions.dart';
 import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step4_method_selection_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:booquest/features/missions/infrastructure/mission_providers.dart';
+import 'package:booquest/features/missions/infrastructure/providers/mission_providers.dart';
 import 'package:booquest/core/utils/user_data_utils.dart';
 import 'package:booquest/features/sidejob/infrastructure/sidejob_providers.dart';
 import 'package:booquest/features/sidejob/domain/sidejob_entity.dart';
 import 'package:booquest/features/sidejob/domain/sidejob_failure.dart';
-import 'package:booquest/features/missions/domain/subquest_request_data.dart';
+import 'package:booquest/features/missions/domain/entities/subquest_request_data.dart';
 
 /// 부업 추천 화면
 class SideJobRecommendationsScreen extends StatefulWidget {

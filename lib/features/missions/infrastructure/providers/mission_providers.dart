@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../domain/mission_repository.dart';
-import 'mission_repository_impl.dart';
-import '../application/mission_notifier.dart';
-import '../application/mission_state.dart';
+import '../../domain/repositories/mission_repository.dart';
+import '../repositories/mission_repository_impl.dart';
+import '../../application/notifiers/mission_notifier.dart';
+import '../../application/states/mission_state.dart';
 
 final missionRepositoryProvider = Provider<MissionRepository>((ref) {
   return MissionRepositoryImpl();
