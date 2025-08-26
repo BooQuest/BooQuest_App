@@ -37,6 +37,9 @@ class AppColors {
   // 온보딩 진행 바 색상
   static const Color progressActive = Color(0xFFACACAC);   // 활성 바 (#ACACAC)
   static const Color progressInactive = Color(0xFFEBEBEB); // 비활성 바 (#EBEBEB)
+  
+  // 주요 색상
+  static const Color primary = Color(0xFF007AFF);          // 주요 색상 (파란색)
 
   // 칩 색상
   static const Color chipSelectedBg = buttonActive;        // 선택 칩 배경
