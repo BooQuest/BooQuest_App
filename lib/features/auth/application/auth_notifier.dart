@@ -53,6 +53,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         
         final userData = response.data!['data'] as Map<String, dynamic>;
         
+        print('🔍 user/me API 응답 데이터 상세:');
+        print('  - 전체 userData: $userData');
+        print('  - id: ${userData['id']}');
+        print('  - email: ${userData['email']}');
+        print('  - nickname: ${userData['nickname']}');
+        print('  - profileImageUrl: ${userData['profileImageUrl']}');
+        
         // 3. 로컬 스토리지 업데이트
         await _storageService.saveUserInfo(
           userId: userData['id'] as int,
@@ -61,6 +68,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           profileImageUrl: userData['profileImageUrl'],
           sideJobId: _extractSideJobId(userData),
         );
+        
+        print('💾 saveUserInfo 호출 완료');
 
         // 4. 인증 성공 상태로 전환 (onboardingProgressInfo 포함)
         state = state.authenticated(userData);

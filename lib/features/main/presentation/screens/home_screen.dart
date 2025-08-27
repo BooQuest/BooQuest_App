@@ -6,6 +6,7 @@ import 'package:booquest/features/main/infrastructure/providers/main_providers.d
 import 'package:booquest/features/main/application/states/character_growth_state.dart';
 import 'package:booquest/features/main/application/states/mission_progress_state.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
 
 /// 홈 화면 - 사용자 캐릭터 정보와 퀘스트 진행 상황을 표시
 class HomeScreen extends ConsumerStatefulWidget {
@@ -550,7 +551,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 width: 40,
                 height: 40,
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsScreen(),
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.settings, color: AppColors.textPrimary),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

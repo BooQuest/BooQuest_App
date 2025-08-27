@@ -10,14 +10,18 @@ class MissionListApiService {
   /// 미션 목록 조회
   /// 
   /// [status]: 미션 상태 ('IN_PROGRESS', 'PLANNED' 등)
+  /// [sideJobId]: 사이드잡 ID
   /// 
   /// Returns: API 응답
-  Future<Response> getMissionList(String status) async {
+  Future<Response> getMissionList(String status, int sideJobId) async {
     try {
-      print('🔍 MissionListApiService: getMissionList 호출 - status: $status');
+      print('🔍 MissionListApiService: getMissionList 호출 - status: $status, sideJobId: $sideJobId');
       
       final response = await _client.get('/api/missions', 
-        queryParameters: {'status': status});
+        queryParameters: {
+          'status': status,
+          'sideJobId': sideJobId,
+        });
       
       print('✅ MissionListApiService: API 응답 성공');
       print('  - Status Code: ${response.statusCode}');

@@ -14,6 +14,7 @@ _$MissionEntityImpl _$$MissionEntityImplFromJson(Map<String, dynamic> json) =>
       status: json['status'] as String,
       orderNo: (json['orderNo'] as num?)?.toInt(),
       designNotes: json['designNotes'] as String,
+      missionTotalExp: (json['missionTotalExp'] as num).toInt(),
       steps: (json['steps'] as List<dynamic>)
           .map((e) => MissionStep.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -30,6 +31,7 @@ Map<String, dynamic> _$$MissionEntityImplToJson(_$MissionEntityImpl instance) =>
       'status': instance.status,
       'orderNo': instance.orderNo,
       'designNotes': instance.designNotes,
+      'missionTotalExp': instance.missionTotalExp,
       'steps': instance.steps,
       'progress': instance.progress,
     };

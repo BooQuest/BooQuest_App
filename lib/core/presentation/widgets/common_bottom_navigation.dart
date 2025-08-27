@@ -41,13 +41,9 @@ class CommonBottomNavigation extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.archive_outlined),
           activeIcon: Icon(Icons.archive),
-          label: '아카이브',
+          label: '나의 기록',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'MY',
-        ),
+
       ],
     );
   }

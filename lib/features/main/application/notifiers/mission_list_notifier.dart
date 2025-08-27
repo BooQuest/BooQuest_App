@@ -11,13 +11,13 @@ class MissionListNotifier extends StateNotifier<MissionListState> {
   MissionListNotifier(this._repository) : super(const MissionListState.initial());
 
   /// 미션 목록 조회
-  Future<void> getMissionList(String status) async {
+  Future<void> getMissionList(String status, int sideJobId) async {
     try {
-      print('🔍 MissionListNotifier: getMissionList 호출 - status: $status');
+      print('🔍 MissionListNotifier: getMissionList 호출 - status: $status, sideJobId: $sideJobId');
       
       state = const MissionListState.loading();
       
-      final result = await _repository.getMissionList(status);
+      final result = await _repository.getMissionList(status, sideJobId);
       
       result.fold(
         (failure) {
