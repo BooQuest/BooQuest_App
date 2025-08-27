@@ -25,6 +25,11 @@ class MissionRepositoryImpl implements MissionRepository {
   Future<Either<MissionFailure, List<SubQuestEntity>>> getSubQuests(SubQuestRequestData request) {
     return apiService.getSubQuests(request);
   }
+
+  @override
+  Future<Either<MissionFailure, bool>> startMission(int missionId) {
+    return apiService.startMission(missionId);
+  }
 }
 
 
