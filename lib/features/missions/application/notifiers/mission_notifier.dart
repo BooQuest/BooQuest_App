@@ -54,6 +54,23 @@ class MissionNotifier extends StateNotifier<MissionState> {
       },
     );
   }
+
+  /// 미션 시작
+  Future<bool> startMission(int missionId) async {
+    print('🚀 미션 시작 시작... missionId: $missionId');
+    
+    final result = await repository.startMission(missionId);
+    return result.fold(
+      (MissionFailure f) {
+        print('❌ 미션 시작 실패: ${f.userMessage}');
+        return false;
+      },
+      (bool success) {
+        print('✅ 미션 시작 성공');
+        return success;
+      },
+    );
+  }
 }
 
 

@@ -168,6 +168,48 @@ class MissionApiService {
       return Left(MissionFailure.unknown(message));
     }
   }
+
+  /// 미션 시작 API 호출
+  /// POST /api/missions/{missionId}/start
+  Future<Either<MissionFailure, bool>> startMission(int missionId) async {
+    try {
+      print('🚀 미션 시작 API 호출 시작... missionId: $missionId');
+      
+      final authStorage = await AuthStorageService.getInstance();
+      final client = NetworkClient(authStorage);
+
+      final response = await client.post<Map<String, dynamic>>(
+        '/api/missions/$missionId/start',
+        data: {}, // 빈 데이터 (요청 바디가 필요 없는 경우)
+      );
+
+      print('📥 미션 시작 API 응답:');
+      print('  - Status Code: ${response.statusCode}');
+      print('  - Response Data: ${response.data}');
+
+      if (response.statusCode != 200 || response.data == null) {
+        return Left(MissionFailure.server('서버 오류 (${response.statusCode})'));
+      }
+
+      final body = response.data!;
+      if (body['success'] != true) {
+        final message = body['message']?.toString();
+        print('❌ API 실패 응답: $message');
+        return Left(MissionFailure.server(message ?? 'API 실패'));
+      }
+
+      print('✅ 미션 시작 API 성공');
+      return const Right(true);
+      
+    } catch (e) {
+      print('❌ 미션 시작 API 호출 중 예외 발생: $e');
+      final message = e.toString();
+      if (message.contains('SocketException') || message.contains('TimeoutException')) {
+        return Left(MissionFailure.network(message));
+      }
+      return Left(MissionFailure.unknown(message));
+    }
+  }
 }
 
 

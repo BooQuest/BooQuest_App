@@ -524,6 +524,30 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
                   }
                   return;
                 }
+                
+                // 부업 선택 성공 후, 메인 퀘스트 1단계 시작 API 호출
+                final missionState = ref.read(missionNotifierProvider);
+                final missionData = missionState.maybeWhen(
+                  success: (steps) => steps.isNotEmpty ? steps.first : null,
+                  orElse: () => null,
+                );
+                
+                if (missionData != null && missionData.id != null) {
+                  print('🔍 메인 퀘스트 1단계 ID: ${missionData.id}');
+                  
+                  final missionStartSuccess = await ref.read(missionNotifierProvider.notifier).startMission(missionData.id!);
+                  if (!missionStartSuccess) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('미션 시작에 실패했습니다. 다시 시도해주세요.')),
+                      );
+                    }
+                    return;
+                  }
+                } else {
+                  print('⚠️ 메인 퀘스트 1단계 ID를 찾을 수 없습니다');
+                  return;
+                }
               }
               
               // 온보딩 완료 상태로 설정 
