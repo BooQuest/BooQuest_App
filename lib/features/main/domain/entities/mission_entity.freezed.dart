@@ -27,6 +27,7 @@ mixin _$MissionEntity {
   String get status => throw _privateConstructorUsedError;
   int? get orderNo => throw _privateConstructorUsedError;
   String get designNotes => throw _privateConstructorUsedError;
+  int get missionTotalExp => throw _privateConstructorUsedError;
   List<MissionStep> get steps => throw _privateConstructorUsedError;
   MissionProgress get progress => throw _privateConstructorUsedError;
 
@@ -54,6 +55,7 @@ abstract class $MissionEntityCopyWith<$Res> {
     String status,
     int? orderNo,
     String designNotes,
+    int missionTotalExp,
     List<MissionStep> steps,
     MissionProgress progress,
   });
@@ -82,6 +84,7 @@ class _$MissionEntityCopyWithImpl<$Res, $Val extends MissionEntity>
     Object? status = null,
     Object? orderNo = freezed,
     Object? designNotes = null,
+    Object? missionTotalExp = null,
     Object? steps = null,
     Object? progress = null,
   }) {
@@ -111,6 +114,10 @@ class _$MissionEntityCopyWithImpl<$Res, $Val extends MissionEntity>
                 ? _value.designNotes
                 : designNotes // ignore: cast_nullable_to_non_nullable
                       as String,
+            missionTotalExp: null == missionTotalExp
+                ? _value.missionTotalExp
+                : missionTotalExp // ignore: cast_nullable_to_non_nullable
+                      as int,
             steps: null == steps
                 ? _value.steps
                 : steps // ignore: cast_nullable_to_non_nullable
@@ -151,6 +158,7 @@ abstract class _$$MissionEntityImplCopyWith<$Res>
     String status,
     int? orderNo,
     String designNotes,
+    int missionTotalExp,
     List<MissionStep> steps,
     MissionProgress progress,
   });
@@ -179,6 +187,7 @@ class __$$MissionEntityImplCopyWithImpl<$Res>
     Object? status = null,
     Object? orderNo = freezed,
     Object? designNotes = null,
+    Object? missionTotalExp = null,
     Object? steps = null,
     Object? progress = null,
   }) {
@@ -208,6 +217,10 @@ class __$$MissionEntityImplCopyWithImpl<$Res>
             ? _value.designNotes
             : designNotes // ignore: cast_nullable_to_non_nullable
                   as String,
+        missionTotalExp: null == missionTotalExp
+            ? _value.missionTotalExp
+            : missionTotalExp // ignore: cast_nullable_to_non_nullable
+                  as int,
         steps: null == steps
             ? _value._steps
             : steps // ignore: cast_nullable_to_non_nullable
@@ -231,6 +244,7 @@ class _$MissionEntityImpl implements _MissionEntity {
     required this.status,
     this.orderNo,
     required this.designNotes,
+    required this.missionTotalExp,
     required final List<MissionStep> steps,
     required this.progress,
   }) : _steps = steps;
@@ -250,6 +264,8 @@ class _$MissionEntityImpl implements _MissionEntity {
   final int? orderNo;
   @override
   final String designNotes;
+  @override
+  final int missionTotalExp;
   final List<MissionStep> _steps;
   @override
   List<MissionStep> get steps {
@@ -263,7 +279,7 @@ class _$MissionEntityImpl implements _MissionEntity {
 
   @override
   String toString() {
-    return 'MissionEntity(id: $id, sideJobId: $sideJobId, title: $title, status: $status, orderNo: $orderNo, designNotes: $designNotes, steps: $steps, progress: $progress)';
+    return 'MissionEntity(id: $id, sideJobId: $sideJobId, title: $title, status: $status, orderNo: $orderNo, designNotes: $designNotes, missionTotalExp: $missionTotalExp, steps: $steps, progress: $progress)';
   }
 
   @override
@@ -279,6 +295,8 @@ class _$MissionEntityImpl implements _MissionEntity {
             (identical(other.orderNo, orderNo) || other.orderNo == orderNo) &&
             (identical(other.designNotes, designNotes) ||
                 other.designNotes == designNotes) &&
+            (identical(other.missionTotalExp, missionTotalExp) ||
+                other.missionTotalExp == missionTotalExp) &&
             const DeepCollectionEquality().equals(other._steps, _steps) &&
             (identical(other.progress, progress) ||
                 other.progress == progress));
@@ -294,6 +312,7 @@ class _$MissionEntityImpl implements _MissionEntity {
     status,
     orderNo,
     designNotes,
+    missionTotalExp,
     const DeepCollectionEquality().hash(_steps),
     progress,
   );
@@ -320,6 +339,7 @@ abstract class _MissionEntity implements MissionEntity {
     required final String status,
     final int? orderNo,
     required final String designNotes,
+    required final int missionTotalExp,
     required final List<MissionStep> steps,
     required final MissionProgress progress,
   }) = _$MissionEntityImpl;
@@ -339,6 +359,8 @@ abstract class _MissionEntity implements MissionEntity {
   int? get orderNo;
   @override
   String get designNotes;
+  @override
+  int get missionTotalExp;
   @override
   List<MissionStep> get steps;
   @override

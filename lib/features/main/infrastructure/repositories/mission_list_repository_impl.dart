@@ -11,9 +11,10 @@ class MissionListRepositoryImpl {
   /// 미션 목록 조회
   /// 
   /// [status]: 미션 상태 ('IN_PROGRESS', 'PLANNED' 등)
+  /// [sideJobId]: 사이드잡 ID
   /// 
   /// Returns: 성공 시 MissionListEntity, 실패 시 MainFailure
-  Future<Either<MainFailure, MissionListEntity>> getMissionList(String status) async {
+  Future<Either<MainFailure, MissionListEntity>> getMissionList(String status, int sideJobId) async {
     try {
       print('🔍 MissionListRepository: getMissionList 호출 - status: $status');
       
@@ -22,7 +23,7 @@ class MissionListRepositoryImpl {
       final client = NetworkClient(authStorage);
       final apiService = MissionListApiService(client); // Local instance
 
-      final response = await apiService.getMissionList(status); // Use local instance
+      final response = await apiService.getMissionList(status, sideJobId); // Use local instance
       
       print('✅ MissionListRepository: API 응답 성공');
       print('  - Status Code: ${response.statusCode}');

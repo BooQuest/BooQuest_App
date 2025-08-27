@@ -13,6 +13,7 @@ class MissionEntity with _$MissionEntity {
     required String status,
     int? orderNo,
     required String designNotes,
+    required int missionTotalExp,
     required List<MissionStep> steps,
     required MissionProgress progress,
   }) = _MissionEntity;
