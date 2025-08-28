@@ -129,6 +129,14 @@ class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
 }
 
 class _MyActivityCard extends ConsumerWidget {
+  /// 통화 포맷팅 (123,456 형태)
+  String _formatCurrency(int amount) {
+    if (amount == 0) return '0';
+    
+    final formatter = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return amount.toString().replaceAllMapped(formatter, (Match m) => '${m[1]},');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activitySummaryState = ref.watch(userActivitySummaryNotifierProvider);
@@ -145,7 +153,7 @@ class _MyActivityCard extends ConsumerWidget {
             _ActivityRow(
               icon: Icons.monetization_on,
               label: '나의 총 수익',
-              value: '${data.totalIncome}원',
+              value: '${_formatCurrency(data.totalIncome)}원',
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
@@ -305,7 +313,13 @@ class _ProjectCard extends ConsumerWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => SidejobDetailScreen(userSideJobId: sideJob.id),
+                  builder: (context) => SidejobDetailScreen(
+                    userSideJobId: sideJob.id,
+                    onBack: () {
+                      // 뒤로가기 시 데이터 새로고침
+                      ref.read(userActivitySummaryNotifierProvider.notifier).getUserActivitySummary();
+                    },
+                  ),
                 ),
               );
             },

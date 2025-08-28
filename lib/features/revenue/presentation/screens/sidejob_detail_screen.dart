@@ -14,10 +14,12 @@ import 'package:booquest/features/revenue/domain/entities/sidejob_summary_entity
 /// 부업 프로젝트 상세 화면 - Clean Architecture + Riverpod 구조
 class SidejobDetailScreen extends ConsumerStatefulWidget {
   final int userSideJobId;
+  final VoidCallback? onBack;
   
   const SidejobDetailScreen({
     super.key,
     required this.userSideJobId,
+    this.onBack,
   });
 
   @override
@@ -42,6 +44,8 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
       _loadData();
     });
   }
+
+
 
   Future<void> _loadData() async {
     try {
@@ -131,7 +135,11 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              Navigator.of(context).pop();
+              // 뒤로가기 시 콜백 호출
+              widget.onBack?.call();
+            },
             icon: const Icon(
               Icons.arrow_back_ios,
               color: Colors.white,
@@ -379,6 +387,7 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
             ),
             icon: Icons.monetization_on,
             showAddButton: true,
+            summaryState: summaryState,
           ),
           const SizedBox(height: 16),
           // 하단 두 카드 (가로 배치)
@@ -424,6 +433,7 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     required String value,
     required IconData icon,
     required bool showAddButton,
+    SideJobSummaryState? summaryState,
   }) {
     return Container(
       width: double.infinity,
@@ -449,10 +459,26 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
               if (showAddButton)
                 GestureDetector(
                   onTap: () {
+                    // 부업 이름 가져오기
+                    String sideJobTitle = '부업 프로젝트';
+                    if (summaryState != null) {
+                      summaryState.when(
+                        initial: () => sideJobTitle = '부업 프로젝트',
+                        loading: () => sideJobTitle = '부업 프로젝트',
+                        success: (data) => sideJobTitle = data.userSideJob.title,
+                        failure: (_) => sideJobTitle = '부업 프로젝트',
+                      );
+                    }
+                    
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => TotalRevenueScreen(
                           userSideJobId: widget.userSideJobId,
+                          sideJobTitle: sideJobTitle,
+                          onBack: () {
+                            // 뒤로가기 시 데이터 새로고침
+                            _loadData();
+                          },
                         ),
                       ),
                     );
