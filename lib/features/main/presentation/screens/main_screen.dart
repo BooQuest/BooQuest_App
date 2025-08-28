@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/core/presentation/widgets/common_bottom_navigation.dart';
 import 'package:booquest/features/main/presentation/screens/home_screen.dart';
-import 'package:booquest/features/main/presentation/screens/quest_screen.dart';
+import 'package:booquest/features/quest/presentation/screens/quest_screen.dart';
 import 'package:booquest/features/main/presentation/screens/my_record_screen.dart';
 
 

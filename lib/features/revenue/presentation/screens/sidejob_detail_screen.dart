@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/presentation/widgets/common_bottom_navigation.dart';
 import 'package:booquest/features/main/presentation/screens/home_screen.dart';
-import 'package:booquest/features/main/presentation/screens/quest_screen.dart';
+import 'package:booquest/features/quest/presentation/screens/quest_screen.dart';
 import 'package:booquest/features/main/presentation/screens/my_record_screen.dart';
 import 'package:booquest/features/revenue/application/providers/sidejob_summary_providers.dart';
 import 'package:booquest/features/revenue/presentation/screens/total_revenue_screen.dart';
