@@ -1,52 +1,113 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
+import 'package:booquest/core/presentation/widgets/common_bottom_navigation.dart';
+import 'package:booquest/features/main/presentation/screens/home_screen.dart';
+import 'package:booquest/features/main/presentation/screens/quest_screen.dart';
+import 'package:booquest/features/main/presentation/screens/my_record_screen.dart';
+import 'package:booquest/features/revenue/application/providers/income_providers.dart';
+
 
 
 /// 총 수익 상세 화면 - 이미지와 동일한 디자인
-class TotalRevenueScreen extends StatelessWidget {
-  final int totalIncome;
-  final String sideJobTitle;
-  final VoidCallback? onBack;
+class TotalRevenueScreen extends ConsumerStatefulWidget {
+  final int userSideJobId;
 
   const TotalRevenueScreen({
     super.key,
-    required this.totalIncome,
-    required this.sideJobTitle,
-    this.onBack,
+    required this.userSideJobId,
   });
+
+  @override
+  ConsumerState<TotalRevenueScreen> createState() => _TotalRevenueScreenState();
+}
+
+class _TotalRevenueScreenState extends ConsumerState<TotalRevenueScreen> {
+  int _currentIndex = 2; // MyRecord 탭이 선택된 상태
+
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const QuestScreen(),
+    const MyRecordScreen(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // userSideJobId 값 출력
+    print('TotalRevenueScreen - userSideJobId: ${widget.userSideJobId}');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
+
+  Future<void> _loadData() async {
+    try {
+      await ref.read(incomeNotifierProvider.notifier).getIncomeList(widget.userSideJobId);
+    } catch (e) {
+      print('Error loading data: $e');
+    }
+  }
+
+  void _onTabTapped(int index) {
+    if (index == _currentIndex) return; // 같은 탭 클릭 시 무시
+    
+    setState(() {
+      _currentIndex = index;
+    });
+    // IndexedStack으로 화면 전환하므로 하단 탭이 유지됨
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
-        child: Column(
+        child: IndexedStack(
+          index: _currentIndex,
           children: [
-            _buildTopBar(context),
-            const SizedBox(height: 20),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeaderSection(),
-                    const SizedBox(height: 24),
-                    // 구분선
-                    Container(
-                      height: 1,
-                      color: const Color(0xFFE0E0E0),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildRevenueList(),
-                  ],
-                ),
-              ),
-            ),
-
+            // Home 화면
+            const HomeScreen(),
+            // Quest 화면  
+            const QuestScreen(),
+            // TotalRevenue 화면 (현재 화면)
+            _buildTotalRevenueContent(),
           ],
         ),
       ),
+      bottomNavigationBar: CommonBottomNavigation(
+        currentIndex: _currentIndex,
+        onTap: _onTabTapped,
+      ),
+    );
+  }
+
+  /// TotalRevenue 화면 내용만 구성 (IndexedStack 내부용)
+  Widget _buildTotalRevenueContent() {
+    return Column(
+      children: [
+        _buildTopBar(context),
+        const SizedBox(height: 20),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeaderSection(),
+                const SizedBox(height: 24),
+                // 구분선
+                Container(
+                  height: 1,
+                  color: const Color(0xFFE0E0E0),
+                ),
+                const SizedBox(height: 24),
+                _buildRevenueList(),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -62,10 +123,9 @@ class TotalRevenueScreen extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: GestureDetector(
-                onTap: onBack ?? () => Navigator.of(context).pop(),
+                onTap: () => Navigator.of(context).pop(),
                 child: const Icon(
                   Icons.arrow_back,
-                  color: AppColors.textPrimary,
                   size: 24,
                 ),
               ),
@@ -101,6 +161,8 @@ class TotalRevenueScreen extends StatelessWidget {
 
   /// 헤더 섹션 (카테고리 태그 + 총 수익 + 추가 버튼)
   Widget _buildHeaderSection() {
+    final incomeState = ref.watch(incomeNotifierProvider);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -115,7 +177,7 @@ class TotalRevenueScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                sideJobTitle,
+                '부업 프로젝트', // TODO: userSideJobId로 실제 부업 제목 조회
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -148,12 +210,38 @@ class TotalRevenueScreen extends StatelessWidget {
         const SizedBox(height: 16),
         // 총 수익 금액 (중앙 정렬, 이미지와 동일)
         Center(
-          child: Text(
-            '${_formatCurrency(totalIncome)}원',
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+          child: incomeState.when(
+            initial: () => const Text(
+              '0원',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            loading: () => const Text(
+              '로딩 중...',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            success: (data) => Text(
+              '${_formatCurrency(data.totalAmount)}원',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            failure: (_) => const Text(
+              '0원',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ),
@@ -161,25 +249,49 @@ class TotalRevenueScreen extends StatelessWidget {
     );
   }
 
-  /// 수익 목록 (이미지와 동일하게 6개)
+  /// 수익 목록 (API 데이터 사용)
   Widget _buildRevenueList() {
-    // 이미지와 동일한 데이터 (6개 항목)
-    final revenueEntries = [
-      {'title': '광고 수익', 'date': '2025.08.19', 'amount': '123,45', 'refNumber': '123,456'},
-      {'title': '광고 수익', 'date': '2025.08.19', 'amount': '123,45', 'refNumber': '123,456'},
-      {'title': '광고 수익', 'date': '2025.08.19', 'amount': '123,45', 'refNumber': '123,456'},
-      {'title': '광고 수익', 'date': '2025.08.19', 'amount': '123,45', 'refNumber': '123,456'},
-      {'title': '광고 수익', 'date': '2025.08.19', 'amount': '123,45', 'refNumber': '123,456'},
-      {'title': '광고 수익', 'date': '2025.08.19', 'amount': '123,45', 'refNumber': '123,456'},
-    ];
+    final incomeState = ref.watch(incomeNotifierProvider);
+    
+    return incomeState.when(
+      initial: () => const Center(
+        child: Text(
+          '데이터를 불러오는 중...',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+      ),
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      success: (data) {
+        if (data.incomes.isEmpty) {
+          return const Center(
+            child: Text(
+              '등록된 수익이 없습니다.',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          );
+        }
 
-    return Column(
-      children: revenueEntries.map((entry) => _buildRevenueItem(
-        title: entry['title'] as String,
-        date: entry['date'] as String,
-        amount: entry['amount'] as String,
-        refNumber: entry['refNumber'] as String,
-      )).toList(),
+        return Column(
+          children: data.incomes.map((income) => _buildRevenueItem(
+            title: income.title,
+            date: income.incomeDate,
+            amount: _formatCurrency(income.amount),
+            refNumber: income.id.toString(),
+          )).toList(),
+        );
+      },
+      failure: (_) => const Center(
+        child: Text(
+          '데이터를 불러오는데 실패했습니다.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+      ),
     );
   }
 

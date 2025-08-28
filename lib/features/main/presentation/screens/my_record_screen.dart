@@ -5,6 +5,7 @@ import 'package:booquest/features/main/infrastructure/providers/user_activity_su
 import 'package:booquest/features/main/infrastructure/providers/user_sidejob_list_providers.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
+import 'package:booquest/features/revenue/presentation/screens/sidejob_detail_screen.dart';
 
 
 
@@ -300,58 +301,67 @@ class _ProjectCard extends ConsumerWidget {
         }
 
         return Column(
-          children: data.sideJobs.map((sideJob) => Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.cardBorder, width: 1),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            if (sideJob.status == 'PLANNED') ...[
-                              _Chip(label: '예정'),
-                            ] else ...[
-                              _Chip(label: sideJob.period),
+          children: data.sideJobs.map((sideJob) => GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SidejobDetailScreen(userSideJobId: sideJob.id),
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.cardBorder, width: 1),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              if (sideJob.status == 'PLANNED') ...[
+                                _Chip(label: '예정'),
+                              ] else ...[
+                                _Chip(label: sideJob.period),
+                              ],
                             ],
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          sideJob.title,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 10),
+                          Text(
+                            sideJob.title,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // SVG 이미지
-                  SvgPicture.asset(
-                    'assets/images/characters/sidejob_test.svg',
-                    width: 100,
-                    height: 100,
-                  ),
-                  const SizedBox(width: 4),
-                  // 화살표 아이콘 (더 구석으로)
-                  const Icon(
-                    Icons.chevron_right, 
-                    color: AppColors.textPrimary,
-                    size: 20,
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    // SVG 이미지
+                    SvgPicture.asset(
+                      'assets/images/characters/sidejob_test.svg',
+                      width: 100,
+                      height: 100,
+                    ),
+                    const SizedBox(width: 4),
+                    // 화살표 아이콘 (더 구석으로)
+                    const Icon(
+                      Icons.chevron_right, 
+                      color: AppColors.textPrimary,
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
           )).toList(),
