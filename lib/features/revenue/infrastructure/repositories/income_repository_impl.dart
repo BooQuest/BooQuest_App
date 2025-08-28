@@ -20,7 +20,6 @@ class IncomeRepositoryImpl {
       final response = await apiService.getIncomeList(userSideJobId);
 
       print('✅ IncomeRepository: API 응답 성공');
-      print('  - Status Code: ${response.statusCode}');
       print('  - Response Data: ${response.data}');
 
       if (response.statusCode == 200 &&
