@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/presentation/widgets/common_bottom_navigation.dart';
 import 'package:booquest/features/main/presentation/screens/home_screen.dart';
-import 'package:booquest/features/main/presentation/screens/quest_screen.dart';
+import 'package:booquest/features/quest/presentation/screens/quest_screen.dart';
 import 'package:booquest/features/main/presentation/screens/my_record_screen.dart';
 import 'package:booquest/features/revenue/application/providers/income_providers.dart';
 import 'package:booquest/features/revenue/domain/entities/income_entity.dart';
@@ -77,7 +77,7 @@ class _TotalRevenueScreenState extends ConsumerState<TotalRevenueScreen> {
             // Home 화면
             const HomeScreen(),
             // Quest 화면  
-            const QuestScreen(),
+            const SizedBox.shrink(),
             // TotalRevenue 화면 (현재 화면)
             _buildTotalRevenueContent(),
           ],
