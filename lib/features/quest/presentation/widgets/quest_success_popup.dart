@@ -3,7 +3,12 @@ import 'package:booquest/features/quest/presentation/widgets/experience_boost_po
 
 /// 부퀘스트 성공 팝업 위젯
 class QuestSuccessPopup extends StatelessWidget {
-  const QuestSuccessPopup({super.key});
+  final int stepId;
+  
+  const QuestSuccessPopup({
+    super.key,
+    required this.stepId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +117,7 @@ class QuestSuccessPopup extends StatelessWidget {
                         showDialog(
                           context: context,
                           barrierDismissible: false,
-                          builder: (BuildContext context) => const ExperienceBoostPopup(),
+                          builder: (BuildContext context) => ExperienceBoostPopup(stepId: stepId),
                         );
                       },
                       child: const Text(

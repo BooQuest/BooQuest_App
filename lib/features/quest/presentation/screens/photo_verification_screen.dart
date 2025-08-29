@@ -9,7 +9,12 @@ import 'package:booquest/features/quest/presentation/screens/verification_comple
 
 /// 사진 인증 화면 - 부업 활동에 관한 모습을 간단히 남기기
 class PhotoVerificationScreen extends ConsumerStatefulWidget {
-  const PhotoVerificationScreen({super.key});
+  final int stepId;
+  
+  const PhotoVerificationScreen({
+    super.key,
+    required this.stepId,
+  });
 
   @override
   ConsumerState<PhotoVerificationScreen> createState() => _PhotoVerificationScreenState();

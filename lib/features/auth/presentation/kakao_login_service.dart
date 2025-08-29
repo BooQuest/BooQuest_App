@@ -1,4 +1,4 @@
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
 /// 카카오 로그인 서비스
 ///

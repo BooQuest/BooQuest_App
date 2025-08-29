@@ -6,10 +6,18 @@ import 'package:booquest/features/main/presentation/screens/home_screen.dart';
 import 'package:booquest/features/quest/presentation/screens/quest_screen.dart';
 import 'package:booquest/features/main/presentation/screens/my_record_screen.dart';
 import 'package:booquest/features/quest/presentation/screens/verification_complete_screen.dart';
+import 'package:booquest/features/quest/infrastructure/providers/bonus_proof_providers.dart';
+import 'package:booquest/features/quest/application/states/bonus_proof_state.dart';
+import 'package:booquest/features/quest/domain/entities/bonus_proof_entity.dart';
 
 /// 링크 인증 화면 - 부업 활동에 관한 링크를 간단히 남기기
 class LinkVerificationScreen extends ConsumerStatefulWidget {
-  const LinkVerificationScreen({super.key});
+  final int stepId;
+  
+  const LinkVerificationScreen({
+    super.key,
+    required this.stepId,
+  });
 
   @override
   ConsumerState<LinkVerificationScreen> createState() => _LinkVerificationScreenState();
@@ -269,21 +277,64 @@ class _LinkVerificationScreenState extends ConsumerState<LinkVerificationScreen>
   }
 
   /// 인증하기 버튼 클릭 처리
-  void _onVerifyPressed() {
+  Future<void> _onVerifyPressed() async {
     final link = _linkController.text.trim();
     if (link.isEmpty) return;
     
-    // 링크 인증 처리
-    print('링크 인증 처리: $link');
-    
-    // 인증 완료 후 완료 화면으로 이동
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => VerificationCompleteScreen(
-          method: 'link',
-          content: link,
-        ),
-      ),
-    );
+    try {
+      print('🔗 링크 인증 시작: $link');
+      
+      // 보너스 인증 API 호출
+      await ref.read(bonusProofNotifierProvider.notifier).submitProof(
+        widget.stepId,
+        ProofType.link,
+        link,
+      );
+      
+      // 상태 확인
+      final state = ref.read(bonusProofNotifierProvider);
+      
+      if (mounted) {
+        state.when(
+          initial: () {},
+          loading: () {},
+          success: (data) {
+            print('✅ 링크 인증 성공: status=${data.status}, additionalExp=${data.additionalExp}');
+            
+            // 인증 완료 후 완료 화면으로 이동
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => VerificationCompleteScreen(
+                  method: 'link',
+                  content: link,
+                ),
+              ),
+            );
+          },
+          failure: (message) {
+            print('❌ 링크 인증 실패: $message');
+            
+            // 실패 시 에러 메시지 표시
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('링크 인증 실패: $message'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print('❌ 링크 인증 처리 중 오류: $e');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('링크 인증 처리 중 오류가 발생했습니다.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

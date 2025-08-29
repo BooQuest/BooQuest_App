@@ -11,7 +11,12 @@ import 'package:booquest/features/quest/presentation/screens/photo_verification_
 
 /// 퀘스트 인증 화면 - 퀘스트 수행 결과를 간단하게 인증
 class QuestVerificationScreen extends ConsumerStatefulWidget {
-  const QuestVerificationScreen({super.key});
+  final int stepId;
+  
+  const QuestVerificationScreen({
+    super.key,
+    required this.stepId,
+  });
 
   @override
   ConsumerState<QuestVerificationScreen> createState() => _QuestVerificationScreenState();
@@ -338,19 +343,19 @@ class _QuestVerificationScreenState extends ConsumerState<QuestVerificationScree
     if (_selectedVerificationMethod == 'link') {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const LinkVerificationScreen(),
+          builder: (context) => LinkVerificationScreen(stepId: widget.stepId),
         ),
       );
     } else if (_selectedVerificationMethod == 'text') {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const TextVerificationScreen(),
+          builder: (context) => TextVerificationScreen(stepId: widget.stepId),
         ),
       );
     } else if (_selectedVerificationMethod == 'photo') {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const PhotoVerificationScreen(),
+          builder: (context) => PhotoVerificationScreen(stepId: widget.stepId),
         ),
       );
     }
