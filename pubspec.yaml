@@ -58,6 +58,9 @@ dependencies:
   flutter_svg: ^2.0.10+1
   lottie: ^3.1.2
   kakao_flutter_sdk: ^1.9.7+3
+  
+  # 애니메이션
+  flutter_animate: ^4.5.0
 
 dev_dependencies:
   flutter_test:

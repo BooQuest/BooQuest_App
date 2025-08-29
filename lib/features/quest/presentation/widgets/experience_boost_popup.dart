@@ -3,7 +3,12 @@ import 'package:booquest/features/quest/presentation/screens/quest_verification_
 
 /// 경험치 부스트 팝업 위젯
 class ExperienceBoostPopup extends StatelessWidget {
-  const ExperienceBoostPopup({super.key});
+  final int stepId;
+  
+  const ExperienceBoostPopup({
+    super.key,
+    required this.stepId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +106,7 @@ class ExperienceBoostPopup extends StatelessWidget {
                         // 인증 화면으로 이동
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => const QuestVerificationScreen(),
+                            builder: (context) => QuestVerificationScreen(stepId: stepId),
                           ),
                         );
                       },

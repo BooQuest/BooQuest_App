@@ -28,6 +28,15 @@ class AuthStorageService {
     return _instance!;
   }
 
+  /// 싱글톤 인스턴스 획득 (동기 버전)
+  /// 주의: SharedPreferences가 이미 초기화된 경우에만 사용
+  static AuthStorageService getInstanceSync() {
+    if (_instance == null) {
+      throw Exception('AuthStorageService not initialized. Call getInstance() first.');
+    }
+    return _instance!;
+  }
+
   // ========== 사용자 정보 관련 ==========
 
   /// 사용자 ID 저장

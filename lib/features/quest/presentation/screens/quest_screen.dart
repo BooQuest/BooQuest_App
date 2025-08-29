@@ -9,6 +9,8 @@ import 'package:booquest/features/main/domain/entities/mission_entity.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
 import 'package:booquest/features/quest/presentation/widgets/quest_success_popup.dart';
+import 'package:booquest/features/quest/infrastructure/providers/mission_step_completion_providers.dart';
+import 'package:booquest/features/quest/application/states/mission_step_completion_state.dart';
 
 class QuestScreen extends ConsumerStatefulWidget {
   const QuestScreen({super.key});
@@ -1164,6 +1166,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
               
               return Column(
                 children: sortedSteps.map((step) => _buildSubQuestItem(
+                  step.id,
                   step.title,
                   step.status == 'COMPLETED',
                   step.status == 'PLANNED',
@@ -1185,7 +1188,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     );
   }
 
-  Widget _buildSubQuestItem(String title, bool isCompleted, bool isPlanned) {
+  Widget _buildSubQuestItem(int stepId, String title, bool isCompleted, bool isPlanned) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -1207,7 +1210,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           ),
           const SizedBox(width: 12),
           GestureDetector(
-            onTap: isCompleted ? null : () => _showQuestSuccessPopup(context),
+            onTap: isCompleted ? null : () => _handleStepCompletion(context, stepId),
             child: Container(
               width: 20,
               height: 20,
@@ -1248,12 +1251,59 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     );
   }
 
+  /// 퀘스트 스텝 완료 처리
+  Future<void> _handleStepCompletion(BuildContext context, int stepId) async {
+    try {
+      // 스텝 완료 API 호출
+      await ref.read(missionStepCompletionNotifierProvider.notifier).completeStep(
+        stepId,
+        'COMPLETED',
+      );
+
+      // 상태 확인
+      final state = ref.read(missionStepCompletionNotifierProvider);
+      
+      if (mounted) {
+        state.when(
+          initial: () {},
+          loading: () {},
+          success: (data) {
+          // 성공 시 성공 팝업 표시
+          _showQuestSuccessPopup(context, stepId);
+          
+          // 데이터 새로고침
+          _loadData();
+        },
+          failure: (message) {
+            // 실패 시 에러 메시지 표시
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('퀘스트 완료 실패: $message'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print('❌ 퀘스트 스텝 완료 처리 중 오류: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('퀘스트 완료 처리 중 오류가 발생했습니다.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   /// 부퀘스트 성공 팝업 표시
-  void _showQuestSuccessPopup(BuildContext context) {
+  void _showQuestSuccessPopup(BuildContext context, int stepId) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) => const QuestSuccessPopup(),
+      builder: (BuildContext context) => QuestSuccessPopup(stepId: stepId),
     );
   }
 }
