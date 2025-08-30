@@ -577,17 +577,17 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
   /// 온보딩 완료 상태 설정
   Future<void> _markOnboardingCompleted() async {
     try {
-      // LocalStorageService: 온보딩 완료 상태 설정
+      // 토큰을 제외한 모든 로컬 데이터 초기화
       final storage = await LocalStorageService.getInstance();
-      await storage.setOnboardingCompleted(true);
+      await storage.clearAllDataExceptToken();
       
-      // OnboardingStorageService: 현재 온보딩 단계 정보 삭제
+      // OnboardingStorageService: 모든 온보딩 데이터 삭제
       final onboardingStorage = await OnboardingStorageService.getInstance();
-      await onboardingStorage.removeCurrentStep();
+      await onboardingStorage.clearAllData();
       
-      print('✅ 온보딩 완료 상태 업데이트 완료');
+      print('✅ 온보딩 완료 - 토큰을 제외한 모든 로컬 데이터 초기화 완료');
     } catch (error) {
-      print('❌ 온보딩 완료 상태 업데이트 실패: $error');
+      print('❌ 온보딩 완료 처리 실패: $error');
     }
   }
 }

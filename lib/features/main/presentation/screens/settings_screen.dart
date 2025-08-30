@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/features/main/presentation/screens/account_screen.dart';
 
 /// 설정 화면
 class SettingsScreen extends StatefulWidget {
@@ -29,6 +30,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       print('❌ 이메일 로드 실패: $e');
     }
+  }
+
+  /// 계정 화면으로 이동
+  void _navigateToAccountScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AccountScreen(),
+      ),
+    );
   }
 
   @override
@@ -114,31 +124,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.cardBorder, width: 1),
-          ),
-          child: Row(
-            children: [
-              Text(
-                _userEmail ?? '이메일을 불러오는 중...',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+        GestureDetector(
+          onTap: () => _navigateToAccountScreen(context),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.cardBorder, width: 1),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  _userEmail ?? '이메일을 불러오는 중...',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: AppColors.textSecondary,
-                size: 16,
-              ),
-            ],
+                const Spacer(),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppColors.textSecondary,
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ],

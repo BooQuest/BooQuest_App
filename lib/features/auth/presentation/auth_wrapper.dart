@@ -150,15 +150,8 @@ class _OnboardingRouter extends StatelessWidget {
       }
     }
     
-    // onboardingProgressInfo가 없거나 모든 값이 false인 경우
-    // 기존 로직대로 storage data 기준으로 화면 결정
-    print('🔄 onboardingProgressInfo 없음 → storage data 기준으로 화면 결정');
-    
-    // 온보딩 완료 여부 확인 (LocalStorageService)
-    final localStorage = await LocalStorageService.getInstance();
-    if (localStorage.isOnboardingCompleted()) {
-      return const MainScreen();
-    }
+        // onboardingProgressInfo가 없거나 모든 값이 false인 경우
+    // 온보딩이 완료되지 않은 상태로 간주하여 온보딩 화면으로 이동
 
     // 온보딩 진행 상황 확인 (OnboardingStorageService)
     final onboardingStorage = await OnboardingStorageService.getInstance();

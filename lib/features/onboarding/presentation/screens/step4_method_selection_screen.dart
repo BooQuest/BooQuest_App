@@ -8,7 +8,7 @@ import 'package:booquest/features/recommendation/presentation/screens/sidejob_re
 import 'package:booquest/core/presentation/widgets/common_widgets.dart';
 import 'package:booquest/core/navigation/transitions.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
+
 import 'package:booquest/core/utils/user_data_utils.dart';
 import 'package:booquest/features/sidejob/infrastructure/sidejob_providers.dart';
 import 'package:booquest/features/sidejob/application/sidejob_state.dart';
@@ -101,8 +101,7 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
           // 로딩 상태 - 아무것도 하지 않음
         },
         success: (recommendations) async {
-          // 성공 시 온보딩 완료 처리 후 다음 화면으로 이동
-          await _completeOnboarding();
+          // 성공 시 다음 화면으로 이동
           if (mounted) {
             Navigator.push(
               context,
@@ -360,21 +359,7 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
     }
   }
 
-  /// 온보딩 완료 처리 (LocalStorageService 사용)
-  Future<void> _completeOnboarding() async {
-    try {
-      final storage = await LocalStorageService.getInstance();
-      await storage.setOnboardingCompleted(true);
-      print('✅ 온보딩 완료 상태 설정됨');
-      
-      // 온보딩 데이터 정리 (OnboardingStorageService)
-      final onboardingStorage = await OnboardingStorageService.getInstance();
-      onboardingStorage.printOnboardingData(); // 디버깅용 출력
-      
-    } catch (error) {
-      print('❌ 온보딩 완료 처리 실패: $error');
-    }
-  }
+
 
   Future<void> _goBack() async {
     await _saveCurrentStep();

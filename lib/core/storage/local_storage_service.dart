@@ -7,7 +7,6 @@ import 'package:booquest/core/storage/onboarding_storage_service.dart';
 /// 온보딩 완료 여부, 앱 설정 등 앱 수준의 데이터를 담당합니다.
 class LocalStorageService {
   // 앱 상태 키
-  static const String _onboardingCompletedKey = 'app_onboarding_completed';
   static const String _appVersionKey = 'app_version';
   static const String _firstLaunchKey = 'app_first_launch';
   
@@ -33,15 +32,7 @@ class LocalStorageService {
     return _instance!;
   }
 
-  /// 온보딩 완료 상태 저장
-  Future<void> setOnboardingCompleted(bool completed) async {
-    await _preferences?.setBool(_onboardingCompletedKey, completed);
-  }
 
-  /// 온보딩 완료 상태 확인
-  bool isOnboardingCompleted() {
-    return _preferences?.getBool(_onboardingCompletedKey) ?? false;
-  }
 
   // ========== 앱 설정 관리 ==========
 
@@ -69,15 +60,30 @@ class LocalStorageService {
 
   /// 앱 설정 데이터 초기화
   Future<void> clearAppSettings() async {
-    await _preferences?.remove(_onboardingCompletedKey);
     await _preferences?.remove(_appVersionKey);
     await _preferences?.remove(_firstLaunchKey);
+  }
+
+  /// 토큰을 제외한 모든 로컬 데이터 초기화 (부업 생성 완료 시 사용)
+  Future<void> clearAllDataExceptToken() async {
+    if (_preferences != null) {
+      // 모든 키 가져오기
+      final keys = _preferences!.getKeys();
+      
+      // 토큰 관련 키는 제외하고 모든 데이터 삭제
+      for (final key in keys) {
+        if (!key.contains('token') && !key.contains('auth')) {
+          await _preferences!.remove(key);
+        }
+      }
+      print('🧹 토큰을 제외한 모든 로컬 데이터 초기화 완료');
+    }
   }
 
   /// 디버깅용: 현재 저장된 앱 설정 데이터 출력
   void printAppSettings() {
     print('--- LocalStorageService Data ---');
-    print('Onboarding Completed: ${isOnboardingCompleted()}');
+
     print('App Version: ${getAppVersion()}');
     print('First Launch: ${isFirstLaunch()}');
     print('------------------------------');

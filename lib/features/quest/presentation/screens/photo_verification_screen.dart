@@ -6,6 +6,13 @@ import 'package:booquest/features/main/presentation/screens/home_screen.dart';
 import 'package:booquest/features/quest/presentation/screens/quest_screen.dart';
 import 'package:booquest/features/main/presentation/screens/my_record_screen.dart';
 import 'package:booquest/features/quest/presentation/screens/verification_complete_screen.dart';
+import 'package:booquest/features/quest/infrastructure/providers/image_proof_providers.dart';
+import 'package:booquest/features/quest/application/states/image_proof_state.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
+
+
 
 /// 사진 인증 화면 - 부업 활동에 관한 모습을 간단히 남기기
 class PhotoVerificationScreen extends ConsumerStatefulWidget {
@@ -22,13 +29,15 @@ class PhotoVerificationScreen extends ConsumerStatefulWidget {
 
 class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScreen> {
   int _currentIndex = 1; // Quest 탭이 선택된 상태
-  List<String> _selectedImages = []; // 선택된 이미지들
+  File? _selectedImage; // 선택된 이미지 파일
 
   final List<Widget> _screens = [
     const HomeScreen(),
     const QuestScreen(),
     const MyRecordScreen(),
   ];
+
+  final ImagePicker _imagePicker = ImagePicker();
 
   void _onTabTapped(int index) {
     if (index == _currentIndex) return; // 같은 탭 클릭 시 무시
@@ -40,6 +49,29 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
 
   @override
   Widget build(BuildContext context) {
+    // 이미지 업로드 상태 감지
+    ref.listen<ImageProofState>(imageProofNotifierProvider, (previous, next) {
+      next.when(
+        initial: () {},
+        loading: () {},
+        success: (data) {
+          // 성공 시 인증 완료 화면으로 이동
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VerificationCompleteScreen(
+                method: 'photo',
+                content: '이미지 업로드 완료',
+              ),
+            ),
+          );
+        },
+        failure: (message) {
+          // 실패 시 에러 다이얼로그 표시
+          _showErrorDialog(message);
+        },
+      );
+    });
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -202,80 +234,91 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
 
   /// 사진 업로드 섹션
   Widget _buildPhotoUploadSection() {
-    return Container(
-      width: double.infinity,
-      height: 200,
-      decoration: BoxDecoration(
-        color: AppColors.cardBorder.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.cardBorder,
-          width: 1,
+    return GestureDetector(
+      onTap: _handleImageUploadTap,
+      child: Container(
+        width: double.infinity,
+        height: 200,
+        decoration: BoxDecoration(
+          color: AppColors.cardBorder.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.cardBorder,
+            width: 1,
+          ),
         ),
-      ),
-      child: _selectedImages.isNotEmpty
-          ? Stack(
-              children: [
-                // 선택된 이미지 표시 (예시로 플레이스홀더)
-                Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.image,
-                    size: 60,
-                    color: AppColors.primary,
-                  ),
-                ),
-                // 편집 버튼 (우상단)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      color: AppColors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.edit,
-                      size: 16,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+        child: _selectedImage != null
+            ? Stack(
                 children: [
-                  Icon(
-                    Icons.add_photo_alternate,
-                    size: 60,
-                    color: AppColors.textSecondary,
+                  // 선택된 이미지 표시
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        _selectedImage!,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    '메인 사진을 선택해주세요',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
+                  // 편집 버튼 (우상단)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: _handleImageUploadTap,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
+                          color: AppColors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          size: 16,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                     ),
                   ),
                 ],
+              )
+            : const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_photo_alternate,
+                      size: 60,
+                      color: AppColors.textSecondary,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '메인 사진을 선택해주세요',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 
   /// 인증하기 버튼
   Widget _buildVerifyButton() {
-    final isEnabled = _selectedImages.isNotEmpty;
+    final imageProofState = ref.watch(imageProofNotifierProvider);
+    final isEnabled = _selectedImage != null && !imageProofState.maybeWhen(
+      loading: () => true,
+      orElse: () => false,
+    );
     
     return Container(
       width: double.infinity,
@@ -286,12 +329,22 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
       ),
       child: TextButton(
         onPressed: isEnabled ? _onVerifyPressed : null,
-        child: Text(
-          '인증하기',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: isEnabled ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
+        child: imageProofState.maybeWhen(
+          loading: () => const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+            ),
+          ),
+          orElse: () => Text(
+            '인증하기',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: isEnabled ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
+            ),
           ),
         ),
       ),
@@ -299,19 +352,145 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
   }
 
   /// 인증하기 버튼 클릭 처리
-  void _onVerifyPressed() {
-    if (_selectedImages.isEmpty) return;
+  Future<void> _onVerifyPressed() async {
+    if (_selectedImage == null) return;
     
-    // 사진 인증 처리
-    print('사진 인증 처리: ${_selectedImages.length}장의 사진');
-    
-    // 인증 완료 후 완료 화면으로 이동
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => VerificationCompleteScreen(
-          method: 'photo',
-          content: _selectedImages.join(', '),
+    // 이미지 업로드 API 호출 - File 객체 직접 전달
+    await ref.read(imageProofNotifierProvider.notifier).uploadImageProof(
+      widget.stepId,
+      _selectedImage!,
+    );
+  }
+
+  /// 이미지 업로드 영역 터치 처리
+  Future<void> _handleImageUploadTap() async {
+    // 바로 사진 선택 팝업 표시
+    _showImageSourceDialog();
+  }
+
+  /// 이미지 소스 선택 다이얼로그 표시
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 제목
+            const Text(
+              '사진 선택',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // 갤러리에서 선택
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: AppColors.primary),
+              title: const Text('갤러리에서 선택'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImageFromGallery();
+              },
+            ),
+            // 카메라로 촬영
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              title: const Text('카메라로 촬영'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImageFromCamera();
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
+      ),
+    );
+  }
+
+  /// 갤러리에서 이미지 선택
+  Future<void> _pickImageFromGallery() async {
+    try {
+      // 권한 요청 없이 바로 이미지 선택
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        // 이미지 크기 체크 (5MB 이하)
+        final file = File(image.path);
+        final fileSize = await file.length();
+        final maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if (fileSize > maxSize) {
+          _showErrorDialog('이미지 크기가 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.');
+          return;
+        }
+        
+        setState(() {
+          _selectedImage = file;
+        });
+      }
+    } catch (e) {
+      _showErrorDialog('갤러리에서 이미지를 선택하는 중 오류가 발생했습니다.');
+    }
+  }
+
+  /// 카메라로 이미지 촬영
+  Future<void> _pickImageFromCamera() async {
+    try {
+      // 권한 요청 없이 바로 이미지 촬영
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        // 이미지 크기 체크 (5MB 이하)
+        final file = File(image.path);
+        final fileSize = await file.length();
+        final maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if (fileSize > maxSize) {
+          _showErrorDialog('이미지 크기가 5MB를 초과합니다. 더 작은 이미지를 선택해주세요.');
+          return;
+        }
+        
+        setState(() {
+          _selectedImage = file;
+        });
+      }
+    } catch (e) {
+      _showErrorDialog('카메라로 사진을 촬영하는 중 오류가 발생했습니다.');
+    }
+  }
+
+  /// 오류 다이얼로그 표시
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('오류'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
       ),
     );
   }
