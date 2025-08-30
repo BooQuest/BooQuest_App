@@ -98,6 +98,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
       
+      // 500 에러인 경우도 서버 에러이므로 로그인 페이지로 이동
+      if (e is DioException && e.response?.statusCode == 500) {
+        print('🚫 500 Server Error (catch) - 로그인 페이지로 이동');
+        await _storageService.clearAuthData();
+        state = state.unauthenticated('서버 오류가 발생했습니다. 다시 로그인해주세요.');
+        return;
+      }
+      
       // 네트워크 오류 등의 경우, 로컬 데이터로 인증 상태 유지
       print('⚠️ getUserInfo API 호출 중 에러 발생: $e');
       final localUserData = _storageService.getUserInfo();

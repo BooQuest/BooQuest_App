@@ -30,6 +30,7 @@ mixin _$MissionEntity {
   int get missionTotalExp => throw _privateConstructorUsedError;
   List<MissionStep> get steps => throw _privateConstructorUsedError;
   MissionProgress get progress => throw _privateConstructorUsedError;
+  String? get guide => throw _privateConstructorUsedError;
 
   /// Serializes this MissionEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -58,6 +59,7 @@ abstract class $MissionEntityCopyWith<$Res> {
     int missionTotalExp,
     List<MissionStep> steps,
     MissionProgress progress,
+    String? guide,
   });
 
   $MissionProgressCopyWith<$Res> get progress;
@@ -87,6 +89,7 @@ class _$MissionEntityCopyWithImpl<$Res, $Val extends MissionEntity>
     Object? missionTotalExp = null,
     Object? steps = null,
     Object? progress = null,
+    Object? guide = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -126,6 +129,10 @@ class _$MissionEntityCopyWithImpl<$Res, $Val extends MissionEntity>
                 ? _value.progress
                 : progress // ignore: cast_nullable_to_non_nullable
                       as MissionProgress,
+            guide: freezed == guide
+                ? _value.guide
+                : guide // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -161,6 +168,7 @@ abstract class _$$MissionEntityImplCopyWith<$Res>
     int missionTotalExp,
     List<MissionStep> steps,
     MissionProgress progress,
+    String? guide,
   });
 
   @override
@@ -190,6 +198,7 @@ class __$$MissionEntityImplCopyWithImpl<$Res>
     Object? missionTotalExp = null,
     Object? steps = null,
     Object? progress = null,
+    Object? guide = freezed,
   }) {
     return _then(
       _$MissionEntityImpl(
@@ -229,6 +238,10 @@ class __$$MissionEntityImplCopyWithImpl<$Res>
             ? _value.progress
             : progress // ignore: cast_nullable_to_non_nullable
                   as MissionProgress,
+        guide: freezed == guide
+            ? _value.guide
+            : guide // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -247,6 +260,7 @@ class _$MissionEntityImpl implements _MissionEntity {
     required this.missionTotalExp,
     required final List<MissionStep> steps,
     required this.progress,
+    this.guide,
   }) : _steps = steps;
 
   factory _$MissionEntityImpl.fromJson(Map<String, dynamic> json) =>
@@ -276,10 +290,12 @@ class _$MissionEntityImpl implements _MissionEntity {
 
   @override
   final MissionProgress progress;
+  @override
+  final String? guide;
 
   @override
   String toString() {
-    return 'MissionEntity(id: $id, sideJobId: $sideJobId, title: $title, status: $status, orderNo: $orderNo, designNotes: $designNotes, missionTotalExp: $missionTotalExp, steps: $steps, progress: $progress)';
+    return 'MissionEntity(id: $id, sideJobId: $sideJobId, title: $title, status: $status, orderNo: $orderNo, designNotes: $designNotes, missionTotalExp: $missionTotalExp, steps: $steps, progress: $progress, guide: $guide)';
   }
 
   @override
@@ -299,7 +315,8 @@ class _$MissionEntityImpl implements _MissionEntity {
                 other.missionTotalExp == missionTotalExp) &&
             const DeepCollectionEquality().equals(other._steps, _steps) &&
             (identical(other.progress, progress) ||
-                other.progress == progress));
+                other.progress == progress) &&
+            (identical(other.guide, guide) || other.guide == guide));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -315,6 +332,7 @@ class _$MissionEntityImpl implements _MissionEntity {
     missionTotalExp,
     const DeepCollectionEquality().hash(_steps),
     progress,
+    guide,
   );
 
   /// Create a copy of MissionEntity
@@ -342,6 +360,7 @@ abstract class _MissionEntity implements MissionEntity {
     required final int missionTotalExp,
     required final List<MissionStep> steps,
     required final MissionProgress progress,
+    final String? guide,
   }) = _$MissionEntityImpl;
 
   factory _MissionEntity.fromJson(Map<String, dynamic> json) =
@@ -365,6 +384,8 @@ abstract class _MissionEntity implements MissionEntity {
   List<MissionStep> get steps;
   @override
   MissionProgress get progress;
+  @override
+  String? get guide;
 
   /// Create a copy of MissionEntity
   /// with the given fields replaced by the non-null parameter values.

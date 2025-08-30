@@ -9,6 +9,7 @@ import 'package:booquest/features/main/domain/entities/mission_entity.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
 import 'package:booquest/features/quest/presentation/widgets/quest_success_popup.dart';
+import 'package:booquest/features/quest/presentation/widgets/sidejob_guide_popup.dart';
 import 'package:booquest/features/quest/infrastructure/providers/mission_step_completion_providers.dart';
 import 'package:booquest/features/quest/application/states/mission_step_completion_state.dart';
 
@@ -954,31 +955,34 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                 return Column(
                   children: [
                     // 부업가이드 버튼
-                    Container(
-                      width: double.infinity,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            '부업가이드',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                    GestureDetector(
+                      onTap: () => _showSidejobGuidePopup(context),
+                      child: Container(
+                        width: double.infinity,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5F5F5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              '부업가이드',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_upward,
-                            size: 16,
-                            color: AppColors.textPrimary.withValues(alpha: 0.7),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_upward,
+                              size: 16,
+                              color: AppColors.textPrimary.withValues(alpha: 0.7),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -1029,35 +1033,6 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
               },
               orElse: () => Column(
                 children: [
-                  // 부업가이드 버튼
-                  Container(
-                    width: double.infinity,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          '부업가이드',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.arrow_upward,
-                          size: 16,
-                          color: AppColors.textPrimary.withValues(alpha: 0.7),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                   // 완료하기 버튼
                   Container(
                     width: double.infinity,
@@ -1304,6 +1279,48 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => QuestSuccessPopup(stepId: stepId),
+    );
+  }
+
+  /// 부업 가이드 팝업 표시
+  void _showSidejobGuidePopup(BuildContext context) {
+    final missionListState = ref.read(missionListNotifierProvider);
+    
+    missionListState.when(
+      initial: () => _showEmptyGuidePopup(context),
+      loading: () => _showEmptyGuidePopup(context),
+      success: (data) {
+        if (data.missions.isNotEmpty) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (BuildContext context) => SidejobGuidePopup(missions: data.missions),
+          );
+        } else {
+          _showEmptyGuidePopup(context);
+        }
+      },
+      failure: (message) {
+        // API 에러 시 에러 메시지만 표시
+        print('❌ 부업 가이드 팝업 표시 실패: $message');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('부업 가이드 로드 실패: $message'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
+    );
+  }
+  
+  /// 빈 가이드 팝업 표시 (데이터가 없을 때)
+  void _showEmptyGuidePopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) => const SidejobGuidePopup(missions: []),
     );
   }
 }

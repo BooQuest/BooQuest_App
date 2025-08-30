@@ -16,6 +16,7 @@ class MissionEntity with _$MissionEntity {
     required int missionTotalExp,
     required List<MissionStep> steps,
     required MissionProgress progress,
+    String? guide,
   }) = _MissionEntity;
 
   factory MissionEntity.fromJson(Map<String, dynamic> json) =>

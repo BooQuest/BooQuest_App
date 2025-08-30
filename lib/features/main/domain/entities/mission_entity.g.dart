@@ -21,6 +21,7 @@ _$MissionEntityImpl _$$MissionEntityImplFromJson(Map<String, dynamic> json) =>
       progress: MissionProgress.fromJson(
         json['progress'] as Map<String, dynamic>,
       ),
+      guide: json['guide'] as String?,
     );
 
 Map<String, dynamic> _$$MissionEntityImplToJson(_$MissionEntityImpl instance) =>
@@ -34,6 +35,7 @@ Map<String, dynamic> _$$MissionEntityImplToJson(_$MissionEntityImpl instance) =>
       'missionTotalExp': instance.missionTotalExp,
       'steps': instance.steps,
       'progress': instance.progress,
+      'guide': instance.guide,
     };
 
 _$MissionStepImpl _$$MissionStepImplFromJson(Map<String, dynamic> json) =>
