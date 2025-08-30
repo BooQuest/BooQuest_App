@@ -1,3 +1,4 @@
+import 'package:booquest/features/missions/domain/entities/subquest_regenerate_request_data.dart';
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/mission_entity.dart';
 import '../../domain/failures/mission_failure.dart';
@@ -29,6 +30,13 @@ class MissionRepositoryImpl implements MissionRepository {
   @override
   Future<Either<MissionFailure, bool>> startMission(int missionId) {
     return apiService.startMission(missionId);
+  }
+
+  @override
+  Future<Either<MissionFailure, List<SubQuestEntity>>> regenerateSubQuests(
+    SubQuestRegenerateRequestData request,
+  ) {
+    return apiService.regenerateSubQuests(request);
   }
 }
 

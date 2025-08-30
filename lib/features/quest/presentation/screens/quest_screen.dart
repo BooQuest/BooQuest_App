@@ -10,8 +10,11 @@ import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart'
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
 import 'package:booquest/features/quest/presentation/widgets/quest_success_popup.dart';
 import 'package:booquest/features/quest/presentation/widgets/sidejob_guide_popup.dart';
+import 'package:booquest/features/quest/presentation/screens/verification_complete_screen.dart';
 import 'package:booquest/features/quest/infrastructure/providers/mission_step_completion_providers.dart';
 import 'package:booquest/features/quest/application/states/mission_step_completion_state.dart';
+import 'package:booquest/features/quest/infrastructure/providers/mission_completion_providers.dart';
+import 'package:booquest/features/quest/application/states/mission_completion_state.dart';
 
 class QuestScreen extends ConsumerStatefulWidget {
   const QuestScreen({super.key});
@@ -24,6 +27,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   int _selectedTabIndex = 0; // 0: 진행 중, 1: 예정
   String? _userNickname;
   int? _sideJobId;
+  int? _selectedStepId; // 선택된 부퀘스트 스텝 ID (하나만 선택 가능)
 
   @override
   void initState() {
@@ -987,42 +991,22 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                     ),
                     const SizedBox(height: 12),
                     // 완료하기 버튼
-                    Container(
-                      width: double.infinity,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: _isAllSubQuestsCompleted(state) ? AppColors.primary : AppColors.textSecondary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: state.maybeWhen(
-                          success: (data) {
-                            final inProgressMissions = data.missions.where((mission) => mission.status == 'IN_PROGRESS').toList();
-                            if (inProgressMissions.isNotEmpty) {
-                              return Text(
-                                '완료하기 + ${inProgressMissions.first.missionTotalExp} EXP',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: _isAllSubQuestsCompleted(state) ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
-                                ),
-                              );
-                            }
-                            return Text(
-                              '완료하기 + 0 EXP',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: _isAllSubQuestsCompleted(state) ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
-                              ),
-                            );
-                          },
-                          orElse: () => Text(
-                            '완료하기 + 0 EXP',
+                    GestureDetector(
+                      onTap: _isCompleteButtonEnabled(state) ? () => _handleButtonTap(context, state) : null,
+                      child: Container(
+                        width: double.infinity,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _isCompleteButtonEnabled(state) ? AppColors.primary : AppColors.textSecondary.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getButtonText(state),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: _isAllSubQuestsCompleted(state) ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
+                              color: _isCompleteButtonEnabled(state) ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -1034,20 +1018,23 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
               orElse: () => Column(
                 children: [
                   // 완료하기 버튼
-                  Container(
-                    width: double.infinity,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: _isAllSubQuestsCompleted(state) ? AppColors.primary : AppColors.textSecondary.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '완료하기 + 0 EXP',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: _isAllSubQuestsCompleted(state) ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
+                  GestureDetector(
+                    onTap: _isCompleteButtonEnabled(state) ? () => _handleButtonTap(context, state) : null,
+                    child: Container(
+                      width: double.infinity,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _isCompleteButtonEnabled(state) ? AppColors.primary : AppColors.textSecondary.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _getButtonText(state),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _isCompleteButtonEnabled(state) ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
+                          ),
                         ),
                       ),
                     ),
@@ -1091,9 +1078,10 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             const Spacer(),
             state.maybeWhen(
               success: (data) {
-                if (data.missions.isNotEmpty) {
-                  final mission = data.missions.first;
-                  final completedCount = mission.steps.where((step) => step.status == 'COMPLETED').length;
+                // IN_PROGRESS 상태인 미션 찾기
+                final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+                if (inProgressMission != null) {
+                  final completedCount = inProgressMission.steps.where((step) => step.status == 'COMPLETED').length;
                   return Text(
                     '($completedCount/5) 완료',
                     style: const TextStyle(
@@ -1133,10 +1121,11 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
         const SizedBox(height: 16),
         state.maybeWhen(
           success: (data) {
-            if (data.missions.isNotEmpty) {
-              final mission = data.missions.first;
+            // IN_PROGRESS 상태인 미션 찾기
+            final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+            if (inProgressMission != null) {
               // seq 순서대로 정렬
-              final sortedSteps = List<MissionStep>.from(mission.steps)
+              final sortedSteps = List<MissionStep>.from(inProgressMission.steps)
                 ..sort((a, b) => a.seq.compareTo(b.seq));
               
               return Column(
@@ -1164,6 +1153,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   }
 
   Widget _buildSubQuestItem(int stepId, String title, bool isCompleted, bool isPlanned) {
+    final isSelected = _selectedStepId == stepId;
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -1185,19 +1176,27 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           ),
           const SizedBox(width: 12),
           GestureDetector(
-            onTap: isCompleted ? null : () => _handleStepCompletion(context, stepId),
+            onTap: isCompleted ? null : () => _handleStepSelection(stepId),
             child: Container(
               width: 20,
               height: 20,
               decoration: BoxDecoration(
-                color: isCompleted ? const Color(0xFF666666) : AppColors.white,
+                color: isCompleted 
+                    ? const Color(0xFF666666) 
+                    : isSelected 
+                        ? AppColors.primary 
+                        : AppColors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isCompleted ? const Color(0xFF666666) : AppColors.cardBorder,
+                  color: isCompleted 
+                      ? const Color(0xFF666666) 
+                      : isSelected 
+                          ? AppColors.primary 
+                          : AppColors.cardBorder,
                   width: 2,
                 ),
               ),
-              child: isCompleted
+              child: isCompleted || isSelected
                   ? const Icon(
                       Icons.check,
                       size: 14,
@@ -1211,14 +1210,15 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     );
   }
 
-  /// 모든 부퀘스트가 완료되었는지 확인하는 메서드
-  bool _isAllSubQuestsCompleted(MissionListState state) {
+  /// 부퀘스트 완료 버튼이 활성화되어야 하는지 확인하는 메서드
+  bool _isCompleteButtonEnabled(MissionListState state) {
     return state.maybeWhen(
       success: (data) {
-        if (data.missions.isNotEmpty) {
-          final mission = data.missions.first;
-          // 모든 steps가 COMPLETED 상태인지 확인
-          return mission.steps.every((step) => step.status == 'COMPLETED');
+        // IN_PROGRESS 상태인 미션 찾기
+        final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+        if (inProgressMission != null) {
+          // 부퀘스트가 선택되었거나, 모든 부퀘스트가 완료된 상태면 버튼 활성화
+          return _selectedStepId != null || _isAllSubQuestsCompleted(inProgressMission);
         }
         return false;
       },
@@ -1226,12 +1226,130 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     );
   }
 
-  /// 퀘스트 스텝 완료 처리
-  Future<void> _handleStepCompletion(BuildContext context, int stepId) async {
+  /// 모든 부퀘스트가 완료되었는지 확인하는 메서드
+  bool _isAllSubQuestsCompleted(dynamic mission) {
+    return mission.steps.every((step) => step.status == 'COMPLETED');
+  }
+
+  /// 버튼 텍스트를 동적으로 반환하는 메서드
+  String _getButtonText(MissionListState state) {
+    return state.maybeWhen(
+      success: (data) {
+        // IN_PROGRESS 상태인 미션 찾기
+        final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+        if (inProgressMission != null) {
+          if (_isAllSubQuestsCompleted(inProgressMission)) {
+            return '메인 퀘스트 완료 + 50 EXP';
+          } else if (_selectedStepId != null) {
+            return '완료하기 + 10 EXP';
+          }
+        }
+        return '완료하기 + 10 EXP';
+      },
+      orElse: () => '완료하기 + 10 EXP',
+    );
+  }
+
+  /// 버튼 탭 처리 메서드 (부퀘스트 완료 또는 메인 퀘스트 완료)
+  Future<void> _handleButtonTap(BuildContext context, MissionListState state) async {
+    state.maybeWhen(
+      success: (data) {
+        // IN_PROGRESS 상태인 미션 찾기
+        final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+        if (inProgressMission != null) {
+          if (_isAllSubQuestsCompleted(inProgressMission)) {
+            // 모든 부퀘스트가 완료된 상태: 메인 퀘스트 완료 처리
+            _handleMainQuestCompletion(context, inProgressMission.id);
+          } else if (_selectedStepId != null) {
+            // 부퀘스트가 선택된 상태: 부퀘스트 완료 처리
+            _handleSelectedStepCompletion(context);
+          }
+        }
+      },
+      orElse: () {},
+    );
+  }
+
+  /// 메인 퀘스트 완료 처리
+  Future<void> _handleMainQuestCompletion(BuildContext context, int missionId) async {
     try {
-      // 스텝 완료 API 호출
+      print('🎉 메인 퀘스트 완료 처리 시작: missionId=$missionId');
+      
+      // 메인 퀘스트 완료 API 호출
+      await ref.read(missionCompletionNotifierProvider.notifier).completeMission(missionId);
+      
+      // 상태 확인
+      final state = ref.read(missionCompletionNotifierProvider);
+      
+      if (mounted) {
+        state.when(
+          initial: () {},
+          loading: () {},
+          success: (data) {
+            // 성공 시 성공 팝업 표시
+            _showMainQuestSuccessPopup(context, data);
+            
+            // 데이터 새로고침
+            _loadData();
+          },
+          failure: (message) {
+            // 실패 시 에러 메시지 표시
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('메인 퀘스트 완료 실패: $message'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print('❌ 메인 퀘스트 완료 처리 중 오류: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('메인 퀘스트 완료 처리 중 오류가 발생했습니다.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 선택된 부퀘스트가 있는지 확인하는 메서드
+  bool _hasSelectedSubQuest() {
+    return _selectedStepId != null;
+  }
+
+  /// 부퀘스트 선택 처리 (라디오 버튼처럼 하나만 선택)
+  void _handleStepSelection(int stepId) {
+    setState(() {
+      if (_selectedStepId == stepId) {
+        // 같은 스텝을 다시 클릭하면 선택 해제
+        _selectedStepId = null;
+      } else {
+        // 다른 스텝을 클릭하면 기존 선택 해제하고 새로 선택
+        _selectedStepId = stepId;
+      }
+    });
+  }
+
+  /// 선택된 부퀘스트를 완료 처리
+  Future<void> _handleSelectedStepCompletion(BuildContext context) async {
+    if (_selectedStepId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('완료할 부퀘스트를 선택해주세요.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // 선택된 스텝을 완료 처리
       await ref.read(missionStepCompletionNotifierProvider.notifier).completeStep(
-        stepId,
+        _selectedStepId!,
         'COMPLETED',
       );
 
@@ -1243,17 +1361,22 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           initial: () {},
           loading: () {},
           success: (data) {
-          // 성공 시 성공 팝업 표시
-          _showQuestSuccessPopup(context, stepId);
-          
-          // 데이터 새로고침
-          _loadData();
-        },
+            // 성공 시 성공 팝업 표시
+            _showQuestSuccessPopup(context, _selectedStepId!);
+            
+            // 선택 상태 초기화
+            setState(() {
+              _selectedStepId = null;
+            });
+            
+            // 데이터 새로고침
+            _loadData();
+          },
           failure: (message) {
             // 실패 시 에러 메시지 표시
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('퀘스트 완료 실패: $message'),
+                content: Text('부퀘스트 완료 실패: $message'),
                 backgroundColor: Colors.red,
               ),
             );
@@ -1261,11 +1384,11 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
         );
       }
     } catch (e) {
-      print('❌ 퀘스트 스텝 완료 처리 중 오류: $e');
+      print('❌ 부퀘스트 완료 처리 중 오류: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('퀘스트 완료 처리 중 오류가 발생했습니다.'),
+            content: Text('부퀘스트 완료 처리 중 오류가 발생했습니다.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -1279,6 +1402,19 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => QuestSuccessPopup(stepId: stepId),
+    );
+  }
+
+  /// 메인 퀘스트 성공 팝업 표시
+  void _showMainQuestSuccessPopup(BuildContext context, dynamic data) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VerificationCompleteScreen(
+          method: 'main_quest',
+          content: '메인 퀘스트 완료',
+          expReward: data.totalExpReward,
+        ),
+      ),
     );
   }
 

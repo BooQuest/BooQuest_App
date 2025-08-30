@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
+import 'package:booquest/features/quest/presentation/screens/next_quest_setup_screen.dart';
 
 /// 인증 완료 화면 - 축하 메시지와 EXP 획득 정보 표시
 class VerificationCompleteScreen extends StatelessWidget {
-  final String method; // 인증 방식 (link, text, photo)
+  final String method; // 인증 방식 (link, text, photo, main_quest)
   final String content; // 인증 내용
+  final int? expReward; // 획득 경험치 (메인 퀘스트 완료 시 사용)
 
   const VerificationCompleteScreen({
     super.key,
     required this.method,
     required this.content,
+    this.expReward,
   });
 
   @override
@@ -49,9 +52,9 @@ class VerificationCompleteScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               // 축하 메시지
-              const Text(
-                '축하드려요!',
-                style: TextStyle(
+              Text(
+                _getCongratulationMessage(),
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -73,9 +76,9 @@ class VerificationCompleteScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               // EXP 획득 정보
-              const Text(
-                '+EXP 5만큼 경험치가 올랐어요',
-                style: TextStyle(
+              Text(
+                _getExpMessage(),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
@@ -97,6 +100,14 @@ class VerificationCompleteScreen extends StatelessWidget {
     );
   }
 
+  /// 축하 메시지 반환
+  String _getCongratulationMessage() {
+    if (method == 'main_quest') {
+      return '축하드려요!';
+    }
+    return '축하드려요!';
+  }
+
   /// 인증 방식에 따른 메시지 반환
   String _getVerificationMessage() {
     switch (method) {
@@ -106,9 +117,19 @@ class VerificationCompleteScreen extends StatelessWidget {
         return '텍스트 인증 완료';
       case 'photo':
         return '사진 인증 완료';
+      case 'main_quest':
+        return '메인 퀘스트 완료';
       default:
         return '추가 인증 완료';
     }
+  }
+
+  /// EXP 메시지 반환
+  String _getExpMessage() {
+    if (method == 'main_quest' && expReward != null) {
+      return '+EXP ${expReward}만큼 경험치가 올랐어요';
+    }
+    return '+EXP 5만큼 경험치가 올랐어요';
   }
 
   /// 확인 버튼
@@ -136,7 +157,16 @@ class VerificationCompleteScreen extends StatelessWidget {
 
   /// 확인 버튼 클릭 처리
   void _onConfirmPressed(BuildContext context) {
-    // 모든 화면을 닫고 메인 화면으로 돌아가기
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    if (method == 'main_quest') {
+      // 메인 퀘스트 완료 시: 다음 퀘스트 설정 화면으로 이동
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const NextQuestSetupScreen(),
+        ),
+      );
+    } else {
+      // 다른 인증 완료 시: 기존 로직 (메인 화면으로 돌아가기)
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 }
