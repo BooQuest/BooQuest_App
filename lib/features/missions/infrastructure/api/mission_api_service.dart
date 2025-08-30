@@ -5,6 +5,7 @@ import '../../domain/entities/mission_entity.dart';
 import '../../domain/failures/mission_failure.dart';
 import '../../domain/entities/subquest_entity.dart';
 import '../../domain/entities/subquest_request_data.dart';
+import '../../domain/entities/subquest_regenerate_request_data.dart';
 
 class MissionApiService {
   static MissionApiService? _instance;
@@ -114,14 +115,14 @@ class MissionApiService {
     }
   }
 
-  /// 부퀘스트 조회 API 호출
+  /// 부퀘스트 생성 API 호출
   /// POST /api/missions/steps
   Future<Either<MissionFailure, List<SubQuestEntity>>> getSubQuests(SubQuestRequestData request) async {
     try {
       final authStorage = await AuthStorageService.getInstance();
       final client = NetworkClient(authStorage);
 
-      print('🚀 부퀘스트 API 호출 시작...');
+      print('🚀 부퀘스트 생성 API 호출 시작...');
       print('  - userId: ${request.userId}');
       print('  - missionId: ${request.missionId}');
       print('  - missionTitle: ${request.missionTitle}');
@@ -132,7 +133,7 @@ class MissionApiService {
         data: request.toJson(),
       );
 
-      print('📥 부퀘스트 API 응답:');
+      print('📥 부퀘스트 생성 API 응답:');
       print('  - Status Code: ${response.statusCode}');
       print('  - Response Data: ${response.data}');
 
@@ -203,6 +204,61 @@ class MissionApiService {
       
     } catch (e) {
       print('❌ 미션 시작 API 호출 중 예외 발생: $e');
+      final message = e.toString();
+      if (message.contains('SocketException') || message.contains('TimeoutException')) {
+        return Left(MissionFailure.network(message));
+      }
+      return Left(MissionFailure.unknown(message));
+    }
+  }
+
+  /// 부퀘스트 재생성 API 호출
+  /// POST /api/missions/steps/regenerate
+  Future<Either<MissionFailure, List<SubQuestEntity>>> regenerateSubQuests(SubQuestRegenerateRequestData request) async {
+    try {
+      final authStorage = await AuthStorageService.getInstance();
+      final client = NetworkClient(authStorage);
+
+      print('🚀 부퀘스트 재생성 API 호출 시작...');
+      print('  - userId: ${request.generateMissionStep.userId}');
+      print('  - missionId: ${request.generateMissionStep.missionId}');
+      print('  - reasons: ${request.feedbackData.reasons}');
+      print('  - etcFeedback: ${request.feedbackData.etcFeedback}');
+
+      final response = await client.post<Map<String, dynamic>>(
+        '/api/missions/steps/regenerate',
+        data: request.toJson(),
+      );
+
+      print('📥 부퀘스트 재생성 API 응답:');
+      print('  - Status Code: ${response.statusCode}');
+      print('  - Response Data: ${response.data}');
+
+      if (response.statusCode != 200 || response.data == null) {
+        return Left(MissionFailure.server('서버 오류 (${response.statusCode})'));
+      }
+
+      final body = response.data!;
+      if (body['success'] != true || body['data'] == null) {
+        return Left(MissionFailure.server(body['message']?.toString() ?? 'API 실패'));
+      }
+
+      final list = (body['data'] as List<dynamic>).map((item) {
+        final q = item as Map<String, dynamic>;
+        return SubQuestEntity(
+          id: (q['id'] ?? 0) as int,
+          title: (q['title'] ?? '').toString(),
+          seq: (q['seq'] ?? 0) as int,
+          status: (q['status'] ?? '').toString(),
+          detail: (q['detail'] ?? '').toString(),
+        );
+      }).toList();
+
+      print('✅ 부퀘스트 재생성 데이터 파싱 완료: ${list.length}개');
+      return Right(list);
+      
+    } catch (e) {
+      print('❌ 부퀘스트 재생성 API 호출 중 예외 발생: $e');
       final message = e.toString();
       if (message.contains('SocketException') || message.contains('TimeoutException')) {
         return Left(MissionFailure.network(message));

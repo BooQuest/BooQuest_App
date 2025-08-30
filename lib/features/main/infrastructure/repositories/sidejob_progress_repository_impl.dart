@@ -39,7 +39,7 @@ class SideJobProgressRepositoryImpl {
         final sideJobProgress = SideJobProgressEntity(
           title: data['title'] as String,
           progressPercent: progress['percent'] as int,
-          currentOrder: stage['currentOrder'] as int,
+          currentOrder: stage['currentOrder'] as int? ?? 0, // null일 경우 0으로 기본값 설정
           totalStages: stage['total'] as int,
         );
 

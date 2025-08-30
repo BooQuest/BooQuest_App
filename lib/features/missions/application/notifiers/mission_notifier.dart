@@ -1,3 +1,4 @@
+import 'package:booquest/features/missions/domain/entities/subquest_regenerate_request_data.dart';
 import 'package:state_notifier/state_notifier.dart';
 import '../../domain/repositories/mission_repository.dart';
 import '../../domain/entities/mission_entity.dart';
@@ -51,6 +52,35 @@ class MissionNotifier extends StateNotifier<MissionState> {
       (List<SubQuestEntity> subQuests) {
         print('✅ 부퀘스트 조회 성공: ${subQuests.length}개');
         return subQuests;
+      },
+    );
+  }
+
+  /// 상태 직접 설정 (외부에서 사용)
+  void setState(MissionState newState) {
+    state = newState;
+  }
+
+  /// 부퀘스트 재생성
+  Future<void> regenerateSubQuests(SubQuestRegenerateRequestData request) async {
+    state = const MissionState.loading();
+    
+    final result = await repository.regenerateSubQuests(request);
+    result.fold(
+      (MissionFailure f) {
+        print('❌ 부퀘스트 재생성 실패: ${f.userMessage}');
+        state = MissionState.failure(f);
+      },
+      (List<SubQuestEntity> subQuests) {
+        print('✅ 부퀘스트 재생성 성공: ${subQuests.length}개');
+        // SubQuestEntity를 MissionStepEntity로 변환
+        final missionSteps = subQuests.map((subQuest) => MissionStepEntity(
+          id: subQuest.id,
+          title: subQuest.title,
+          order: subQuest.seq,
+          designNotes: subQuest.detail,
+        )).toList();
+        state = MissionState.success(missionSteps);
       },
     );
   }
