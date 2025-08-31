@@ -111,7 +111,7 @@ class _Step0CharacterSelectionScreenState extends State<Step0CharacterSelectionS
                       child: const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '당신의 새로운 성장을\n함께할 친구를\n골라주세요',
+                          '새로운 성장을 함께할 \n파트너를 선택해 주세요',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -151,22 +151,27 @@ class _Step0CharacterSelectionScreenState extends State<Step0CharacterSelectionS
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(_horizontalPadding, 0, _horizontalPadding, _bottomSpacing),
-              child: SizedBox(
+              child: Container(
                 width: double.infinity,
                 height: 46,
-                child: ElevatedButton(
-                  onPressed: _onCharacterSelected,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonActive,
-                    foregroundColor: AppColors.buttonText,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    '선택',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1976D2), // 파란색 배경
+                  borderRadius: BorderRadius.circular(12), // 둥근 모서리
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _onCharacterSelected,
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Center(
+                      child: Text(
+                        '선택',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                   ),
                 ),
