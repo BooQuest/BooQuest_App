@@ -193,20 +193,30 @@ class _Step3PreferredMethodScreenState extends State<Step3PreferredMethodScreen>
           right: _horizontalPadding,
           bottom: 16 + bottomInset,
         ),
-        child: SizedBox(
+        child: Container(
           width: double.infinity,
           height: 46,
-          child: ElevatedButton(
-            onPressed: _selectedOption != null ? _onNext : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _selectedOption != null ? AppColors.buttonActive : AppColors.buttonInactive,
-              foregroundColor: AppColors.buttonText,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              elevation: 0,
-            ),
-            child: const Text(
-              '다음',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          decoration: BoxDecoration(
+            color: _selectedOption != null 
+                ? const Color(0xFF1976D2) // 파란색 배경
+                : const Color(0xFFCCCCCC), // 비활성화 시 회색
+            borderRadius: BorderRadius.circular(12), // 둥근 모서리
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _selectedOption != null ? _onNext : null,
+              borderRadius: BorderRadius.circular(12),
+              child: Center(
+                child: Text(
+                  '다음',
+                  style: TextStyle(
+                    color: _selectedOption != null ? Colors.white : Colors.grey[600],
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

@@ -13,6 +13,7 @@ class NaverLoginService {
   // 네이버 개발자 센터에서 발급받은 값들
   static const String _clientId = 'TM5eDkpd_rKv82eBNyJd';
   static const String _clientSecret = 'unToCI8V3H';
+  
   /// 네이버 로그인 실행
   /// 
   /// 1. 네이버 로그인 SDK를 통해 인증 수행
@@ -20,7 +21,6 @@ class NaverLoginService {
   /// 3. 실패 시 null 반환
   Future<String?> login() async {
     try {
-      
       // 네이버 로그인 실행
       final result = await FlutterNaverLogin.logIn();
       
@@ -29,6 +29,7 @@ class NaverLoginService {
         print('  - Access Token: ${result.accessToken?.accessToken}');
         
         // 로그인 성공 시 액세스 토큰만 반환
+        // 실제 서버 인증은 AuthNotifier.loginWithSocial에서 처리
         return result.accessToken?.accessToken;
       } else {
         print('❌ 네이버 로그인 실패: ${result.status}');
@@ -40,6 +41,4 @@ class NaverLoginService {
       return null;
     }
   }
-  
-
 }

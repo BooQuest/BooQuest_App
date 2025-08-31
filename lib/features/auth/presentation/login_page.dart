@@ -106,7 +106,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       // 2. 앱 인증 진행
       final bool loginSuccess = await widget.authNotifier.loginWithSocial(
         accessToken: naverAccessToken,
-        provider: 'naver',
+        provider: 'NAVER',
       );
 
       if (!mounted) return;
@@ -297,23 +297,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             borderRadius: BorderRadius.circular(16),
             child: GestureDetector(
               onTap: isLoading ? null : _handleNaverLogin,
-              child: Container(
+              child: SvgPicture.asset(
+                'assets/images/login/naver.svg',
                 width: double.infinity,
                 height: _getButtonHeight(),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF03C75A), // 네이버 브랜드 색상
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text(
-                    '네이버 로그인',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                fit: BoxFit.cover,
               ),
             ),
           ),

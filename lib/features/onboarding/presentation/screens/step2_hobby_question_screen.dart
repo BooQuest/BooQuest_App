@@ -313,17 +313,29 @@ class _Step2HobbyQuestionScreenState extends State<Step2HobbyQuestionScreen> {
             SizedBox(
               width: double.infinity,
               height: 46,
-              child: ElevatedButton(
-                onPressed: canProceed ? _onNext : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: canProceed ? AppColors.buttonActive : AppColors.buttonInactive,
-                  foregroundColor: AppColors.buttonText,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: canProceed 
+                      ? const Color(0xFF1976D2) // 파란색 배경
+                      : const Color(0xFFCCCCCC), // 비활성화 시 회색
+                  borderRadius: BorderRadius.circular(12), // 둥근 모서리
                 ),
-                child: const Text(
-                  '다음',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: canProceed ? _onNext : null,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Center(
+                      child: Text(
+                        '다음',
+                        style: TextStyle(
+                          color: canProceed ? Colors.white : Colors.grey[600],
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

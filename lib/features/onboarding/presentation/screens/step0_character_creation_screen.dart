@@ -175,7 +175,7 @@ class _Step0CharacterCreationScreenState extends State<Step0CharacterCreationScr
     return const Align(
       alignment: Alignment.centerLeft,
       child: Text(
-        '당신을 어떻게\n불러드리면 될까요?',
+        '어떻게 불러드리면 될까요?',
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w700,
@@ -259,21 +259,28 @@ class _Step0CharacterCreationScreenState extends State<Step0CharacterCreationScr
     return SizedBox(
       width: double.infinity,
       height: 46,
-      child: ElevatedButton(
-        onPressed: _isNameValid ? _onConfirmPressed : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _isNameValid 
-              ? AppColors.buttonActive
-              : AppColors.buttonInactive,
-          foregroundColor: AppColors.buttonText,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _isNameValid 
+              ? const Color(0xFF1976D2) // 파란색 배경
+              : const Color(0xFFCCCCCC), // 비활성화 시 회색
+          borderRadius: BorderRadius.circular(12), // 둥근 모서리
         ),
-        child: const Text(
-          '확인',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _isNameValid ? _onConfirmPressed : null,
+            borderRadius: BorderRadius.circular(12),
+            child: Center(
+              child: Text(
+                '확인',
+                style: TextStyle(
+                  color: _isNameValid ? Colors.white : Colors.grey[600],
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
         ),
       ),
