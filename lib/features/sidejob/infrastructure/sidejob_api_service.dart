@@ -150,6 +150,9 @@ class SideJobApiService {
       final authStorage = await AuthStorageService.getInstance();
       final networkClient = NetworkClient(authStorage);
 
+      print('📤 reasons: $reasons');
+      print('generateSideJobRequest: $generateSideJobRequest');
+      
       final response = await networkClient.post<Map<String, dynamic>>(
         '/api/sideJob/regenerate/$sideJobId',
         data: {
