@@ -6,12 +6,12 @@ import 'package:booquest/features/auth/presentation/login_page.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step0_character_selection_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step0_character_creation_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step1_job_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step2_hobby_question_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step3_preferred_method_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step4_method_selection_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step1_character_selection_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step2_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step3_job_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step4_hobby_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step5_preferred_method_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step6_method_selection_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
 
@@ -165,26 +165,26 @@ class _OnboardingRouter extends StatelessWidget {
         final String? screenType = onboardingStorage.getCharacterScreenType();
         print('🔄 온보딩 라우터: 캐릭터 화면 타입 = $screenType');
         if (screenType == 'creation') {
-          return const Step0CharacterCreationScreen();
+          return const Step2CharacterCreationScreen();
         } else {
-          return const Step0CharacterSelectionScreen();
+          return const Step1CharacterSelectionScreen();
         }
       case 1:
         // Step 1: 직업 질문
-        return const Step1JobQuestionScreen();
+        return const Step3JobQuestionScreen();
       case 2:
         // Step 2: 취미 질문
-        return const Step2HobbyQuestionScreen();
+        return const Step4HobbyQuestionScreen();
       case 3:
         // Step 3: 표현 방식 선호도
-        return const Step3PreferredMethodScreen();
+        return const Step5PreferredMethodScreen();
       case 4:
         // Step 4: 방법 선택
-        return const Step4MethodSelectionScreen();
+        return const Step6MethodSelectionScreen();
       default:
         // 기본값: 캐릭터 선택부터 시작
         print('🔄 온보딩 라우터: 기본값으로 캐릭터 선택 화면');
-        return const Step0CharacterSelectionScreen();
+        return const Step1CharacterSelectionScreen();
     }
   }
 
@@ -205,11 +205,11 @@ class _OnboardingRouter extends StatelessWidget {
         // 에러 발생 시 기본 화면 (캐릭터 선택)
         if (snapshot.hasError) {
           print('OnboardingRouter 에러: ${snapshot.error}');
-          return const Step0CharacterSelectionScreen();
+          return const Step1CharacterSelectionScreen();
         }
 
         // 결정된 화면 반환
-        return snapshot.data ?? const Step0CharacterSelectionScreen();
+        return snapshot.data ?? const Step1CharacterSelectionScreen();
       },
     );
   }

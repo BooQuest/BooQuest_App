@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step3_preferred_method_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step5_preferred_method_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
 import 'package:booquest/core/presentation/widgets/common_widgets.dart';
 import 'package:booquest/core/navigation/transitions.dart';
@@ -15,22 +15,20 @@ import 'package:booquest/features/sidejob/application/sidejob_state.dart';
 import 'package:booquest/features/sidejob/domain/sidejob_failure.dart';
 import 'package:booquest/features/sidejob/domain/sidejob_entity.dart';
 
-/// 온보딩 4단계 - 자신 있는 방식 선택 화면
-class Step4MethodSelectionScreen extends ConsumerStatefulWidget {
-  const Step4MethodSelectionScreen({super.key});
+/// 온보딩 6단계 - 자신 있는 방식 선택 화면
+class Step6MethodSelectionScreen extends ConsumerStatefulWidget {
+  const Step6MethodSelectionScreen({super.key});
 
   @override
-  ConsumerState<Step4MethodSelectionScreen> createState() => _Step4MethodSelectionScreenState();
+  ConsumerState<Step6MethodSelectionScreen> createState() => _Step6MethodSelectionScreenState();
 }
 
-class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectionScreen> {
-  static const double _horizontalPadding = 20.0;
-  static const double _topSpacing = 80.0;
-  static const double _titleToOptionsSpacing = 40.0;
-  static const double _optionsToButtonSpacing = 120.0;
-  static const double _topRowCompensation = 16.0;
+class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectionScreen> {
 
   String? _selectedOption;
+  
+  // 진행 가능 여부 계산
+  bool get _canProceed => _selectedOption != null && !ref.watch(sideJobNotifierProvider).isLoading;
 
   @override
   void initState() {
@@ -123,124 +121,180 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
       );
     });
     
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 40),
-                    _buildTopRow(),
-                    const SizedBox(height: _topSpacing - 40 - _topRowCompensation),
-                    _buildTitle(),
-                    const SizedBox(height: _titleToOptionsSpacing),
-                    _buildOptions(),
-                    const SizedBox(height: _optionsToButtonSpacing),
-                    
-                    // 에러 메시지 표시
-                    if (sideJobState.isFailure) ...[
-                      const SizedBox(height: 20),
-                      CommonErrorMessage(
-                        message: sideJobState.failure!.userMessage,
-                        onRetry: _onNext,
-                        retryText: '다시 시도',
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 실시간 반응형 값 계산 (오버플로우 방지)
+        final double screenHeight = constraints.maxHeight;
+        final double screenWidth = constraints.maxWidth;
+        
+        // 동적으로 계산되는 값들 (실시간 업데이트)
+        final double horizontalPadding = screenWidth * 0.05; // 화면 너비의 5%
+        final double topSpacing = screenHeight * 0.1; // 화면 높이의 10%
+        final double bottomSpacing = screenHeight * 0.04; // 화면 높이의 4%
+        
+        // 상단 여백 관련
+        final double topMargin = screenHeight * 0.05; // 화면 높이의 5%
+        final double titleTopSpacing = screenHeight * 0.05; // 화면 높이의 5%
+        final double titleToOptionsSpacing = screenHeight * 0.05; // 화면 높이의 5%
+        final double optionsToButtonSpacing = screenHeight * 0.075; // 화면 높이의 7.5%
+        
+        // 하단 버튼 관련
+        final double buttonHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
+        
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: Stack(
+            children: [
+              SafeArea(
+                child: GestureDetector(
+                  onTap: () => FocusScope.of(context).unfocus(),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              SizedBox(height: topMargin),
+                              _buildTopRow(screenWidth),
+                              SizedBox(height: titleTopSpacing),
+                              _buildTitle(screenWidth),
+                              SizedBox(height: titleToOptionsSpacing),
+                              _buildOptions(screenWidth),
+                              SizedBox(height: optionsToButtonSpacing),
+                              
+                              // 에러 메시지 표시
+                              if (sideJobState.isFailure) ...[
+                                const SizedBox(height: 20),
+                                CommonErrorMessage(
+                                  message: sideJobState.failure!.userMessage,
+                                  onRetry: _onNext,
+                                  retryText: '다시 시도',
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 20),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 16),
+                        child: Container(
+                          width: double.infinity,
+                          height: buttonHeight.clamp(46.0, 60.0),
+                          decoration: BoxDecoration(
+                            color: _canProceed 
+                                ? const Color(0xFF1976D2)
+                                : const Color(0xFFCCCCCC),
+                            borderRadius: BorderRadius.circular(buttonHeight * 0.26),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _canProceed ? _onNext : null,
+                              borderRadius: BorderRadius.circular(buttonHeight * 0.26),
+                              child: Center(
+                                child: Text(
+                                  '다음',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: buttonHeight * 0.39,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
+              if (sideJobState.isLoading) const AILoadingOverlay(
+                title: 'AI가 당신에게 맞는\n부업을 분석하고 있어요...',
+                subtitle: '',
+              ),
+            ],
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildBottomBar(),
-          ),
-          if (sideJobState.isLoading) const AILoadingOverlay(
-            title: 'AI가 당신에게 맞는\n부업을 분석하고 있어요...',
-            subtitle: '',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildTopRow() {
+  Widget _buildTopRow(double screenWidth) {
+    final double iconSize = screenWidth * 0.05; // 화면 너비의 5% (반응형 아이콘 크기)
+    final double rightPadding = screenWidth * 0.1; // 화면 너비의 10% (반응형 오른쪽 패딩)
+    
     return Row(
       children: [
         IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, 
+            size: iconSize.clamp(18.0, 24.0), // 최소 18, 최대 24로 제한
+            color: AppColors.textPrimary
+          ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
-          onPressed: () => _goBack(),
+          onPressed: _goBack,
         ),
-        const Expanded(
-          child: Center(child: OnboardingProgress(currentStep: 3)),  // 5단계 중 네번째
+        Expanded(
+          child: Center(child: OnboardingProgress(currentStep: 5)),  // 6단계 중 마지막
         ),
-        const SizedBox(width: 40),
+        SizedBox(width: rightPadding),
       ],
     );
   }
 
-  Widget _buildTitle() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTitle(double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: RichText(
+          text: TextSpan(
+            style: TextStyle(
+              fontSize: screenWidth * 0.06, // 화면 너비의 6% (반응형 폰트 크기)
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              height: 1.4,
+            ),
             children: [
-              const Text(
-                '어떤 방식이\n더 자신 있으신가요?',
+              const TextSpan(text: '어떤 '),
+              TextSpan(
+                text: '방식',
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  height: 1.4,
+                  color: const Color(0xFF1976D2), // 파란색 강조
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '가장 능숙하고 편하게 하실 수 있는 방식을 선택해 주세요',
+              const TextSpan(text: '이 더 자신 있으신가요?\n'),
+              TextSpan(
+                text: '가장 즐겁고 자신 있는 활동을 골라주세요.',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: screenWidth * 0.04, // 화면 너비의 4% (반응형 폰트 크기)
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textPrimary.withOpacity(0.6),
-                  height: 1.4,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 16),
-        SvgPicture.asset(
-          'assets/images/characters/basic_icon_1.svg',
-          width: 39,
-          height: 39,
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildOptions() {
-    return Column(
-      children: [
-        _buildOptionButton('창작하기', Icons.auto_awesome, 'CREATE'),
-        const SizedBox(height: 12),
-        _buildOptionButton('정리·전달하기', Icons.article, 'ORGANIZE'),
-        const SizedBox(height: 12),
-        _buildOptionButton('일상 공유하기', Icons.share, 'SHARE'),
-        const SizedBox(height: 12),
-        _buildOptionButton('트렌드 파악하기', Icons.trending_up, 'TREND'),
-      ],
+  Widget _buildOptions(double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+      child: Column(
+        children: [
+          _buildOptionButton('창작하기', Icons.auto_awesome, 'CREATE'),
+          const SizedBox(height: 12),
+          _buildOptionButton('정리·전달하기', Icons.article, 'ORGANIZE'),
+          const SizedBox(height: 12),
+          _buildOptionButton('일상 공유하기', Icons.share, 'SHARE'),
+          const SizedBox(height: 12),
+          _buildOptionButton('트렌드 파악하기', Icons.trending_up, 'TREND'),
+        ],
+      ),
     );
   }
 
@@ -305,47 +359,7 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
     }
   }
 
-  Widget _buildBottomBar() {
-    final sideJobState = ref.watch(sideJobNotifierProvider);
-    final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final bool canProceed = _selectedOption != null && !sideJobState.isLoading;
-    
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: _horizontalPadding,
-          right: _horizontalPadding,
-          bottom: 16 + bottomInset,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: canProceed 
-                ? const Color(0xFF1976D2) // 파란색 배경
-                : const Color(0xFFCCCCCC), // 비활성화 시 회색
-            borderRadius: BorderRadius.circular(12), // 둥근 모서리
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: canProceed ? _onNext : null,
-              borderRadius: BorderRadius.circular(12),
-              child: Center(
-                child: Text(
-                  '다음',
-                  style: TextStyle(
-                    color: canProceed ? Colors.white : Colors.grey[600],
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Future<void> _onNext() async {
     if (_selectedOption == null) return;
@@ -375,7 +389,7 @@ class _Step4MethodSelectionScreenState extends ConsumerState<Step4MethodSelectio
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       SlideFromLeftPageRoute(
-        builder: (_) => const Step3PreferredMethodScreen(),
+        builder: (_) => const Step5PreferredMethodScreen(),
       ),
     );
   }
