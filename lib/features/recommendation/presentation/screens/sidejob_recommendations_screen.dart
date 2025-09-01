@@ -7,7 +7,7 @@ import 'package:booquest/core/navigation/transitions.dart';
 
 
 import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step4_method_selection_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step6_method_selection_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/features/missions/infrastructure/providers/mission_providers.dart';
 import 'package:booquest/core/utils/user_data_utils.dart';
@@ -463,7 +463,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       SlideFromLeftPageRoute(
-        builder: (_) => const Step4MethodSelectionScreen(),
+        builder: (_) => const Step6MethodSelectionScreen(),
       ),
     );
   }
