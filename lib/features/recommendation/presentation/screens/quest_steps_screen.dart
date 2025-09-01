@@ -10,6 +10,7 @@ import 'package:booquest/features/missions/infrastructure/providers/mission_prov
 import 'package:booquest/features/missions/application/states/mission_state.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
 import 'package:booquest/features/sidejob/infrastructure/sidejob_providers.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 
 
 class QuestStepsScreen extends ConsumerStatefulWidget {
@@ -33,6 +34,45 @@ class QuestStepsScreen extends ConsumerStatefulWidget {
 }
 
 class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
+  // 공통 스타일 상수
+  static const _cardColor = Colors.white;
+  static const _cardBorderRadius = BorderRadius.all(Radius.circular(12));
+  static const _cardBorderColor = Color(0xFFE0E0E0);
+  static const _cardBorderWidth = 1.0;
+  static const _cardShadow = [
+    BoxShadow(
+      color: Color(0x0D000000), // alpha: 0.05
+      blurRadius: 10,
+      offset: Offset(0, 2),
+    ),
+  ];
+
+  static const _tagDecoration = BoxDecoration(
+    color: Color(0xFFE7E7E7),
+    borderRadius: BorderRadius.all(Radius.circular(100)),
+  );
+
+  static const _tagTextStyle = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: Colors.black,
+  );
+
+  static const _titleTextStyle = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
+    color: AppColors.textPrimary,
+  );
+
+  static const _descriptionTextStyle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textSecondary,
+    height: 1.4,
+  );
+
+  static const _iconSize = 56.0;
+
   bool _isSubQuestExpanded = true; // 부퀘스트 펼침/접힘 상태
   List<Map<String, dynamic>>? _subQuests; // 부퀘스트 로컬 상태
   bool _isSubQuestLoading = false; // 부퀘스트 로딩 상태 
@@ -54,6 +94,8 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
   @override
   Widget build(BuildContext context) {
     final missionState = ref.watch(missionNotifierProvider);
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
     
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -64,17 +106,19 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
               children: [
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenSize.width * 0.05, // 화면 너비의 5%
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 12),
+                        SizedBox(height: isSmallScreen ? 8 : 12),
                         _buildTopRow(context),
-                        const SizedBox(height: 16),
+                        SizedBox(height: isSmallScreen ? 12 : 16),
                         _buildTitle(),
-                        const SizedBox(height: 20),
+                        SizedBox(height: isSmallScreen ? 16 : 20),
                         _buildMainQuestSection(missionState),
-                        const SizedBox(height: 50), 
+                        SizedBox(height: isSmallScreen ? 40 : 50), 
                       ],
                     ),
                   ),
@@ -94,18 +138,34 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
   }
 
   Widget _buildTopRow(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
     return Row(
       children: [
         IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded, 
+            size: isSmallScreen ? 18 : 20, 
+            color: AppColors.textPrimary
+          ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
           onPressed: () => _handleBack(),
         ),
-        const Expanded(
-          child: Center(child: Text('메인 퀘스트', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
+        Expanded(
+          child: Center(
+            child: Text(
+              '메인 퀘스트', 
+              style: TextStyle(
+                fontSize: isSmallScreen ? 16 : 18, 
+                fontWeight: FontWeight.w700, 
+                color: AppColors.textPrimary
+              )
+            )
+          ),
         ),
-        const SizedBox(width: 40),
+        SizedBox(width: isSmallScreen ? 32 : 40),
       ],
     );
   }
@@ -119,6 +179,9 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
   }
 
   Widget _buildTitle() {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -126,20 +189,20 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 '메인 퀘스트 생성 완료',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: isSmallScreen ? 20 : 24,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                   height: 1.4,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: isSmallScreen ? 6 : 8),
+              Text(
                 '이렇게 진행하면 될까요?',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: isSmallScreen ? 14 : 16,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textPrimary,
                   height: 1.4,
@@ -153,6 +216,26 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
   }
 
   Widget _buildMainQuestSection(MissionState missionState) {
+    final screenSize = MediaQuery.of(context).size;
+    
+    // widget.missionSteps가 있으면 로컬 데이터 우선 사용
+    if (widget.missionSteps != null && widget.missionSteps!.isNotEmpty) {
+      return Column(
+        children: [
+          for (int i = 0; i < widget.missionSteps!.length; i++) ...[
+            if (i > 0) SizedBox(height: screenSize.height < 700 ? 12 : 16),
+            _buildMainQuestListItem(
+              widget.missionSteps![i]['title'] ?? '',
+              '${widget.missionSteps![i]['order']}단계',
+              widget.missionSteps![i]['designNotes'] ?? '',
+              isFirstCard: i == 0,
+            ),
+          ],
+        ],
+      );
+    }
+    
+    // widget.missionSteps가 없으면 전역 상태 사용
     return missionState.when(
       initial: () => _buildEmptyState(),
       loading: () => const SizedBox.shrink(), // 로딩은 오버레이로 처리
@@ -184,7 +267,7 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
         return Column(
           children: [
             for (int i = 0; i < steps.length; i++) ...[
-              if (i > 0) const SizedBox(height: 16), // 카드 간 간격을 16으로 증가
+              if (i > 0) SizedBox(height: screenSize.height < 700 ? 12 : 16), // 카드 간격을 반응형으로 조정
               _buildMainQuestListItem(
                 steps[i].title,
                 '${steps[i].order}단계',
@@ -270,7 +353,7 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFF8F9FA), // 연한 회색 배경으로 메인퀘스트와 구분
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
       ),
@@ -363,6 +446,23 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
     );
   }
 
+  /// 공통 태그 위젯 생성 메서드
+  Widget _buildTag(String text, {Color? backgroundColor, Color? textColor}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? _tagDecoration.color,
+        borderRadius: _tagDecoration.borderRadius,
+      ),
+      child: Text(
+        text,
+        style: _tagTextStyle.copyWith(
+          color: textColor ?? _tagTextStyle.color,
+        ),
+      ),
+    );
+  }
+
   /// 부퀘스트 아이템 위젯
   Widget _buildSubQuestItem(String title) {
     return Row(
@@ -390,101 +490,135 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
   }
 
   Widget _buildMainQuestListItem(String title, String difficulty, String description, {bool isFirstCard = false}) {
+    // 1단계 메인퀘스트인 경우 새로운 디자인 적용
+    if (isFirstCard) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _cardColor,
+          borderRadius: _cardBorderRadius,
+          border: Border.all(color: _cardBorderColor, width: _cardBorderWidth),
+          boxShadow: _cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 상단 태그 섹션
+            Row(
+              children: [
+                // 진행 예정 태그 (파란색)
+                _buildTag(
+                  '진행 예정',
+                  backgroundColor: const Color(0xFF1976D2),
+                  textColor: Colors.white,
+                ),
+                const Spacer(),
+                // 메인 퀘스트 태그 (회색)
+                _buildTag('메인 퀘스트'),
+                const SizedBox(width: 12),
+                // 단계 태그 (회색)
+                _buildTag(difficulty),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // 메인 콘텐츠 섹션
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 텍스트 영역
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: _titleTextStyle),
+                      const SizedBox(height: 6),
+                      Text(description, style: _descriptionTextStyle),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 아이콘 (텍스트 오른쪽)
+                Container(
+                  width: _iconSize,
+                  height: _iconSize,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFCE4EC), // 연한 붉은색 배경
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.settings,
+                    size: 24,
+                    color: Color(0xFFE91E63), // 붉은색 아이콘
+                  ),
+                ),
+              ],
+            ),
+            // 첫 번째 카드에만 부퀘스트 섹션 추가
+            const SizedBox(height: 20),
+            _buildSubQuestSection(),
+          ],
+        ),
+      );
+    }
+    
+    // 기존 디자인 (2단계, 3단계 등) - 새로운 디자인으로 수정
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+        color: _cardColor,
+        borderRadius: _cardBorderRadius,
+        border: Border.all(color: _cardBorderColor, width: _cardBorderWidth),
+        boxShadow: _cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 상단 태그 섹션
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE7E7E7),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: const Text(
-                  '메인 퀘스트',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE7E7E7),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Text(
-                  difficulty,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+              // 대기 중 태그 (회색)
+              _buildTag('대기 중'),
               const Spacer(),
-              const Icon(
-                Icons.keyboard_arrow_down,
-                size: 20,
-                color: Colors.black,
-              ),
+              // 메인 퀘스트 태그 (회색) - 완전 오른쪽 정렬
+              _buildTag('메인 퀘스트'),
+              const SizedBox(width: 12),
+              // 단계 태그 (회색) - 완전 오른쪽 정렬
+              _buildTag(difficulty),
             ],
           ),
           const SizedBox(height: 12),
+          // 메인 콘텐츠 섹션
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.image, size: 24, color: Colors.grey),
-              ),
-              const SizedBox(width: 12),
+              // 텍스트 영역
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+                    Text(title, style: _titleTextStyle),
                     const SizedBox(height: 6),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                    Text(description, style: _descriptionTextStyle),
                   ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // 아이콘 (텍스트 오른쪽)
+              Container(
+                width: _iconSize,
+                height: _iconSize,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E0E0), // 연한 회색 배경
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.lock, // 자물쇠 아이콘
+                  size: 24,
+                  color: Color(0xFF666666), // 짙은 회색 아이콘
                 ),
               ),
             ],
           ),
-          // 첫 번째 카드에만 부퀘스트 섹션 추가
-          if (isFirstCard) ...[
-            const SizedBox(height: 20),
-            _buildSubQuestSection(),
-          ],
         ],
       ),
     );
@@ -533,7 +667,6 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
                 );
                 
                 if (missionData != null && missionData.id != null) {
-                  print('🔍 메인 퀘스트 1단계 ID: ${missionData.id}');
                   
                   final missionStartSuccess = await ref.read(missionNotifierProvider.notifier).startMission(missionData.id!);
                   if (!missionStartSuccess) {
@@ -545,7 +678,6 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
                     return;
                   }
                 } else {
-                  print('⚠️ 메인 퀘스트 1단계 ID를 찾을 수 없습니다');
                   return;
                 }
               }
@@ -553,11 +685,17 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
               // 온보딩 완료 상태로 설정 
               await _markOnboardingCompleted();
               
+              // 사용자 이름 가져오기
+              final authStorage = await AuthStorageService.getInstance();
+              final userName = authStorage.getNickname() ?? '';
+              
               // 다음 화면으로 이동
               if (context.mounted) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const TutorialCompletionScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => TutorialCompletionScreen(userName: userName),
+                  ),
                 );
               }
             },

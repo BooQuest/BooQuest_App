@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 
 class TutorialCompletionScreen extends StatelessWidget {
-  const TutorialCompletionScreen({super.key});
+  final String userName;
+  
+  const TutorialCompletionScreen({
+    super.key,
+    required this.userName,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -14,15 +21,17 @@ class TutorialCompletionScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenSize.width * 0.05, // 화면 너비의 5%
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 120),
-                    _buildCheckIcon(),
-                    const SizedBox(height: 40),
+                    SizedBox(height: isSmallScreen ? 80 : 120),
+                    _buildCatImage(),
+                    SizedBox(height: isSmallScreen ? 30 : 40),
                     _buildCongratulatoryText(),
-                    const SizedBox(height: 100),
+                    SizedBox(height: isSmallScreen ? 80 : 100),
                   ],
                 ),
               ),
@@ -34,18 +43,13 @@ class TutorialCompletionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCheckIcon() {
+  Widget _buildCatImage() {
     return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE0E0E0),
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(
-        Icons.check,
-        size: 50,
-        color: Colors.white,
+      width: double.infinity,
+      height: 200,
+      child: Image.asset(
+        'assets/images/login/complete.png',
+        fit: BoxFit.contain,
       ),
     );
   }
@@ -53,9 +57,9 @@ class TutorialCompletionScreen extends StatelessWidget {
   Widget _buildCongratulatoryText() {
     return Column(
       children: [
-        const Text(
-          '새로운 "소현"를 위한',
-          style: TextStyle(
+        Text(
+          '$userName님의',
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: Colors.black,
@@ -65,7 +69,7 @@ class TutorialCompletionScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         const Text(
-          '튜토리얼의 첫걸음을 응원합니다',
+          '새로운 여정을 응원해요!',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -90,17 +94,20 @@ class TutorialCompletionScreen extends StatelessWidget {
   }
 
   Widget _buildBottomBar(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
     return SafeArea(
       top: false,
       child: Padding(
         padding: EdgeInsets.only(
-          left: 20.0,
-          right: 20.0,
-          bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+          left: screenSize.width * 0.05, // 화면 너비의 5%
+          right: screenSize.width * 0.05, // 화면 너비의 5%
+          bottom: (isSmallScreen ? 12 : 16) + MediaQuery.of(context).viewInsets.bottom,
         ),
         child: SizedBox(
           width: double.infinity,
-          height: 46,
+          height: isSmallScreen ? 42 : 46,
           child: ElevatedButton(
             onPressed: () {
               // 시작하기 버튼 클릭 시 메인 화면으로 이동
@@ -111,12 +118,18 @@ class TutorialCompletionScreen extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4A4A4A),
+              backgroundColor: const Color(0xFF1976D2), // 이미지와 동일한 파란색
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               elevation: 0,
             ),
-            child: const Text('시작하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            child: Text(
+              '부퀘스트 시작하기', 
+              style: TextStyle(
+                fontSize: isSmallScreen ? 15 : 16, 
+                fontWeight: FontWeight.w500
+              )
+            ),
           ),
         ),
       ),
