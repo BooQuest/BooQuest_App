@@ -35,7 +35,9 @@ class AppConstants {
   static const String userInfoKey = 'user_info';
   
   // API 관련 (나중에 Spring API 구현시 사용)
-  static const String baseUrl = 'http://49.50.129.68:8080'; // 실제 API URL
+  // static const String baseUrl = 'http://49.50.129.68:8080'; // 실제 API URL
+  static const String baseUrl = 'https://api-dev.booquest.p-e.kr'; // 실제 API URL
+
   static const String loginEndpoint = '/api/auth/login';
   static const Duration requestTimeout = Duration(seconds: 30);
 }

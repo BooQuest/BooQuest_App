@@ -4,6 +4,7 @@ import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
 import 'package:booquest/core/navigation/transitions.dart';
+import 'package:booquest/features/recommendation/presentation/widgets/feedback_bottom_sheet.dart';
 
 
 import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
@@ -92,7 +93,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
             setState(() {
               _isLoading = false;
               _recommendations = list
-                  .map((e) => {
+                  .map((e) => <String, dynamic>{
                         'id': e.id,
                         'title': e.title,
                         'description': e.description,
@@ -109,115 +110,150 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 12),
-                        _buildTopBar(),
-                        const SizedBox(height: 16),
-                        _buildTitle(),
-                        const SizedBox(height: 20),
-                        _buildCardList(),
-                        const SizedBox(height: 50),
-                      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 실시간 반응형 값 계산 (오버플로우 방지)
+        final double screenHeight = constraints.maxHeight;
+        final double screenWidth = constraints.maxWidth;
+        
+        // 동적으로 계산되는 값들 (실시간 업데이트)
+        final double horizontalPadding = screenWidth * 0.05; // 화면 너비의 5%
+        final double topSpacing = screenHeight * 0.1; // 화면 높이의 10%
+        final double bottomSpacing = screenHeight * 0.04; // 화면 높이의 4%
+        
+        // 상단 여백 관련
+        final double topMargin = screenHeight * 0.05; // 화면 높이의 5%
+        final double titleTopSpacing = screenHeight * 0.05; // 화면 높이의 5%
+        final double titleToCardSpacing = screenHeight * 0.05; // 화면 높이의 5%
+        final double cardToBottomSpacing = screenHeight * 0.075; // 화면 높이의 7.5%
+        
+        // 하단 버튼 관련
+        final double buttonHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
+        
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: topMargin),
+                            _buildTopBar(screenWidth),
+                            SizedBox(height: titleTopSpacing),
+                            _buildTitle(screenWidth),
+                            SizedBox(height: titleToCardSpacing),
+                            _buildCardList(),
+                            SizedBox(height: cardToBottomSpacing),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    _buildBottomBar(horizontalPadding, buttonHeight),
+                  ],
                 ),
-                _buildBottomBar(),
-
-              ],
-            ),
+              ),
+              if (_isLoading) const AILoadingOverlay(
+                title: 'AI가 추천을 탐색 중...',
+                subtitle: '취향, 패턴, 목표를 분석하고 있어요',
+              ),
+            ],
           ),
-          if (_isLoading) const AILoadingOverlay(
-            title: 'AI가 추천을 탐색 중...',
-            subtitle: '취향, 패턴, 목표를 분석하고 있어요',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(double screenWidth) {
+    final double iconSize = screenWidth * 0.05; // 화면 너비의 5% (반응형 아이콘 크기)
+    final double rightPadding = screenWidth * 0.1; // 화면 너비의 10% (반응형 오른쪽 패딩)
+    final double titleFontSize = screenWidth * 0.045; // 화면 너비의 4.5% (반응형 폰트 크기)
+    
     return Row(
       children: [
         IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, 
+            size: iconSize.clamp(18.0, 24.0), // 최소 18, 최대 24로 제한
+            color: AppColors.textPrimary
+          ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
           onPressed: _handleBack,
         ),
-        const Expanded(
-          child: Center(child: Text('부업 추천 3가지', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
+        Expanded(
+          child: Center(child: Text('부업 추천 3가지', 
+            style: TextStyle(
+              fontSize: titleFontSize.clamp(16.0, 20.0), // 최소 16, 최대 20으로 제한
+              fontWeight: FontWeight.w700, 
+              color: AppColors.textPrimary
+            )
+          )),
         ),
-        const SizedBox(width: 40),
+        SizedBox(width: rightPadding),
       ],
     );
   }
 
-  Widget _buildTitle() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTitle(double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.only(left: screenWidth * 0.04), // 카드 내부 텍스트와 동일한 위치로 이동
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: RichText(
+          text: TextSpan(
+            style: TextStyle(
+              fontSize: screenWidth * 0.06, // 화면 너비의 6% (반응형 폰트 크기)
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              height: 1.4,
+            ),
             children: [
-              Text(
-                '${_characterName.isNotEmpty ? _characterName : '사용자'} 에게 딱 맞는\n부업을 3가지 추천할게',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  height: 1.4,
+              TextSpan(text: '${_characterName.isNotEmpty ? _characterName : '사용자'}님에게 딱 맞는\n'),
+              TextSpan(
+                text: '부업 3가지',
+                style: TextStyle(
+                  color: const Color(0xFF1976D2), // 파란색 강조
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                '재생성을 원하거나 맘에드는 부업을 선택해 주세요.',
+              const TextSpan(text: '를 추천할게요\n'),
+              TextSpan(
+                text: '다시 추천 받기를 원하거나 마음에 드는 부업을 선택해 주세요.',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: screenWidth * 0.04, // 화면 너비의 4% (반응형 폰트 크기)
                   fontWeight: FontWeight.w400,
-                                                  color: AppColors.textPrimary.withValues(alpha: 0.6),
-                  height: 1.4,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 39,
-          height: 39,
-          child: SvgPicture.asset(
-            'assets/images/characters/basic_icon_1.svg',
-            fit: BoxFit.contain,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildCardList() {
     // 전달받은 recommendations 데이터 사용
     if (_recommendations.isEmpty) {
-      return const Center(
-        child: Text(
-          '부업 추천 데이터가 없습니다.',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-        ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final double screenWidth = constraints.maxWidth;
+          final double fontSize = screenWidth * 0.04; // 화면 너비의 4% (반응형 폰트 크기)
+          
+          return Center(
+            child: Text(
+              '부업 추천 데이터가 없습니다.',
+              style: TextStyle(
+                fontSize: fontSize.clamp(14.0, 18.0), // 최소 14, 최대 18으로 제한
+                color: Colors.grey,
+              ),
+            ),
+          );
+        },
       );
     }
 
@@ -279,11 +315,13 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return _FeedbackBottomSheet(
+        return FeedbackBottomSheet(
           sideJobIndex: sideJobIndex,
           onApply: (List<String> selectedReasons, String additionalComment) async {
-            await _handleFeedbackSubmit(sideJobIndex, selectedReasons, additionalComment);
+            // 팝업 닫기
             Navigator.of(context).pop();
+            // API 처리 시작
+            await _handleFeedbackSubmit(sideJobIndex, selectedReasons, additionalComment);
           },
         );
       },
@@ -300,7 +338,10 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     final sideJobId = int.tryParse(rec['id']?.toString() ?? '') ?? 0;
     if (sideJobId == 0) return;
 
-    setState(() { _isLoading = true; });
+    // 로딩 상태 시작
+    if (mounted) {
+      setState(() { _isLoading = true; });
+    }
 
     final container = ProviderContainer();
     try {
@@ -325,18 +366,8 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
         characterName: characterName,
       );
 
-      // 영어 reason 키로 매핑 (이미 영어 키로 저장 중이지만 안전하게 보정)
-      final mappedReasons = selectedReasons.map((key) {
-        switch (key) {
-          case 'low_profitability': return 'LOW_PROFITABILITY';
-          case 'not_interesting': return 'NO_INTEREST';
-          case 'personality_mismatch': return 'NOT_MY_STYLE';
-          case 'too_time_consuming': return 'TAKES_TOO_MUCH_TIME';
-          case 'not_capable': return 'NOT_FEASIBLE';
-          case 'high_initial_cost': return 'TOO_EXPENSIVE';
-          default: return key.toString().toUpperCase();
-        }
-      }).toList();
+      // frontend key와 API request value를 동일하게 사용
+      final mappedReasons = selectedReasons.toList();
 
       final usecase = container.read(regenerateSingleSideJobProvider);
       final result = await usecase(
@@ -359,16 +390,33 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
           if (mounted) {
             setState(() {
               _isLoading = false;
-              // 해당 카드만 새 데이터로 교체
-              _recommendations[sideJobIndex] = {
-                'id': entity.id,
+              // 해당 카드만 새 데이터로 교체 (타입 안전하게 처리)
+              _recommendations[sideJobIndex] = <String, dynamic>{
+                'id': entity.id, // String으로 저장 (API 응답과 일치)
                 'title': entity.title,
                 'description': entity.description,
               };
+              
+              print('✅ 재생성 완료 - 카드 인덱스: $sideJobIndex, 새 ID: ${entity.id}');
             });
+            // 성공 메시지 표시
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('부업이 성공적으로 재생성되었습니다!'),
+                backgroundColor: Colors.green,
+              ),
+            );
           }
         },
       );
+    } catch (e) {
+      // 예외 발생 시에도 로딩 상태 해제
+      if (mounted) {
+        setState(() { _isLoading = false; });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('재생성 중 오류가 발생했습니다: $e')),
+        );
+      }
     } finally {
       container.dispose();
     }
@@ -468,29 +516,40 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(double horizontalPadding, double buttonHeight) {
     return SafeArea(
       top: false,
       child: Padding(
         padding: EdgeInsets.only(
-          left: _horizontalPadding,
-          right: _horizontalPadding,
+          left: horizontalPadding,
+          right: horizontalPadding,
           bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: SizedBox(
+        child: Container(
           width: double.infinity,
-          height: 46,
-          child: ElevatedButton(
-            onPressed: () async {
-              await _handleRegenerate();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.buttonActive,
-              foregroundColor: AppColors.buttonText,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              elevation: 0,
+          height: buttonHeight.clamp(46.0, 60.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1976D2),
+            borderRadius: BorderRadius.circular(buttonHeight * 0.26),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () async {
+                await _handleRegenerate();
+              },
+              borderRadius: BorderRadius.circular(buttonHeight * 0.26),
+              child: Center(
+                child: Text(
+                  '전체 재생성하기',
+                  style: TextStyle(
+                    color: AppColors.buttonText,
+                    fontSize: buttonHeight * 0.39,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ),
-            child: const Text('전체 재생성하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
           ),
         ),
       ),
@@ -557,7 +616,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
             setState(() { _isLoading = false; });
             // 화면의 카드 리스트 데이터 업데이트
             _recommendations = list
-                .map((e) => {
+                .map((e) => <String, dynamic>{
                       'id': e.id,
                       'title': e.title,
                       'description': e.description,
@@ -565,6 +624,14 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
                 .toList();
             // setState로 UI 갱신
             setState(() {});
+            
+            // 성공 메시지 표시
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('전체 부업이 성공적으로 재생성되었습니다!'),
+                backgroundColor: Colors.green,
+              ),
+            );
           }
         },
       );
@@ -595,369 +662,117 @@ class _SideJobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.cardBorder, 
-          width: 1
-        ),
-        boxShadow: [
-          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double screenWidth = constraints.maxWidth;
+        final double cardPadding = screenWidth * 0.04; // 화면 너비의 4% (반응형 패딩)
+        final double titleFontSize = screenWidth * 0.045; // 화면 너비의 4.5% (반응형 폰트 크기)
+        final double subtitleFontSize = screenWidth * 0.035; // 화면 너비의 3.5% (반응형 폰트 크기)
+        final double buttonFontSize = screenWidth * 0.035; // 화면 너비의 3.5% (반응형 폰트 크기)
+        final double buttonHeight = screenWidth * 0.12; // 화면 너비의 12% (반응형 버튼 높이)
+        
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.cardBorder, 
+              width: 1
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              item.title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              item.subtitle,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
+          child: Padding(
+            padding: EdgeInsets.all(cardPadding.clamp(12.0, 20.0)), // 최소 12, 최대 20으로 제한
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 40,
-                    child: OutlinedButton(
-                      onPressed: onRecommendAgain,
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF5F5F5),
-                        foregroundColor: const Color(0xFF666666),
-                        side: const BorderSide(color: Color(0xFFE0E0E0)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        '다시 추천받기',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+                Text(
+                  item.title,
+                  style: TextStyle(
+                    fontSize: titleFontSize.clamp(16.0, 22.0), // 최소 16, 최대 22로 제한
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SizedBox(
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed: onSelect,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.buttonActive,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        '선택하기',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                SizedBox(height: cardPadding * 0.5), // 패딩의 절반만큼 간격
+                Text(
+                  item.subtitle,
+                  style: TextStyle(
+                    fontSize: subtitleFontSize.clamp(12.0, 16.0), // 최소 12, 최대 16으로 제한
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondary,
+                    height: 1.4,
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-
-}
-
-/// 피드백 수집 바텀 시트
-class _FeedbackBottomSheet extends StatefulWidget {
-  final int sideJobIndex;
-  final Future<void> Function(List<String> selectedReasons, String additionalComment) onApply;
-
-  const _FeedbackBottomSheet({
-    required this.sideJobIndex,
-    required this.onApply,
-  });
-
-  @override
-  State<_FeedbackBottomSheet> createState() => _FeedbackBottomSheetState();
-}
-
-class _FeedbackBottomSheetState extends State<_FeedbackBottomSheet> {
-  final Set<String> _selectedReasons = <String>{};
-  final TextEditingController _commentController = TextEditingController();
-  bool _isSubmitting = false;
-
-  static const List<Map<String, dynamic>> _feedbackOptions = [
-    {'label': '수익성이 낮아보여요', 'key': 'low_profitability'},
-    {'label': '흥미가 생기지 않아요', 'key': 'not_interesting'},
-    {'label': '성향과 맞지 않아요', 'key': 'personality_mismatch'},
-    {'label': '시간이 너무 많이 필요해요', 'key': 'too_time_consuming'},
-    {'label': '할 수 있는 일이 아니에요', 'key': 'not_capable'},
-    {'label': '초기 비용이 부담돼요', 'key': 'high_initial_cost'},
-  ];
-
-  @override
-  void dispose() {
-    _commentController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final double kb = MediaQuery.of(context).viewInsets.bottom;
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      child: SafeArea(
-        child: Stack(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: kb > 0 ? kb : 0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                SizedBox(height: cardPadding * 1.25), // 패딩의 1.25배만큼 간격
+                Row(
                   children: [
-                    // 상단 핸들 바
-                    Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(top: 12, bottom: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E0E0),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-
-                    // 제목 및 설명
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              '더 정확한 추천을 위해,\n어떤 점이 아쉬웠나요?',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                                height: 1.3,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '아쉬웠던 점을 모두 선택해주세요.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.textPrimary.withValues(alpha: 0.6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // 피드백 옵션들
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          // 2열 3행으로 배치
-                          for (int row = 0; row < 3; row++)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Row(
-                                children: [
-                                  for (int col = 0; col < 2; col++)
-                                    Expanded(
-                                      child: Padding(
-                                        padding: EdgeInsets.only(
-                                          right: col == 0 ? 6 : 0,
-                                          left: col == 1 ? 6 : 0,
-                                        ),
-                                        child: _buildFeedbackOption(_feedbackOptions[row * 2 + col]),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // 추가 코멘트 입력 필드
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: TextField(
-                          controller: _commentController,
-                          maxLines: 3,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => FocusScope.of(context).unfocus(),
-                          decoration: const InputDecoration(
-                            hintText: '추가로 고려할 점이 있다면 작성해주세요.',
-                            hintStyle: TextStyle(fontSize: 14, color: Color(0xFF999999)),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.all(16),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // 적용하기 버튼
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
+                    Expanded(
                       child: SizedBox(
-                        width: double.infinity,
-                        height: 46,
-                        child: ElevatedButton(
-                          onPressed: _selectedReasons.isNotEmpty && !_isSubmitting
-                              ? () async {
-                                  setState(() {
-                                    _isSubmitting = true;
-                                  });
-                                  try {
-                                    await widget.onApply(
-                                        _selectedReasons.toList(), _commentController.text);
-                                  } finally {
-                                    if (mounted) {
-                                      setState(() {
-                                        _isSubmitting = false;
-                                      });
-                                    }
-                                  }
-                                }
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _selectedReasons.isNotEmpty
-                                ? const Color(0xFF666666)
-                                : const Color(0xFFE0E0E0),
-                            foregroundColor: Colors.white,
+                        height: buttonHeight.clamp(36.0, 48.0), // 최소 36, 최대 48으로 제한
+                        child: OutlinedButton(
+                          onPressed: onRecommendAgain,
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF5F5F5),
+                            foregroundColor: const Color(0xFF666666),
+                            side: const BorderSide(color: Color(0xFFE0E0E0)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            elevation: 0,
                           ),
-                          child: const Text(
-                            '적용하기',
+                          child: Text(
+                            '다시 추천받기',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: buttonFontSize.clamp(12.0, 16.0), // 최소 12, 최대 16으로 제한
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                       ),
                     ),
+                    SizedBox(width: cardPadding * 0.75), // 패딩의 0.75배만큼 간격
+                    Expanded(
+                      child: SizedBox(
+                        height: buttonHeight.clamp(36.0, 48.0), // 최소 36, 최대 48으로 제한
+                                                  child: ElevatedButton(
+                            onPressed: onSelect,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF424242), // 더 진한 회색으로 변경
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              '선택하기',
+                              style: TextStyle(
+                                fontSize: buttonFontSize.clamp(12.0, 16.0), // 최소 12, 최대 16으로 제한
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
+              ],
             ),
-            // 로딩 오버레이
-            if (_isSubmitting)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeedbackOption(Map<String, dynamic> option) {
-    final String label = option['label'];
-    final String key = option['key'];
-    final bool isSelected = _selectedReasons.contains(key);
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (isSelected) {
-            _selectedReasons.remove(key);
-          } else {
-            _selectedReasons.add(key);
-          }
-        });
+          ),
+        );
       },
-      child: Container(
-        height: 40,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF666666) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF666666) : const Color(0xFFE0E0E0),
-            width: 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: isSelected ? Colors.white : const Color(0xFF666666),
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
     );
   }
+
+
 }
+
+
 
 
