@@ -25,6 +25,12 @@
 -keep class com.kakao.sdk.** { *; }
 -dontwarn com.kakao.**
 
+# Naver SDK ProGuard rules
+-keep class com.navercorp.nid.** { *; }
+-keep class com.nhn.android.naverlogin.** { *; }
+-dontwarn com.navercorp.nid.**
+-dontwarn com.nhn.android.naverlogin.**
+
 # Keep native methods
 -keepclasseswithmembernames class * {
     native <methods>;
