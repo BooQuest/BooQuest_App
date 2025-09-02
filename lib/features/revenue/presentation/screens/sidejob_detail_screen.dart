@@ -159,10 +159,6 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 상단 바 구성
   Widget _buildTopBar(BuildContext context, SideJobSummaryState summaryState) {
-    // 반응형을 위한 화면 크기 계산
-    final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.width < 400;
-    
     String title = '로딩 중...';
     
     summaryState.when(
@@ -173,43 +169,58 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     );
 
     return Container(
-      color: Colors.white, // 최상단 바는 흰색 배경
-      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20, vertical: isSmallScreen ? 14 : 16),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // 뒤로가기 시 콜백 호출
-              widget.onBack?.call();
-            },
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.black, // 검은색으로 변경
-              size: isSmallScreen ? 18 : 20,
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 16 : 18,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black, // 검은색으로 변경
+      color: Colors.white, 
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        height: 48,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 뒤로가기 버튼 (왼쪽)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // 뒤로가기 시 콜백 호출
+                    widget.onBack?.call();
+                  },
+                  icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
               ),
             ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.settings,
-              color: Colors.black, // 검은색으로 변경
-              size: isSmallScreen ? 18 : 20,
+            // 제목 (중앙)
+            Center(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
             ),
-          ),
-        ],
+            // 설정 버튼 (오른쪽)
+            Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                width: 40,
+                height: 40,
+                child: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.settings, color: AppColors.textPrimary),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

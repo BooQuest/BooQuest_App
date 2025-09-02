@@ -659,26 +659,38 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
                   return;
                 }
                 
-                // 부업 선택 성공 후, 메인 퀘스트 1단계 시작 API 호출
+                // 부업 선택 성공 후 sideJobId를 storage에 저장
+                final authStorage = await AuthStorageService.getInstance();
+                await authStorage.setSideJobId(widget.selectedSideJobId!);
+                
+                // 부업 선택 성공 후, 미션 데이터 로드
+                await ref.read(missionNotifierProvider.notifier).getMissionsBySideJobId(widget.selectedSideJobId!);
+                
+                // 미션 데이터 로드 완료 후 상태 확인
                 final missionState = ref.read(missionNotifierProvider);
                 final missionData = missionState.maybeWhen(
                   success: (steps) => steps.isNotEmpty ? steps.first : null,
                   orElse: () => null,
                 );
                 
-                if (missionData != null && missionData.id != null) {
+                if (missionData != null) {
+                  final missionStartSuccess = await ref.read(missionNotifierProvider.notifier).startMission(missionData.id);
                   
-                  final missionStartSuccess = await ref.read(missionNotifierProvider.notifier).startMission(missionData.id!);
                   if (!missionStartSuccess) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('미션 시작에 실패했습니다. 다시 시도해주세요.')),
                       );
                     }
-                    return;
+                    return; // 실패 시 온보딩 중단
                   }
                 } else {
-                  return;
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('미션 데이터를 찾을 수 없습니다. 다시 시도해주세요.')),
+                    );
+                  }
+                  return; // 미션 데이터 없으면 온보딩 중단
                 }
               }
               
@@ -723,9 +735,9 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
       final onboardingStorage = await OnboardingStorageService.getInstance();
       await onboardingStorage.clearAllData();
       
-      print('✅ 온보딩 완료 - 토큰을 제외한 모든 로컬 데이터 초기화 완료');
+      // 온보딩 완료 처리 성공
     } catch (error) {
-      print('❌ 온보딩 완료 처리 실패: $error');
+      // 온보딩 완료 처리 실패 (에러 무시하고 계속 진행)
     }
   }
 }
