@@ -47,6 +47,8 @@
 	<true/>
 	
 	<!-- 카카오 로그인 설정 -->
+	<key>KakaoAppKey</key>
+	<string>635d855eae5acd47eaaaf28fc6b49ca8</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

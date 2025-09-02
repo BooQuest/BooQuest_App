@@ -57,25 +57,53 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// MyRecord 상세 화면 내용만 구성 (IndexedStack 내부용)
   Widget _buildMyRecordDetailContent(SideJobSummaryState summaryState) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Column(
       children: [
         _buildTopBar(context, summaryState),
         _buildHeaderSection(summaryState),
         Expanded(
           child: Container(
-            decoration: const BoxDecoration(
-              color: AppColors.white,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+                topLeft: Radius.circular(isSmallScreen ? 24 : 30),
+                topRight: Radius.circular(isSmallScreen ? 24 : 30),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: isSmallScreen ? 16 : 20,
+                  offset: const Offset(0, -5),
+                ),
+              ],
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildStatsSection(summaryState),
-                ],
-              ),
+            child: Column(
+              children: [
+                // 드래그 핸들 (팝업 스타일)
+                Container(
+                  margin: EdgeInsets.only(top: isSmallScreen ? 10 : 12, bottom: isSmallScreen ? 6 : 8),
+                  width: isSmallScreen ? 36 : 40,
+                  height: isSmallScreen ? 3 : 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0), // 회색으로 변경
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _buildStatsSection(summaryState),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -97,8 +125,18 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     final summaryState = ref.watch(sideJobSummaryNotifierProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white, 
+              Color(0xFFE6F3FF),
+            ],
+          ),
+        ),
+        child: SafeArea(
         child: IndexedStack(
           index: _currentIndex,
           children: [
@@ -110,6 +148,7 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
             _buildMyRecordDetailContent(summaryState),
           ],
         ),
+        ),
       ),
       bottomNavigationBar: CommonBottomNavigation(
         currentIndex: _currentIndex,
@@ -120,6 +159,10 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 상단 바 구성
   Widget _buildTopBar(BuildContext context, SideJobSummaryState summaryState) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     String title = '로딩 중...';
     
     summaryState.when(
@@ -130,8 +173,8 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     );
 
     return Container(
-      color: const Color(0xFF8A8A8A),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      color: Colors.white, // 최상단 바는 흰색 배경
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20, vertical: isSmallScreen ? 14 : 16),
       child: Row(
         children: [
           IconButton(
@@ -140,30 +183,30 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
               // 뒤로가기 시 콜백 호출
               widget.onBack?.call();
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_ios,
-              color: Colors.white,
-              size: 20,
+              color: Colors.black, // 검은색으로 변경
+              size: isSmallScreen ? 18 : 20,
             ),
           ),
           Expanded(
             child: Center(
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 16 : 18,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: Colors.black, // 검은색으로 변경
                 ),
               ),
             ),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(
+            icon: Icon(
               Icons.settings,
-              color: Colors.white,
-              size: 20,
+              color: Colors.black, // 검은색으로 변경
+              size: isSmallScreen ? 18 : 20,
             ),
           ),
         ],
@@ -173,11 +216,22 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 헤더 섹션 구성
   Widget _buildHeaderSection(SideJobSummaryState summaryState) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
       decoration: const BoxDecoration(
-        color: Color(0xFF8A8A8A),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFEFEFF), // 거의 흰색
+            Color(0xFFE6F3FF), // 연한 하늘색
+          ],
+        ),
       ),
       child: summaryState.when(
         initial: () => _buildLoadingHeader(),
@@ -190,48 +244,52 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 로딩 중 헤더
   Widget _buildLoadingHeader() {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '지금까지',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: isSmallScreen ? 18 : 20,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        const Text(
+        Text(
           '로딩 중...',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: isSmallScreen ? 18 : 20,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
-        const Text(
+        SizedBox(height: isSmallScreen ? 10 : 12),
+        Text(
           '0원 벌었어요!',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: isSmallScreen ? 26 : 30,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isSmallScreen ? 16 : 20),
         Row(
           children: [
             _buildTag('로딩 중...'),
-            const SizedBox(width: 12),
+            SizedBox(width: isSmallScreen ? 10 : 12),
             _buildTag('로딩 중...'),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isSmallScreen ? 16 : 20),
         Align(
           alignment: Alignment.centerRight,
           child: SizedBox(
-            width: 140,
-            height: 160,
+            width: isSmallScreen ? 140 : 160,
+            height: isSmallScreen ? 160 : 180,
             child: const Center(child: CircularProgressIndicator()),
           ),
         ),
@@ -241,49 +299,53 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 성공 헤더
   Widget _buildSuccessHeader(SideJobSummaryEntity data) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '지금까지',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: isSmallScreen ? 18 : 20,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
         Text(
           '${data.userSideJob.title}로',
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: isSmallScreen ? 18 : 20,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: isSmallScreen ? 10 : 12),
         Text(
           '${_formatCurrency(data.totalIncome)}원 벌었어요!',
-          style: const TextStyle(
-            fontSize: 28,
+          style: TextStyle(
+            fontSize: isSmallScreen ? 26 : 30,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isSmallScreen ? 16 : 20),
         Row(
           children: [
             _buildTag(data.period),
-            const SizedBox(width: 12),
+            SizedBox(width: isSmallScreen ? 10 : 12),
             //_buildTag('경제·사회·재테크'),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isSmallScreen ? 16 : 20),
         Align(
           alignment: Alignment.centerRight,
           child: SvgPicture.asset(
             'assets/images/characters/sidejob_test2.svg',
-            width: 140,
-            height: 160,
+            width: isSmallScreen ? 140 : 160,
+            height: isSmallScreen ? 160 : 180,
           ),
         ),
       ],
@@ -292,57 +354,61 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 에러 헤더
   Widget _buildErrorHeader(String message) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '지금까지',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: isSmallScreen ? 18 : 20,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        const Text(
+        Text(
           '부업 프로젝트로',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: isSmallScreen ? 18 : 20,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
-        const Text(
+        SizedBox(height: isSmallScreen ? 10 : 12),
+        Text(
           '0원 벌었어요!',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: isSmallScreen ? 26 : 30,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isSmallScreen ? 16 : 20),
         Row(
           children: [
             _buildTag('에러 발생'),
-            const SizedBox(width: 12),
+            SizedBox(width: isSmallScreen ? 10 : 12),
             _buildTag('데이터 없음'),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isSmallScreen ? 16 : 20),
         Align(
           alignment: Alignment.centerRight,
           child: Container(
-            width: 140,
-            height: 160,
+            width: isSmallScreen ? 140 : 160,
+            height: isSmallScreen ? 160 : 180,
             decoration: BoxDecoration(
               color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(
                 Icons.error_outline,
                 color: Colors.red,
-                size: 48,
+                size: isSmallScreen ? 40 : 48,
               ),
             ),
           ),
@@ -353,16 +419,21 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 태그 위젯
   Widget _buildTag(String text) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 10 : 12, vertical: isSmallScreen ? 5 : 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFE0E0E0),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(isSmallScreen ? 14 : 16),
+        border: Border.all(color: Colors.black, width: 1),
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
+        style: TextStyle(
+          fontSize: isSmallScreen ? 11 : 12,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
         ),
@@ -372,8 +443,12 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
 
   /// 통계 섹션 구성
   Widget _buildStatsSection(SideJobSummaryState summaryState) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 40), // 하단 패딩 증가
+      padding: EdgeInsets.fromLTRB(isSmallScreen ? 20 : 24, isSmallScreen ? 12 : 16, isSmallScreen ? 20 : 24, 0), 
       child: Column(
         children: [
           // 총 수익 카드
@@ -389,7 +464,7 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
             showAddButton: true,
             summaryState: summaryState,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isSmallScreen ? 12 : 16),
           // 하단 두 카드 (가로 배치)
           Row(
             children: [
@@ -406,7 +481,7 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
                   showAddButton: false,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isSmallScreen ? 16 : 20), 
               Expanded(
                 child: _buildStatCard(
                   label: '첫 수익화까지',
@@ -435,12 +510,23 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     required bool showAddButton,
     SideJobSummaryState? summaryState,
   }) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5), // 밝은 회색 배경
-        borderRadius: BorderRadius.circular(20), // 더 둥근 모서리
+        color: const Color(0xFFF8F9FA), 
+        borderRadius: BorderRadius.circular(isSmallScreen ? 16 : 20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: isSmallScreen ? 8 : 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,9 +536,9 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 14 : 16, 
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -484,41 +570,53 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
                     );
                   },
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: isSmallScreen ? 32 : 36,
+                    height: isSmallScreen ? 32 : 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE0E0E0), // 밝은 회색 원형 버튼
+                      color: const Color(0xFF1976D2), // 파란색으로 변경
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.add,
-                      color: AppColors.textPrimary,
-                      size: 20,
+                      color: Colors.white,
+                      size: isSmallScreen ? 20 : 22, 
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 12),
-          if (!showAddButton) ...[
-            Container(
-              width: 24,
-              height: 24,
-              decoration: const BoxDecoration(
-                color: Color(0xFF8A8A8A), // 어두운 회색 원형 아이콘
-                shape: BoxShape.circle,
+          SizedBox(height: isSmallScreen ? 14 : 16),
+          if (!showAddButton) 
+            Row(
+              children: [
+                Container(
+                  width: isSmallScreen ? 24 : 28,
+                  height: isSmallScreen ? 24 : 28,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6F3FF), 
+                    borderRadius: BorderRadius.all(Radius.circular(isSmallScreen ? 6 : 8)),
+                  ),
+                ),
+                SizedBox(width: isSmallScreen ? 8 : 10),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 20 : 24,
+                    fontWeight: FontWeight.w800, 
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 20 : 24,
+                fontWeight: FontWeight.w800, 
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 12),
-          ],
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
         ],
       ),
     );
