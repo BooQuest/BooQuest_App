@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/features/main/infrastructure/providers/main_providers.dart';
-import 'package:booquest/features/main/application/states/character_growth_state.dart';
-import 'package:booquest/features/main/application/states/mission_progress_state.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
 
@@ -17,8 +14,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool _stageExpanded = false;
-  String? _userNickname;
 
   @override
   void initState() {
@@ -32,7 +27,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       final authStorage = await AuthStorageService.getInstance();
       final sideJobId = authStorage.getSideJobId();
-      _userNickname = authStorage.getNickname();
       
       if (sideJobId != null) {
         // sideJobId가 있으면 두 API 동시 호출
@@ -52,12 +46,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     // CharacterGrowthState와 MissionProgressState를 관찰합니다
     final characterGrowthState = ref.watch(characterGrowthNotifierProvider);
     final missionProgressState = ref.watch(missionProgressNotifierProvider);
     
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: const Color(0xFFF8F9FA), // 전체 배경색을 연한 회색으로 변경
       body: SafeArea(
         child: Column(
           children: [
@@ -65,32 +63,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 12),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.zero, // 패딩 제거하여 카드가 화면 전체 너비 사용
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Greeting bubble - 사용자 이름을 동적으로 표시
-                    characterGrowthState.maybeWhen(
-                      success: (data) => _SpeechBubble(text: '${_userNickname ?? '사용자'}님, 오늘의 퀘스트를 시작해 볼까요?'),
-                      orElse: () => const _SpeechBubble(text: '오늘의 퀘스트를 시작해 볼까요?'),
+                    // TIP 말풍선 추가 (인사말 말풍선 제거)
+                    _TipBubble(
+                      text: '사람들이 가장 많이 접속하는 시간 ⏰ (저녁 7시~10시)에 콘텐츠를 올려보세요',
+                      isSmallScreen: isSmallScreen,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: isSmallScreen ? 0 : 0), // 간격 0으로 줄임
+                    
                     // Boo avatar placeholder
                     Container(
-                      width: 220,
-                      height: 220,
+                      width: isSmallScreen ? 250 : 300, // 반응형 크기 조정
+                      height: isSmallScreen ? 250 : 300, // 반응형 크기 조정
                       child: Image.asset(
-                        'assets/images/characters/boo.png',
-                        width: 100,
-                        height: 100,
+                        'assets/images/characters/Character1.png', // 이미지 변경
+                        width: isSmallScreen ? 250 : 300, // 반응형 크기 조정
+                        height: isSmallScreen ? 250 : 300, // 반응형 크기 조정
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
                           print('이미지 로드 에러: $error');
-                          return const Icon(Icons.pets, size: 100, color: AppColors.textHint);
+                          return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
                         },
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: isSmallScreen ? 6 : 8), // 반응형 간격
                     // Level badge and name - 레벨과 이름을 동적으로 표시
                     characterGrowthState.maybeWhen(
                       success: (data) => Row(
@@ -99,23 +98,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEDEDED),
+                              color: const Color(0xFF1976D2), // 파란색 배경으로 복구
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               'Lv.${data.level}',
-                              style: const TextStyle(
-                                fontSize: 12,
+                              style: TextStyle(
+                                fontSize: isSmallScreen ? 11 : 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: Colors.white, // 흰색 텍스트로 복구
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             data.name,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 16 : 18,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
@@ -128,23 +127,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEDEDED),
+                              color: const Color(0xFF1976D2), // 파란색 배경으로 복구
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
+                            child: Text(
                               '',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: isSmallScreen ? 11 : 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: Colors.white, // 흰색 텍스트로 복구
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Text(
+                          Text(
                             '',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: isSmallScreen ? 16 : 18,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
@@ -152,17 +151,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    SizedBox(height: isSmallScreen ? 20 : 28), // 반응형 간격
 
                     // Growth section container
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE9E9E9),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white, // 흰색 배경으로 변경
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        padding: EdgeInsets.all(isSmallScreen ? 20 : 24), // 카드 패딩 증가
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -172,16 +178,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   child: characterGrowthState.maybeWhen(
                                     success: (data) => Text(
                                       '${data.name} 성장률',
-                                      style: const TextStyle(
-                                        fontSize: 16,
+                                      style: TextStyle(
+                                        fontSize: isSmallScreen ? 18 : 20, // 텍스트 크기 증가
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.textPrimary,
                                       ),
                                     ),
-                                    orElse: () => const Text(
+                                    orElse: () => Text(
                                       '성장률',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: isSmallScreen ? 18 : 20, // 텍스트 크기 증가
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.textPrimary,
                                       ),
@@ -191,7 +197,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 const Icon(Icons.chevron_right, color: AppColors.textPrimary),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: isSmallScreen ? 20 : 24), // 간격 증가
 
                             // Level progress card - 실제 경험치 데이터를 사용
                             characterGrowthState.maybeWhen(
@@ -203,19 +209,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   border: Border.all(color: AppColors.cardBorder, width: 1),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: EdgeInsets.all(isSmallScreen ? 16 : 20), 
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         children: [
-                                          _LevelChip(label: 'Lv.${data.level}'),
+                                          _LevelChip(label: 'Lv.${data.level}', isSmallScreen: isSmallScreen),
                                           const SizedBox(width: 10),
                                           Expanded(
                                             child: Text(
                                               '레벨업까지 ${data.requiredExpForNextLevel - data.currentExp}EXP 남았어요',
-                                              style: const TextStyle(
-                                                fontSize: 16,
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 16 : 18, 
                                                 fontWeight: FontWeight.w700,
                                                 color: AppColors.textPrimary,
                                               ),
@@ -223,10 +229,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 12),
+                                      SizedBox(height: isSmallScreen ? 14 : 16), 
                                       _ExpBar(
                                         currentExp: data.currentExp,
                                         requiredExp: data.requiredExpForNextLevel,
+                                        isSmallScreen: isSmallScreen,
                                       ),
                                     ],
                                   ),
@@ -292,41 +299,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ),
 
-                            const SizedBox(height: 12),
+                            SizedBox(height: isSmallScreen ? 10 : 12), // 반응형 간격
 
                             // Stage card - 미션 진행 상황 데이터를 사용
                             missionProgressState.maybeWhen(
                               success: (data) => Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // 상단 제목과 자세히보기 버튼
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        '퀘스트 진행율',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          // TODO: 자세히보기 페이지로 이동
-                                        },
-                                        child: const Text(
-                                          '자세히보기 >',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  // 상단 제목만 표시 (자세히보기와 화살표 아이콘 제거)
+                                  Text(
+                                    '퀘스트 진행률',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 18 : 20, // 텍스트 크기 증가
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textPrimary,
+                                    ),
                                   ),
-                                  const SizedBox(height: 12),
+                                  SizedBox(height: isSmallScreen ? 20 : 24), // 간격 증가
                                   // 퀘스트 진행 카드
                                   Container(
                                     width: double.infinity,
@@ -336,45 +325,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       border: Border.all(color: AppColors.cardBorder, width: 1),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(16),
+                                      padding: EdgeInsets.all(isSmallScreen ? 16 : 20), 
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          // 단계 태그
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFEDEDED),
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              '${data.currentMissionOrder}단계',
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppColors.textPrimary,
+                                          // 단계 태그와 퀘스트 제목을 가로로 배치
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              // 단계 태그
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFF2C2C2C),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: Text(
+                                                  '${data.currentMissionOrder}단계',
+                                                  style: TextStyle(
+                                                    fontSize: isSmallScreen ? 12 : 13, 
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white, // 흰색 텍스트로 변경
+                                                  ),
+                                                ),
                                               ),
-                                            ),
+                                              const SizedBox(width: 12),
+                                              // 퀘스트 제목
+                                              Expanded(
+                                                child: Text(
+                                                  data.currentMissionTitle,
+                                                  style: TextStyle(
+                                                    fontSize: isSmallScreen ? 18 : 20,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: AppColors.textPrimary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(height: 12),
-                                          // 퀘스트 제목
-                                          Text(
-                                            data.currentMissionTitle,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 12),
-                                          // 진행률 바와 퍼센트
+                                          SizedBox(height: isSmallScreen ? 14 : 16), 
+                                                                                    // 진행률 바와 퍼센트
                                           Row(
                                             children: [
                                               Expanded(
                                                 child: Container(
-                                                  height: 8,
+                                                  height: isSmallScreen ? 6 : 8, 
                                                   decoration: BoxDecoration(
-                                                    color: const Color(0xFFEDEDED),
+                                                    color: const Color(0xFFE6F3FF),
                                                     borderRadius: BorderRadius.circular(4),
                                                   ),
                                                   child: FractionallySizedBox(
@@ -382,7 +379,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                     widthFactor: data.missionStepProgressPercentage / 100.0,
                                                     child: Container(
                                                       decoration: BoxDecoration(
-                                                        color: AppColors.primary,
+                                                        color: const Color(0xFF4A90E2),
                                                         borderRadius: BorderRadius.circular(4),
                                                       ),
                                                     ),
@@ -392,8 +389,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               const SizedBox(width: 12),
                                               Text(
                                                 '${data.missionStepProgressPercentage.toInt()}%',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
+                                                style: TextStyle(
+                                                  fontSize: isSmallScreen ? 12 : 14,
                                                   fontWeight: FontWeight.w700,
                                                   color: AppColors.textPrimary,
                                                 ),
@@ -410,7 +407,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    '퀘스트 진행율',
+                                    '퀘스트 진행률',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
@@ -438,7 +435,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    '퀘스트 진행율',
+                                    '퀘스트 진행률',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
@@ -486,7 +483,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    '퀘스트 진행율',
+                                    '퀘스트 진행률',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
@@ -516,7 +513,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: isSmallScreen ? 20 : 24), // 반응형 간격
                   ],
                 ),
               ),
@@ -571,32 +568,75 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _SpeechBubble extends StatelessWidget {
+class _TipBubble extends StatelessWidget {
   final String text;
-  const _SpeechBubble({required this.text});
+  final bool isSmallScreen;
+  const _TipBubble({required this.text, required this.isSmallScreen});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          width: MediaQuery.of(context).size.width * (isSmallScreen ? 0.7 : 0.6), // 반응형 너비
+          padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 16, vertical: isSmallScreen ? 10 : 12), // 반응형 패딩
           decoration: BoxDecoration(
-            color: const Color(0xFFEDEDED),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // TIP 태그
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 6 : 8, vertical: isSmallScreen ? 3 : 4), // 반응형 패딩
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1976D2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'TIP',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 9 : 10, // 반응형 폰트 크기
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 6 : 8), // 반응형 간격
+              // 텍스트를 2줄로 배치
+              Text(
+                '사람들이 가장 많이 접속하는 시간 ⏰',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 12 : 13, // 반응형 폰트 크기
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                  height: 1.3,
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 1 : 2), // 반응형 간격
+              Text(
+                '(저녁 7시~10시)에 콘텐츠를 올려보세요',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 12 : 13, // 반응형 폰트 크기
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                  height: 1.3,
+                ),
+              ),
+            ],
           ),
         ),
-        // Tail
+        // 말풍선 꼬리 추가
         CustomPaint(
-          painter: _BubbleTailPainter(),
+          painter: _TipBubbleTailPainter(),
           size: const Size(20, 10),
         ),
       ],
@@ -604,10 +644,10 @@ class _SpeechBubble extends StatelessWidget {
   }
 }
 
-class _BubbleTailPainter extends CustomPainter {
+class _TipBubbleTailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFFEDEDED);
+    final paint = Paint()..color = Colors.white;
     final path = Path()
       ..moveTo(0, 0)
       ..lineTo(size.width / 2, size.height)
@@ -620,24 +660,27 @@ class _BubbleTailPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+
+
 class _LevelChip extends StatelessWidget {
   final String label;
-  const _LevelChip({required this.label});
+  final bool isSmallScreen;
+  const _LevelChip({required this.label, required this.isSmallScreen});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 10 : 12, vertical: isSmallScreen ? 5 : 6), // 반응형 패딩
       decoration: BoxDecoration(
-        color: const Color(0xFFEDEDED),
+        color: const Color(0xFF2C2C2C), // 거의 검은색 느낌으로 변경
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          fontSize: 12,
+        style: TextStyle(
+          fontSize: isSmallScreen ? 11 : 12, // 반응형 폰트 크기
           fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
+          color: Colors.white, // 흰색 텍스트로 변경
         ),
       ),
     );
@@ -647,167 +690,55 @@ class _LevelChip extends StatelessWidget {
 class _ExpBar extends StatelessWidget {
   final int currentExp;
   final int requiredExp;
-  const _ExpBar({required this.currentExp, required this.requiredExp});
+  final bool isSmallScreen;
+  const _ExpBar({required this.currentExp, required this.requiredExp, required this.isSmallScreen});
 
   @override
   Widget build(BuildContext context) {
     final double value = currentExp / requiredExp;
     return Column(
       children: [
-        Stack(
-          children: [
-            Container(
-              height: 28,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE5E5E5),
-                borderRadius: BorderRadius.circular(100),
-              ),
-            ),
-            FractionallySizedBox(
-              widthFactor: value.clamp(0.0, 1.0),
-              child: Container(
-                height: 28,
+        Container(
+          height: isSmallScreen ? 24 : 28, // 반응형 높이
+          child: Stack(
+            children: [
+              Container(
+                height: isSmallScreen ? 24 : 28, // 반응형 높이
                 decoration: BoxDecoration(
-                  color: AppColors.textPrimary,
+                  color: const Color(0xFFE6F3FF),
                   borderRadius: BorderRadius.circular(100),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(
-          '$currentExp / $requiredExp EXP',
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HomeStageCard extends StatelessWidget {
-  final String stepLabel;
-  final String title;
-  final double progress;
-  final bool expanded;
-  final VoidCallback onToggle;
-
-  const _HomeStageCard({
-    required this.stepLabel,
-    required this.title,
-    required this.progress,
-    required this.expanded,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder, width: 1),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEDEDED),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          stepLabel,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _SmallProgressBar(value: progress),
-                    ],
+              FractionallySizedBox(
+                widthFactor: value.clamp(0.0, 1.0),
+                child: Container(
+                  height: isSmallScreen ? 24 : 28, 
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4A90E2), 
+                    borderRadius: BorderRadius.circular(100),
                   ),
                 ),
-                IconButton(
-                  onPressed: onToggle,
-                  icon: Icon(
-                    expanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (expanded)
-            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
-          if (expanded)
-            const SizedBox(height: 120), // 상세 컨텐츠 자리 (향후 연결)
-        ],
-      ),
-    );
-  }
-}
-
-class _SmallProgressBar extends StatelessWidget {
-  final double value;
-  const _SmallProgressBar({required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          '${(value * 100).round()}%',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          height: 8,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEDEDED),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: value.clamp(0.0, 1.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.textPrimary,
-                borderRadius: BorderRadius.circular(100),
               ),
-            ),
+              // EXP 데이터를 게이지바 안에 가로세로 완벽한 중앙정렬
+              Positioned.fill(
+                child: Center(
+                  child: Text(
+                    '$currentExp / $requiredExp EXP',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 10 : 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 }
+
+

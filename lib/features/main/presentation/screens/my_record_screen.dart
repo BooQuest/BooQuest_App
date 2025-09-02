@@ -39,41 +39,45 @@ class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
             _buildTopBar(),
-            const SizedBox(height: 20),
+            SizedBox(height: isSmallScreen ? 16 : 20), 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20), 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '나의 활동',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: isSmallScreen ? 15 : 16, 
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: isSmallScreen ? 10 : 12), 
                     _MyActivityCard(),
-                    const SizedBox(height: 24),
-                    const Text(
+                    SizedBox(height: isSmallScreen ? 20 : 24), 
+                    Text(
                       '부업 프로젝트 관리',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: isSmallScreen ? 15 : 16, 
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: isSmallScreen ? 10 : 12), 
                     _ProjectCard(),
-                    const SizedBox(height: 20),
+                    SizedBox(height: isSmallScreen ? 16 : 20),
                   ],
                 ),
               ),
@@ -85,18 +89,22 @@ class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
   }
 
   Widget _buildTopBar() {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
       child: SizedBox(
         height: 48,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            const Center(
+            Center(
               child: Text(
                 '나의 기록',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isSmallScreen ? 16 : 18, 
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -139,6 +147,9 @@ class _MyActivityCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
     final activitySummaryState = ref.watch(userActivitySummaryNotifierProvider);
     
     return Container(
@@ -154,81 +165,93 @@ class _MyActivityCard extends ConsumerWidget {
               icon: Icons.monetization_on,
               label: '나의 총 수익',
               value: '${_formatCurrency(data.totalIncome)}원',
+              isSmallScreen: isSmallScreen,
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.work,
               label: '완료한 부업 프로젝트',
               value: '${data.completedSideJobCount}개',
+              isSmallScreen: isSmallScreen,
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.emoji_events,
               label: '완료한 퀘스트 수',
               value: '${data.completedQuestCount}개',
+              isSmallScreen: isSmallScreen,
             ),
           ],
         ),
-        loading: () => const Column(
+        loading: () => Column(
           children: [
             _ActivityRow(
               icon: Icons.monetization_on,
               label: '나의 총 수익',
               value: '로딩 중...',
+              isSmallScreen: isSmallScreen,
             ),
-            Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
+            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.work,
               label: '완료한 부업 프로젝트',
               value: '로딩 중...',
+              isSmallScreen: isSmallScreen,
             ),
-            Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
+            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.emoji_events,
               label: '완료한 퀘스트 수',
               value: '로딩 중...',
+              isSmallScreen: isSmallScreen,
             ),
           ],
         ),
-        failure: (_) => const Column(
+        failure: (_) => Column(
           children: [
             _ActivityRow(
               icon: Icons.monetization_on,
               label: '나의 총 수익',
               value: '',
+              isSmallScreen: isSmallScreen,
             ),
-            Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
+            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.work,
               label: '완료한 부업 프로젝트',
               value: '',
+              isSmallScreen: isSmallScreen,
             ),
-            Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
+            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.emoji_events,
               label: '완료한 퀘스트 수',
               value: '',
+              isSmallScreen: isSmallScreen,
             ),
           ],
         ),
-        orElse: () => const Column(
+        orElse: () => Column(
           children: [
             _ActivityRow(
               icon: Icons.monetization_on,
               label: '나의 총 수익',
               value: '0원',
+              isSmallScreen: isSmallScreen,
             ),
-            Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
+            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.work,
               label: '완료한 부업 프로젝트',
               value: '0개',
+              isSmallScreen: isSmallScreen,
             ),
-            Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
+            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
               icon: Icons.emoji_events,
               label: '완료한 퀘스트 수',
               value: '0개',
+              isSmallScreen: isSmallScreen,
             ),
           ],
         ),
@@ -241,34 +264,36 @@ class _ActivityRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final bool isSmallScreen;
 
   const _ActivityRow({
     required this.icon,
     required this.label,
     required this.value,
+    required this.isSmallScreen,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 16, vertical: isSmallScreen ? 12 : 16), // 반응형 패딩
       child: Row(
         children: [
           Container(
-            width: 24,
-            height: 24,
+            width: isSmallScreen ? 20 : 24, 
+            height: isSmallScreen ? 20 : 24,
             decoration: BoxDecoration(
               color: const Color(0xFFEDEDED),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(icon, size: 18, color: AppColors.textHint),
+            child: Icon(icon, size: isSmallScreen ? 16 : 18, color: AppColors.textHint), // 반응형 아이콘 크기
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isSmallScreen ? 10 : 12), 
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 14 : 16, 
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
               ),
@@ -276,8 +301,8 @@ class _ActivityRow extends StatelessWidget {
           ),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: isSmallScreen ? 14 : 16, 
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
@@ -291,16 +316,19 @@ class _ActivityRow extends StatelessWidget {
 class _ProjectCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
     final sideJobListState = ref.watch(userSideJobListNotifierProvider);
     
     return sideJobListState.maybeWhen(
       success: (data) {
         if (data.sideJobs.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
               '등록된 부업 프로젝트가 없습니다.',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: isSmallScreen ? 14 : 16, 
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),
@@ -324,14 +352,14 @@ class _ProjectCard extends ConsumerWidget {
               );
             },
             child: Container(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: EdgeInsets.only(bottom: isSmallScreen ? 10 : 12),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.cardBorder, width: 1),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -342,17 +370,17 @@ class _ProjectCard extends ConsumerWidget {
                           Row(
                             children: [
                               if (sideJob.status == 'PLANNED') ...[
-                                _Chip(label: '예정'),
+                                _Chip(label: '예정', isSmallScreen: isSmallScreen),
                               ] else ...[
-                                _Chip(label: sideJob.period),
+                                _Chip(label: sideJob.period, isSmallScreen: isSmallScreen),
                               ],
                             ],
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: isSmallScreen ? 8 : 10),
                           Text(
                             sideJob.title,
-                            style: const TextStyle(
-                              fontSize: 20,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 18 : 20,
                               fontWeight: FontWeight.w800,
                               color: AppColors.textPrimary,
                             ),
@@ -360,19 +388,19 @@ class _ProjectCard extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: isSmallScreen ? 10 : 12),
                     // SVG 이미지
                     SvgPicture.asset(
                       'assets/images/characters/sidejob_test.svg',
-                      width: 100,
-                      height: 100,
+                      width: isSmallScreen ? 80 : 100, 
+                      height: isSmallScreen ? 80 : 100,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: isSmallScreen ? 3 : 4),
                     // 화살표 아이콘 (더 구석으로)
-                    const Icon(
+                    Icon(
                       Icons.chevron_right, 
                       color: AppColors.textPrimary,
-                      size: 20,
+                      size: isSmallScreen ? 18 : 20,
                     ),
                   ],
                 ),
@@ -384,16 +412,22 @@ class _ProjectCard extends ConsumerWidget {
       loading: () => const Center(
         child: CircularProgressIndicator(),
       ),
-      failure: (_) => const Center(
+      failure: (_) => Center(
         child: Text(
           '데이터를 불러오는데 실패했습니다.',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(
+            fontSize: isSmallScreen ? 14 : 16,
+            color: AppColors.textSecondary,
+          ),
         ),
       ),
-      orElse: () => const Center(
+      orElse: () => Center(
         child: Text(
           '데이터를 불러오는 중...',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(
+            fontSize: isSmallScreen ? 14 : 16,
+            color: AppColors.textSecondary,
+          ),
         ),
       ),
     );
@@ -404,20 +438,21 @@ class _ProjectCard extends ConsumerWidget {
 
 class _Chip extends StatelessWidget {
   final String label;
-  const _Chip({required this.label});
+  final bool isSmallScreen;
+  const _Chip({required this.label, required this.isSmallScreen});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 10 : 12, vertical: isSmallScreen ? 5 : 6), // 반응형 패딩
       decoration: BoxDecoration(
         color: const Color(0xFFF0F0F0),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          fontSize: 12,
+        style: TextStyle(
+          fontSize: isSmallScreen ? 11 : 12,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
