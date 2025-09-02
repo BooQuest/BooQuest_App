@@ -15,34 +15,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-    });
-  }
-
-  Future<void> _loadData() async {
-    try {
-      final authStorage = await AuthStorageService.getInstance();
-      final sideJobId = authStorage.getSideJobId();
-      
-      if (sideJobId != null) {
-        // sideJobId가 있으면 두 API 동시 호출
-        await Future.wait([
-          ref.read(characterGrowthNotifierProvider.notifier).getCharacterGrowth(),
-          ref.read(missionProgressNotifierProvider.notifier).getMissionProgress(sideJobId),
-        ]);
-      } else {
-        // sideJobId가 없으면 characterGrowth만 호출
-        await ref.read(characterGrowthNotifierProvider.notifier).getCharacterGrowth();
-      }
-
-    } catch (e) {
-      print('Error loading data: $e');
-    }
-  }
+  // 데이터 로드는 MainScreen에서 중앙 집중식으로 관리
+  // initState와 _loadData 메서드 제거
 
   @override
   Widget build(BuildContext context) {

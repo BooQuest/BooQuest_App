@@ -18,24 +18,8 @@ class MyRecordScreen extends ConsumerStatefulWidget {
 }
 
 class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-    });
-  }
-
-  Future<void> _loadData() async {
-    try {
-      await Future.wait([
-        ref.read(userActivitySummaryNotifierProvider.notifier).getUserActivitySummary(),
-        ref.read(userSideJobListNotifierProvider.notifier).getUserSideJobList(),
-      ]);
-    } catch (e) {
-      print('Error loading data: $e');
-    }
-  }
+  // 데이터 로드는 MainScreen에서 중앙 집중식으로 관리
+  // initState와 _loadData 메서드 제거
 
   @override
   Widget build(BuildContext context) {

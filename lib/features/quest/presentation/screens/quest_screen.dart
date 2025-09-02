@@ -6,15 +6,13 @@ import 'package:booquest/features/main/application/states/sidejob_progress_state
 import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
 import 'package:booquest/features/main/application/states/mission_list_state.dart';
 import 'package:booquest/features/main/domain/entities/mission_entity.dart';
-import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
 import 'package:booquest/features/quest/presentation/widgets/quest_success_popup.dart';
 import 'package:booquest/features/quest/presentation/widgets/sidejob_guide_popup.dart';
 import 'package:booquest/features/quest/presentation/screens/verification_complete_screen.dart';
 import 'package:booquest/features/quest/infrastructure/providers/mission_step_completion_providers.dart';
-import 'package:booquest/features/quest/application/states/mission_step_completion_state.dart';
 import 'package:booquest/features/quest/infrastructure/providers/mission_completion_providers.dart';
-import 'package:booquest/features/quest/application/states/mission_completion_state.dart';
 
 class QuestScreen extends ConsumerStatefulWidget {
   const QuestScreen({super.key});
@@ -29,30 +27,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   int? _sideJobId;
   int? _selectedStepId; // 선택된 부퀘스트 스텝 ID (하나만 선택 가능)
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-    });
-  }
-
-  Future<void> _loadData() async {
-    try {
-      final authStorage = await AuthStorageService.getInstance();
-      _sideJobId = authStorage.getSideJobId();
-      _userNickname = authStorage.getNickname();
-
-      if (_sideJobId != null) {
-        await Future.wait([
-          ref.read(sideJobProgressNotifierProvider.notifier).getSideJobProgress(_sideJobId!),
-          ref.read(missionListNotifierProvider.notifier).getMissionList('', _sideJobId!), // status 빈칸으로 모든 데이터 가져오기, sideJobId 추가
-        ]);
-      }
-    } catch (e) {
-      print('Error loading data: $e');
-    }
-  }
+  // 데이터 로드는 MainScreen에서 중앙 집중식으로 관리
+  // initState와 _loadData 메서드 제거
 
   @override
   Widget build(BuildContext context) {
@@ -528,7 +504,10 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             ),
             const SizedBox(height: 20),
             GestureDetector(
-              onTap: () => _loadData(),
+              onTap: () {
+                // 데이터 새로고침은 MainScreen에서 관리
+                // 필요시 여기서 특정 API만 호출
+              },
               child: Container(
                 width: 120,
                 height: 40,
@@ -1289,8 +1268,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             // 성공 시 성공 팝업 표시
             _showMainQuestSuccessPopup(context, data);
             
-            // 데이터 새로고침
-            _loadData();
+            // 데이터 새로고침은 MainScreen에서 관리
+            // 필요시 여기서 특정 API만 호출
           },
           failure: (message) {
             // 실패 시 에러 메시지 표시
@@ -1369,8 +1348,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
               _selectedStepId = null;
             });
             
-            // 데이터 새로고침
-            _loadData();
+            // 데이터 새로고침은 MainScreen에서 관리
+            // 필요시 여기서 특정 API만 호출
           },
           failure: (message) {
             // 실패 시 에러 메시지 표시
