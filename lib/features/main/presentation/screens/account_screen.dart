@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/features/auth/application/auth_notifier.dart';
+import 'package:booquest/features/main/presentation/widgets/withdraw_confirmation_dialog.dart';
 
 /// 계정 화면
 class AccountScreen extends StatefulWidget {
@@ -59,8 +61,8 @@ class _AccountScreenState extends State<AccountScreen> {
                     _buildEmailSection(),
                     const SizedBox(height: 32),
                     _buildLogoutInfo(),
-                    const SizedBox(height: 24),
-                    _buildLogoutButton(context),
+                    const SizedBox(height: 40),
+                    _buildWithdrawButton(context),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -185,35 +187,13 @@ class _AccountScreenState extends State<AccountScreen> {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.cardBorder, width: 1),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _userEmail ?? '이메일을 불러오는 중...',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: _onWithdrawPressed,
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  '탈퇴하기',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-            ],
+          child: Text(
+            _userEmail ?? '이메일을 불러오는 중...',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
       ],
@@ -226,7 +206,7 @@ class _AccountScreenState extends State<AccountScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       child: const Text(
-        '로그아웃 시 기기의 데이터가 초기화 됩니다. 동일 계정으로 재로그인 시 데이터를 다시 불러 올 수 있습니다.',
+        '로그아웃 시 기기의 데이터가 초기화 됩니다.\n동일 계정으로 재로그인 시 데이터를 다시 불러 올 수 있습니다.',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -238,108 +218,92 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  /// 로그아웃 버튼
-  Widget _buildLogoutButton(BuildContext context) {
+  /// 회원탈퇴 버튼
+  Widget _buildWithdrawButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: () => _onLogoutPressed(context),
+        onPressed: () => _onWithdrawPressed(context),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFF5F5F5),
-          foregroundColor: AppColors.textPrimary,
+          foregroundColor: AppColors.textSecondary,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
         child: const Text(
-          '로그아웃',
+          '회원 탈퇴',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
+            color: AppColors.textHint,
           ),
         ),
       ),
     );
   }
 
-  /// 탈퇴하기 버튼 클릭 처리
-  void _onWithdrawPressed() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('계정 탈퇴'),
-          content: const Text('정말로 계정을 탈퇴하시겠습니까?\n이 작업은 되돌릴 수 없습니다.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // TODO: 계정 탈퇴 로직 구현
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('계정 탈퇴 기능은 준비 중입니다.')),
-                );
-              },
-              child: const Text(
-                '탈퇴',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        );
+  /// 회원탈퇴 버튼 클릭 처리
+  void _onWithdrawPressed(BuildContext context) {
+    WithdrawConfirmationDialog.show(
+      context,
+      userName: _userName ?? '',
+      onConfirm: () async {
+        Navigator.of(context).pop();
+        await _performWithdraw(context);
+      },
+      onCancel: () {
+        Navigator.of(context).pop();
       },
     );
   }
 
-  /// 로그아웃 버튼 클릭 처리
-  void _onLogoutPressed(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('로그아웃'),
-          content: const Text('정말로 로그아웃하시겠습니까?\n기기의 데이터가 초기화됩니다.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _performLogout(context);
-              },
-              child: const Text(
-                '로그아웃',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  /// 로그아웃 실행
-  Future<void> _performLogout(BuildContext context) async {
+
+  /// 회원탈퇴 실행
+  Future<void> _performWithdraw(BuildContext context) async {
     try {
-      final authStorage = await AuthStorageService.getInstance();
-      await authStorage.clearAuthData();
+      // API 호출을 위한 AuthNotifier 생성
+      final authNotifier = await createAuthNotifier();
       
-      if (context.mounted) {
-        // 로그인 화면으로 이동
-        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      // 회원탈퇴 API 호출
+      final success = await authNotifier.withdraw();
+      
+      if (success) {
+        print('✅ 회원탈퇴 성공');
+        
+        // 성공 시 Navigator를 완전히 리셋하여 AuthWrapper가 다시 초기화되도록 함
+        if (context.mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/',
+            (route) => false,
+          );
+        }
+      } else {
+        print('❌ 회원탈퇴 실패');
+        
+        // 실패 시 현재 화면 유지하고 실패 메시지 표시
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('회원탈퇴에 실패했습니다. 다시 시도해주세요.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
-      print('❌ 로그아웃 실패: $e');
+      print('❌ 회원탈퇴 처리 중 오류 발생: $e');
+      
+      // 에러 발생 시 현재 화면 유지하고 에러 메시지 표시
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그아웃 중 오류가 발생했습니다.')),
+          const SnackBar(
+            content: Text('회원탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
