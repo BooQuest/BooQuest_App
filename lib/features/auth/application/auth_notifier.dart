@@ -214,7 +214,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       // 1. 서버에 로그아웃 요청 (선택사항)
       try {
-        await _apiService.logout();
+        final refreshToken = _storageService.getRefreshToken();
+        if (refreshToken != null) {
+          await _apiService.logout(refreshToken);
+        }
       } catch (e) {
         // 서버 요청 실패해도 로컬 데이터는 삭제
         print('서버 로그아웃 요청 실패: $e');
@@ -227,6 +230,38 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.unauthenticated();
     } catch (e) {
       state = state.unauthenticated('로그아웃 중 오류가 발생했습니다.');
+    }
+  }
+
+  /// 회원탈퇴 수행
+  /// 
+  /// 서버에 회원탈퇴 요청을 보내고 로컬 데이터를 모두 삭제합니다.
+  /// 실패 시 현재 상태를 유지하고 에러 메시지를 반환합니다.
+  Future<bool> withdraw() async {
+    try {
+      // 1. 서버에 회원탈퇴 요청
+      final response = await _apiService.withdraw();
+      
+      if (response.statusCode == 200 && 
+          response.data != null && 
+          response.data!['success'] == true) {
+        
+        print('✅ 회원탈퇴 성공: ${response.data}');
+        
+        // 2. 로컬 데이터 삭제
+        await _storageService.clearAuthData();
+        
+        // 3. 미인증 상태로 전환
+        state = state.unauthenticated();
+        return true;
+      } else {
+        final message = response.data?['message'] ?? '회원탈퇴에 실패했습니다.';
+        print('❌ 회원탈퇴 실패: $message');
+        return false;
+      }
+    } catch (e) {
+      print('❌ 회원탈퇴 중 오류 발생: $e');
+      return false;
     }
   }
 

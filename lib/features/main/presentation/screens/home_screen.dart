@@ -385,7 +385,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               children: [
                                                 Expanded(
                                                   child: Container(
-                                                    height: isSmallScreen ? 6 : 8, 
+                                                    height: isSmallScreen ? 10 : 12,
                                                     decoration: BoxDecoration(
                                                       color: const Color(0xFFE6F3FF),
                                                       borderRadius: BorderRadius.circular(4),
@@ -718,11 +718,11 @@ class _ExpBar extends StatelessWidget {
     return Column(
       children: [
         Container(
-          height: isSmallScreen ? 24 : 28, // 반응형 높이
+          height: isSmallScreen ? 32 : 36,
           child: Stack(
             children: [
               Container(
-                height: isSmallScreen ? 24 : 28, // 반응형 높이
+                height: isSmallScreen ? 32 : 36, 
                 decoration: BoxDecoration(
                   color: const Color(0xFFE6F3FF),
                   borderRadius: BorderRadius.circular(100),
@@ -731,7 +731,7 @@ class _ExpBar extends StatelessWidget {
               FractionallySizedBox(
                 widthFactor: value.clamp(0.0, 1.0),
                 child: Container(
-                  height: isSmallScreen ? 24 : 28, 
+                  height: isSmallScreen ? 32 : 36, 
                   decoration: BoxDecoration(
                     color: const Color(0xFF4A90E2), 
                     borderRadius: BorderRadius.circular(100),
@@ -744,7 +744,7 @@ class _ExpBar extends StatelessWidget {
                   child: Text(
                     '$currentExp / $requiredExp EXP',
                     style: TextStyle(
-                      fontSize: isSmallScreen ? 10 : 12,
+                      fontSize: isSmallScreen ? 12 : 14, 
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),

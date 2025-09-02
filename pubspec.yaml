@@ -48,7 +48,12 @@ dependencies:
   
   # 불변 데이터 클래스
   freezed_annotation: ^2.4.1
-  json_annotation: ^4.9.0
+  
+  # 앱 정보 (버전, 빌드 번호 등)
+  package_info_plus: ^4.2.0
+  
+  # 오픈소스 라이선스 정보
+  flutter_oss_licenses: ^2.0.1
   
   # 로컬 스토리지
   shared_preferences: ^2.2.2
@@ -56,11 +61,7 @@ dependencies:
   
   # SVG 이미지 지원
   flutter_svg: ^2.0.10+1
-  lottie: ^3.1.2
   kakao_flutter_sdk: ^1.9.7+3
-  
-  # 애니메이션
-  flutter_animate: ^4.5.0
   
   # 이미지 선택 및 카메라 접근
   image_picker: ^1.0.7
@@ -68,6 +69,9 @@ dependencies:
   # 권한 관리
   permission_handler: ^11.3.1
   flutter_naver_login: ^2.1.1
+  
+  # URL 실행
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

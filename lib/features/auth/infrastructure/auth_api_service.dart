@@ -54,8 +54,25 @@ class AuthApiService {
 
   /// 로그아웃 API 호출
   /// 
+  /// [refreshToken]: 리프레시 토큰
   /// 서버에서 토큰을 무효화합니다.
-  Future<Response<Map<String, dynamic>>> logout() async {
-    return await _networkClient.post<Map<String, dynamic>>('/api/auth/logout');
+  Future<Response<Map<String, dynamic>>> logout(String refreshToken) async {
+    return await _networkClient.post<Map<String, dynamic>>(
+      '/api/auth/logout',
+      options: Options(
+        headers: {
+          'X-Refresh-Token': refreshToken,
+        },
+      ),
+    );
+  }
+
+  /// 회원탈퇴 API 호출
+  /// 
+  /// JWT 토큰을 헤더에 포함하여 현재 사용자 계정을 삭제합니다.
+  /// 
+  /// Returns: 탈퇴된 데이터 정보 (deletedUserSideJobs, deletedSideJobs 등)
+  Future<Response<Map<String, dynamic>>> withdraw() async {
+    return await _networkClient.delete<Map<String, dynamic>>('/api/user/me');
   }
 }

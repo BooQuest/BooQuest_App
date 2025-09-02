@@ -1,23 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/features/auth/application/auth_notifier.dart';
 import 'package:booquest/features/main/presentation/screens/account_screen.dart';
+import 'package:booquest/features/main/presentation/widgets/open_source_license_screen.dart';
+import 'package:booquest/features/main/presentation/widgets/service_preparing_dialog.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 설정 화면
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _userEmail;
+  String? _appVersion;
+  String? _buildNumber;
 
   @override
   void initState() {
     super.initState();
     _loadUserEmail();
+    _loadAppInfo();
   }
 
   Future<void> _loadUserEmail() async {
@@ -32,6 +41,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  /// 앱 정보 로드 (버전, 빌드 번호)
+  Future<void> _loadAppInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      setState(() {
+        _appVersion = packageInfo.version;
+        _buildNumber = packageInfo.buildNumber;
+      });
+    } catch (e) {
+      print('❌ 앱 정보 로드 실패: $e');
+    }
+  }
+
   /// 계정 화면으로 이동
   void _navigateToAccountScreen(BuildContext context) {
     Navigator.of(context).push(
@@ -39,6 +61,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
         builder: (context) => const AccountScreen(),
       ),
     );
+  }
+
+  /// 오픈소스 라이선스 화면으로 이동
+  void _navigateToLicenseScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const OpenSourceLicenseScreen(),
+      ),
+    );
+  }
+
+  /// URL 실행 
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        print('❌ URL 실행 실패: $url');
+      }
+    } catch (e) {
+      print('❌ URL 실행 중 오류 발생: $e');
+    }
+  }
+
+  /// 로그아웃 처리
+  Future<void> _handleLogout() async {
+    try {
+      final authStorage = await AuthStorageService.getInstance();
+      
+      // 1. 서버에 로그아웃 API 호출 (성공/실패 무관)
+      try {
+        final refreshToken = authStorage.getRefreshToken();
+        if (refreshToken != null) {
+          // API 호출을 위한 AuthNotifier 생성
+          final authNotifier = await createAuthNotifier();
+          await authNotifier.logout();
+          print('✅ 로그아웃 API 호출 완료');
+        } else {
+          print('⚠️ Refresh token이 없어서 API 호출 생략');
+        }
+      } catch (e) {
+        print('❌ 로그아웃 API 호출 실패: $e');
+        // API 실패해도 로컬 데이터는 삭제
+      }
+      
+      // 2. 로컬 데이터 삭제 (API 성공/실패 무관)
+      await authStorage.clearAuthData();
+      print('✅ 로컬 데이터 삭제 완료');
+      
+      // 3. Navigator를 완전히 리셋하여 AuthWrapper가 다시 초기화되도록 함
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/',
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      print('❌ 로그아웃 처리 중 오류 발생: $e');
+      // 에러가 발생해도 로그인 페이지로 이동
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/',
+          (route) => false,
+        );
+      }
+    }
+  }
+
+  /// 로그아웃 처리 (다이얼로그 없이 바로 실행)
+  void _handleLogoutDirectly() {
+    _handleLogout();
   }
 
   @override
@@ -63,7 +157,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildPaymentSection(),
                     const SizedBox(height: 32),
                     _buildSupportSection(),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 40),
+                    _buildLogoutSection(),
                   ],
                 ),
               ),
@@ -172,11 +267,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        _buildSettingItem('이용약관'),
+        _buildSettingItem('이용약관', onTap: () => _launchUrl('https://www.notion.so/25928b64b1bf80c0818dd120cb13a42e?source=copy_link')),
         const SizedBox(height: 8),
         _buildSettingItem('개인정보 처리 방침'),
         const SizedBox(height: 8),
-        _buildSettingItem('오픈소스 라이선스'),
+        _buildSettingItem('오픈소스 라이선스', onTap: () => _navigateToLicenseScreen(context)),
+        const SizedBox(height: 8),
+        _buildVersionInfoItem(),
       ],
     );
   }
@@ -245,18 +342,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        _buildSettingItem('문의하기/버그제보'),
+        _buildSettingItem('문의하기/버그제보', onTap: () => _launchUrl('https://forms.gle/Em41EDxHkC3Nbixx8')),
         const SizedBox(height: 8),
-        _buildSettingItem('FAQ'),
+        _buildSettingItem('FAQ', onTap: () => ServicePreparingDialog.show(context)),
         const SizedBox(height: 8),
-        _buildSettingItem('리뷰 남기기'),
+        _buildSettingItem('리뷰 남기기', onTap: () => ServicePreparingDialog.show(context)),
       ],
     );
   }
 
-  /// 설정 아이템 위젯
-  Widget _buildSettingItem(String title, {String? trailing, bool isDisabled = false}) {
+  /// 버전 정보 아이템 위젯
+  Widget _buildVersionInfoItem() {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder, width: 1),
+      ),
+      child: Row(
+        children: [
+          const Text(
+            '버전·필드 정보',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            _appVersion != null && _buildNumber != null 
+                ? 'v$_appVersion (build $_buildNumber)'
+                : '버전 정보 로딩 중...',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 로그아웃 섹션
+  Widget _buildLogoutSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: GestureDetector(
+          onTap: _handleLogoutDirectly,
+          child: const Text(
+            '로그아웃',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSecondary,
+              decoration: TextDecoration.underline,
+              decorationColor: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 설정 아이템 위젯
+  Widget _buildSettingItem(String title, {String? trailing, bool isDisabled = false, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: isDisabled ? null : onTap,
+      child: Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -296,6 +453,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }
