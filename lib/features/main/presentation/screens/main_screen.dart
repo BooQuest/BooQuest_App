@@ -23,6 +23,8 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   void _onTabTapped(int index) {
+    if (index == _currentIndex) return; // 같은 탭 클릭 시 무시
+    
     setState(() {
       _currentIndex = index;
     });
@@ -31,7 +33,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
       bottomNavigationBar: CommonBottomNavigation(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,

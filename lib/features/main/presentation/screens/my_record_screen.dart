@@ -59,18 +59,18 @@ class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
                     Text(
                       '나의 활동',
                       style: TextStyle(
-                        fontSize: isSmallScreen ? 15 : 16, 
+                        fontSize: isSmallScreen ? 18 : 20, 
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: isSmallScreen ? 10 : 12), 
                     _MyActivityCard(),
-                    SizedBox(height: isSmallScreen ? 20 : 24), 
+                    SizedBox(height: isSmallScreen ? 28 : 32), 
                     Text(
                       '부업 프로젝트 관리',
                       style: TextStyle(
-                        fontSize: isSmallScreen ? 15 : 16, 
+                        fontSize: isSmallScreen ? 18 : 20, 
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
@@ -162,21 +162,18 @@ class _MyActivityCard extends ConsumerWidget {
         success: (data) => Column(
           children: [
             _ActivityRow(
-              icon: Icons.monetization_on,
               label: '나의 총 수익',
               value: '${_formatCurrency(data.totalIncome)}원',
               isSmallScreen: isSmallScreen,
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
-              icon: Icons.work,
               label: '완료한 부업 프로젝트',
               value: '${data.completedSideJobCount}개',
               isSmallScreen: isSmallScreen,
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
-              icon: Icons.emoji_events,
               label: '완료한 퀘스트 수',
               value: '${data.completedQuestCount}개',
               isSmallScreen: isSmallScreen,
@@ -186,74 +183,81 @@ class _MyActivityCard extends ConsumerWidget {
         loading: () => Column(
           children: [
             _ActivityRow(
-              icon: Icons.monetization_on,
               label: '나의 총 수익',
               value: '로딩 중...',
               isSmallScreen: isSmallScreen,
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
-              icon: Icons.work,
               label: '완료한 부업 프로젝트',
               value: '로딩 중...',
               isSmallScreen: isSmallScreen,
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
             _ActivityRow(
-              icon: Icons.emoji_events,
               label: '완료한 퀘스트 수',
               value: '로딩 중...',
               isSmallScreen: isSmallScreen,
             ),
           ],
         ),
-        failure: (_) => Column(
-          children: [
-            _ActivityRow(
-              icon: Icons.monetization_on,
-              label: '나의 총 수익',
-              value: '',
-              isSmallScreen: isSmallScreen,
-            ),
-            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
-            _ActivityRow(
-              icon: Icons.work,
-              label: '완료한 부업 프로젝트',
-              value: '',
-              isSmallScreen: isSmallScreen,
-            ),
-            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
-            _ActivityRow(
-              icon: Icons.emoji_events,
-              label: '완료한 퀘스트 수',
-              value: '',
-              isSmallScreen: isSmallScreen,
-            ),
-          ],
+        failure: (_) => Container(
+          padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+          child: Column(
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: isSmallScreen ? 24 : 28,
+                color: Colors.red,
+              ),
+              SizedBox(height: isSmallScreen ? 8 : 10),
+              Text(
+                '데이터를 불러올 수 없습니다',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 14 : 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 4 : 6),
+              Text(
+                '잠시 후 다시 시도해주세요',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 12 : 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
-        orElse: () => Column(
-          children: [
-            _ActivityRow(
-              icon: Icons.monetization_on,
-              label: '나의 총 수익',
-              value: '0원',
-              isSmallScreen: isSmallScreen,
-            ),
-            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
-            _ActivityRow(
-              icon: Icons.work,
-              label: '완료한 부업 프로젝트',
-              value: '0개',
-              isSmallScreen: isSmallScreen,
-            ),
-            const Divider(height: 1, thickness: 1, color: AppColors.cardBorder),
-            _ActivityRow(
-              icon: Icons.emoji_events,
-              label: '완료한 퀘스트 수',
-              value: '0개',
-              isSmallScreen: isSmallScreen,
-            ),
-          ],
+        orElse: () => Container(
+          padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+          child: Column(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: isSmallScreen ? 24 : 28,
+                color: AppColors.textSecondary,
+              ),
+              SizedBox(height: isSmallScreen ? 8 : 10),
+              Text(
+                '아직 활동 기록이 없습니다',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 14 : 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: isSmallScreen ? 4 : 6),
+              Text(
+                '부업을 시작하면 기록이 쌓입니다',
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 12 : 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -261,13 +265,11 @@ class _MyActivityCard extends ConsumerWidget {
 }
 
 class _ActivityRow extends StatelessWidget {
-  final IconData icon;
   final String label;
   final String value;
   final bool isSmallScreen;
 
   const _ActivityRow({
-    required this.icon,
     required this.label,
     required this.value,
     required this.isSmallScreen,
@@ -286,7 +288,7 @@ class _ActivityRow extends StatelessWidget {
               color: const Color(0xFFEDEDED),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(icon, size: isSmallScreen ? 16 : 18, color: AppColors.textHint), // 반응형 아이콘 크기
+            // 정사각형 회색 모양으로 아이콘 대체
           ),
           SizedBox(width: isSmallScreen ? 10 : 12), 
           Expanded(
@@ -352,14 +354,14 @@ class _ProjectCard extends ConsumerWidget {
               );
             },
             child: Container(
-              margin: EdgeInsets.only(bottom: isSmallScreen ? 10 : 12),
+              margin: EdgeInsets.only(bottom: isSmallScreen ? 14 : 16),
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.cardBorder, width: 1),
               ),
               child: Padding(
-                padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+                padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -376,7 +378,7 @@ class _ProjectCard extends ConsumerWidget {
                               ],
                             ],
                           ),
-                          SizedBox(height: isSmallScreen ? 8 : 10),
+                          SizedBox(height: isSmallScreen ? 12 : 14),
                           Text(
                             sideJob.title,
                             style: TextStyle(
@@ -412,22 +414,62 @@ class _ProjectCard extends ConsumerWidget {
       loading: () => const Center(
         child: CircularProgressIndicator(),
       ),
-      failure: (_) => Center(
-        child: Text(
-          '데이터를 불러오는데 실패했습니다.',
-          style: TextStyle(
-            fontSize: isSmallScreen ? 14 : 16,
-            color: AppColors.textSecondary,
-          ),
+      failure: (_) => Container(
+        padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+        child: Column(
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: isSmallScreen ? 24 : 28,
+              color: Colors.red,
+            ),
+            SizedBox(height: isSmallScreen ? 8 : 10),
+            Text(
+              '부업 프로젝트를 불러올 수 없습니다',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 14 : 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(height: isSmallScreen ? 4 : 6),
+            Text(
+              '잠시 후 다시 시도해주세요',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 12 : 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
-      orElse: () => Center(
-        child: Text(
-          '데이터를 불러오는 중...',
-          style: TextStyle(
-            fontSize: isSmallScreen ? 14 : 16,
-            color: AppColors.textSecondary,
-          ),
+      orElse: () => Container(
+        padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+        child: Column(
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: isSmallScreen ? 24 : 28,
+              color: AppColors.textSecondary,
+            ),
+            SizedBox(height: isSmallScreen ? 8 : 10),
+            Text(
+              '아직 등록된 부업 프로젝트가 없습니다',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 14 : 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(height: isSmallScreen ? 4 : 6),
+            Text(
+              '부업을 시작해보세요!',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 12 : 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
