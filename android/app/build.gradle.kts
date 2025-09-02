@@ -54,4 +54,7 @@ dependencies {
     // Kakao SDK 의존성 추가
     implementation("com.kakao.sdk:v2-user:2.20.1")
     implementation("com.kakao.sdk:v2-auth:2.20.1")
+    
+    // 네이버 로그인 SDK 의존성 추가
+    implementation("com.navercorp.nid:oauth:5.9.1")
 }
