@@ -22,6 +22,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _appVersion;
   String? _buildNumber;
 
+  // 반응형을 위한 화면 크기 계산 (home_screen.dart와 동일한 구조)
+  bool get _isSmallScreen => MediaQuery.of(context).size.width < 400;
+
   @override
   void initState() {
     super.initState();
@@ -143,21 +146,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Column(
           children: [
             _buildTopBar(context),
-            const SizedBox(height: 20),
+            SizedBox(height: _isSmallScreen ? 16 : 20),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildAccountSection(),
-                    const SizedBox(height: 32),
+                    SizedBox(height: _isSmallScreen ? 24 : 32),
                     _buildSecuritySection(),
-                    const SizedBox(height: 32),
+                    SizedBox(height: _isSmallScreen ? 24 : 32),
                     _buildPaymentSection(),
-                    const SizedBox(height: 32),
+                    SizedBox(height: _isSmallScreen ? 24 : 32),
                     _buildSupportSection(),
-                    const SizedBox(height: 40),
+                    SizedBox(height: _isSmallScreen ? 32 : 40),
                     _buildLogoutSection(),
                   ],
                 ),
@@ -172,7 +175,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// 상단 바 (뒤로가기 + 제목)
   Widget _buildTopBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20),
       child: SizedBox(
         height: 48,
         child: Stack(
@@ -189,11 +192,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const Center(
+            Center(
               child: Text(
                 '설정',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: _isSmallScreen ? 16 : 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -210,20 +213,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '계정',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: _isSmallScreen ? 10 : 12),
         GestureDetector(
           onTap: () => _navigateToAccountScreen(context),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(_isSmallScreen ? 14 : 16),
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
@@ -233,8 +236,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 Text(
                   _userEmail ?? '이메일을 불러오는 중...',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: _isSmallScreen ? 14 : 16,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
@@ -258,21 +261,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '보안',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: _isSmallScreen ? 10 : 12),
         _buildSettingItem('이용약관', onTap: () => _launchUrl('https://www.notion.so/25928b64b1bf80c0818dd120cb13a42e?source=copy_link')),
-        const SizedBox(height: 8),
+        SizedBox(height: _isSmallScreen ? 6 : 8),
         _buildSettingItem('개인정보 처리 방침'),
-        const SizedBox(height: 8),
+        SizedBox(height: _isSmallScreen ? 6 : 8),
         _buildSettingItem('오픈소스 라이선스', onTap: () => _navigateToLicenseScreen(context)),
-        const SizedBox(height: 8),
+        SizedBox(height: _isSmallScreen ? 6 : 8),
         _buildVersionInfoItem(),
       ],
     );
@@ -283,18 +286,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '결제/구독 관리',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: _isSmallScreen ? 10 : 12),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(_isSmallScreen ? 16 : 20),
           decoration: BoxDecoration(
             color: const Color(0xFFF8F8F8),
             borderRadius: BorderRadius.circular(12),
@@ -302,20 +305,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           child: Column(
             children: [
-              const Text(
+              Text(
                 '곧 제공될 예정이예요',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: _isSmallScreen ? 16 : 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: _isSmallScreen ? 6 : 8),
+              Text(
                 '조금만 기다려주세요',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: _isSmallScreen ? 12 : 14,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
                 ),
@@ -333,19 +336,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '고객지원',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: _isSmallScreen ? 10 : 12),
         _buildSettingItem('문의하기/버그제보', onTap: () => _launchUrl('https://forms.gle/Em41EDxHkC3Nbixx8')),
-        const SizedBox(height: 8),
+        SizedBox(height: _isSmallScreen ? 6 : 8),
         _buildSettingItem('FAQ', onTap: () => ServicePreparingDialog.show(context)),
-        const SizedBox(height: 8),
+        SizedBox(height: _isSmallScreen ? 6 : 8),
         _buildSettingItem('리뷰 남기기', onTap: () => ServicePreparingDialog.show(context)),
       ],
     );
@@ -355,7 +358,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildVersionInfoItem() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(_isSmallScreen ? 14 : 16),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -363,10 +366,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       child: Row(
         children: [
-          const Text(
+          Text(
             '버전·필드 정보',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: _isSmallScreen ? 14 : 16,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
@@ -376,8 +379,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _appVersion != null && _buildNumber != null 
                 ? 'v$_appVersion (build $_buildNumber)'
                 : '버전 정보 로딩 중...',
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: _isSmallScreen ? 12 : 14,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
@@ -390,14 +393,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// 로그아웃 섹션
   Widget _buildLogoutSection() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: _isSmallScreen ? 12 : 16),
       child: Center(
         child: GestureDetector(
           onTap: _handleLogoutDirectly,
-          child: const Text(
+          child: Text(
             '로그아웃',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: _isSmallScreen ? 12 : 14,
               fontWeight: FontWeight.w400,
               color: AppColors.textSecondary,
               decoration: TextDecoration.underline,
@@ -414,46 +417,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return GestureDetector(
       onTap: isDisabled ? null : onTap,
       child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDisabled ? const Color(0xFFF8F8F8) : AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDisabled ? const Color(0xFFE0E0E0) : AppColors.cardBorder,
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: isDisabled ? AppColors.textSecondary : AppColors.textPrimary,
-            ),
+        width: double.infinity,
+        padding: EdgeInsets.all(_isSmallScreen ? 14 : 16),
+        decoration: BoxDecoration(
+          color: isDisabled ? const Color(0xFFF8F8F8) : AppColors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDisabled ? const Color(0xFFE0E0E0) : AppColors.cardBorder,
+            width: 1,
           ),
-          if (trailing != null) ...[
-            const Spacer(),
+        ),
+        child: Row(
+          children: [
             Text(
-              trailing,
+              title,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: _isSmallScreen ? 14 : 16,
                 fontWeight: FontWeight.w500,
                 color: isDisabled ? AppColors.textSecondary : AppColors.textPrimary,
               ),
             ),
+            if (trailing != null) ...[
+              const Spacer(),
+              Text(
+                trailing,
+                style: TextStyle(
+                  fontSize: _isSmallScreen ? 12 : 14,
+                  fontWeight: FontWeight.w500,
+                  color: isDisabled ? AppColors.textSecondary : AppColors.textPrimary,
+                ),
+              ),
+            ],
+            const Spacer(),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: isDisabled ? AppColors.textSecondary.withValues(alpha: 0.5) : AppColors.textSecondary,
+              size: 16,
+            ),
           ],
-          const Spacer(),
-          Icon(
-            Icons.arrow_forward_ios,
-            color: isDisabled ? AppColors.textSecondary.withValues(alpha: 0.5) : AppColors.textSecondary,
-            size: 16,
-          ),
-        ],
+        ),
       ),
-    ),
     );
   }
 }
