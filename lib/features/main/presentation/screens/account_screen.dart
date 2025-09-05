@@ -17,6 +17,9 @@ class _AccountScreenState extends State<AccountScreen> {
   String? _userName;
   String? _profileImageUrl;
 
+  // 반응형을 위한 화면 크기 계산 (home_screen.dart와 동일한 구조)
+  bool get _isSmallScreen => MediaQuery.of(context).size.width < 400;
+
   @override
   void initState() {
     super.initState();
@@ -48,22 +51,22 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Column(
           children: [
             _buildTopBar(context),
-            const SizedBox(height: 20),
+            SizedBox(height: _isSmallScreen ? 16 : 20),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20),
                 child: Column(
                   children: [
                     _buildProfileSection(),
-                    const SizedBox(height: 32),
+                    SizedBox(height: _isSmallScreen ? 24 : 32),
                     _buildNameSection(),
-                    const SizedBox(height: 24),
+                    SizedBox(height: _isSmallScreen ? 20 : 24),
                     _buildEmailSection(),
-                    const SizedBox(height: 32),
+                    SizedBox(height: _isSmallScreen ? 24 : 32),
                     _buildLogoutInfo(),
-                    const SizedBox(height: 40),
+                    SizedBox(height: _isSmallScreen ? 32 : 40),
                     _buildWithdrawButton(context),
-                    const SizedBox(height: 32),
+                    SizedBox(height: _isSmallScreen ? 24 : 32),
                   ],
                 ),
               ),
@@ -77,7 +80,7 @@ class _AccountScreenState extends State<AccountScreen> {
   /// 상단 바 (뒤로가기 + 제목)
   Widget _buildTopBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20),
       child: SizedBox(
         height: 48,
         child: Stack(
@@ -94,11 +97,11 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
             ),
-            const Center(
+            Center(
               child: Text(
                 '계정',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: _isSmallScreen ? 16 : 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -114,15 +117,15 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildProfileSection() {
     return Center(
       child: CircleAvatar(
-        radius: 50,
+        radius: _isSmallScreen ? 40 : 50,
         backgroundColor: AppColors.cardBorder,
         backgroundImage: _profileImageUrl != null && _profileImageUrl!.isNotEmpty
             ? NetworkImage(_profileImageUrl!)
             : null,
         child: _profileImageUrl == null || _profileImageUrl!.isEmpty
-            ? const Icon(
+            ? Icon(
                 Icons.person,
-                size: 50,
+                size: _isSmallScreen ? 40 : 50,
                 color: AppColors.textSecondary,
               )
             : null,
@@ -135,18 +138,18 @@ class _AccountScreenState extends State<AccountScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '이름',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: _isSmallScreen ? 6 : 8),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 14 : 16, vertical: _isSmallScreen ? 10 : 12),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(8),
@@ -154,8 +157,8 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           child: Text(
             _userName ?? '이름을 불러오는 중...',
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: _isSmallScreen ? 14 : 16,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
@@ -170,18 +173,18 @@ class _AccountScreenState extends State<AccountScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '이메일',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: _isSmallScreen ? 6 : 8),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 14 : 16, vertical: _isSmallScreen ? 10 : 12),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(8),
@@ -189,8 +192,8 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           child: Text(
             _userEmail ?? '이메일을 불러오는 중...',
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: _isSmallScreen ? 14 : 16,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
@@ -204,11 +207,11 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildLogoutInfo() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      child: const Text(
+      padding: EdgeInsets.all(_isSmallScreen ? 14 : 16),
+      child: Text(
         '로그아웃 시 기기의 데이터가 초기화 됩니다.\n동일 계정으로 재로그인 시 데이터를 다시 불러 올 수 있습니다.',
         style: TextStyle(
-          fontSize: 14,
+          fontSize: _isSmallScreen ? 12 : 14,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,
           height: 1.4,
@@ -222,7 +225,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildWithdrawButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 48,
+      height: _isSmallScreen ? 44 : 48,
       child: ElevatedButton(
         onPressed: () => _onWithdrawPressed(context),
         style: ElevatedButton.styleFrom(
@@ -233,10 +236,10 @@ class _AccountScreenState extends State<AccountScreen> {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        child: const Text(
+        child: Text(
           '회원 탈퇴',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w600,
             color: AppColors.textHint,
           ),
