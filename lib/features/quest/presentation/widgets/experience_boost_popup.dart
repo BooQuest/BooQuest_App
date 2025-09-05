@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/features/quest/presentation/screens/quest_verification_screen.dart';
+import 'package:booquest/features/quest/presentation/screens/verification_complete_screen.dart';
+import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
+import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 
 /// 경험치 부스트 팝업 위젯
-class ExperienceBoostPopup extends StatelessWidget {
+class ExperienceBoostPopup extends ConsumerWidget {
   final int stepId;
   
   const ExperienceBoostPopup({
@@ -11,7 +16,7 @@ class ExperienceBoostPopup extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
@@ -24,6 +29,48 @@ class ExperienceBoostPopup extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // 상단 닫기 버튼
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    
+                    // API 재호출하여 데이터 업데이트
+                    try {
+                      final authStorage = await AuthStorageService.getInstance();
+                      final sideJobId = authStorage.getSideJobId();
+                      
+                      if (sideJobId != null) {
+                        await Future.wait([
+                          ref.read(sideJobProgressNotifierProvider.notifier).getSideJobProgress(sideJobId),
+                          ref.read(missionListNotifierProvider.notifier).getMissionList('', sideJobId),
+                        ]);
+                      }
+                    } catch (e) {
+                      print('❌ API 재호출 실패: $e');
+                    }
+                    
+                    // VerificationCompleteScreen으로 이동
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const VerificationCompleteScreen(
+                          method: 'sub_quest',
+                          content: '부퀘스트 완료',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Icon(
+                    Icons.close,
+                    size: 24,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // 상단 체크마크 아이콘
             Container(
               width: 80,
@@ -54,9 +101,9 @@ class ExperienceBoostPopup extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            // 부제목
+            // 메인 메시지
             const Text(
-              '보너스 찬스가 도착했어요',
+              '보너스 찬스를 놓치지 마세요',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -69,7 +116,7 @@ class ExperienceBoostPopup extends StatelessWidget {
             Column(
               children: [
                 const Text(
-                  '더 빠른 성장을 위한 두 가지 방법 중',
+                  '경험치를 두배 받고',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -77,8 +124,9 @@ class ExperienceBoostPopup extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 4),
                 const Text(
-                  '하나를 선택해 보상을 획득하세요',
+                  '부냥이를 빠르게 성장시키세요',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -97,7 +145,7 @@ class ExperienceBoostPopup extends StatelessWidget {
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF64B5F6),
+                      color: const Color(0xFF1976D2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: TextButton(

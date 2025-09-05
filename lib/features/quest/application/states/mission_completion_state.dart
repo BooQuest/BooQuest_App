@@ -10,4 +10,5 @@ class MissionCompletionState with _$MissionCompletionState {
   const factory MissionCompletionState.loading() = _Loading;
   const factory MissionCompletionState.success(MissionCompletionEntity data) = _Success;
   const factory MissionCompletionState.failure(String message) = _Failure;
+  const factory MissionCompletionState.alreadyCompleted() = _AlreadyCompleted;
 }

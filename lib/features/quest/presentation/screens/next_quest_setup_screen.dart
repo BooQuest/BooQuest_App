@@ -57,7 +57,6 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
           children: [
             // 상단 바 (quest_screen.dart와 동일한 구조)
             _buildTopBar(),
-            const SizedBox(height: 20),
             // 스크롤 가능한 콘텐츠
             Expanded(
               child: SingleChildScrollView(
@@ -127,7 +126,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
   Widget _buildSuccessMessageCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -152,7 +151,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           // 두 번째 줄: "클리어했네요!" (검은색)
           const Text(
             '클리어했네요!',
@@ -162,7 +161,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           // 세 번째 줄: 설명 (회색)
           const Text(
             '잠시 후 광고가 끝나면 새로운 퀘스트가 열려요.',
@@ -248,10 +247,10 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 상단: 상태 태그들 (가로 배치)
+                  // 상단: 상태 태그들 (완료는 왼쪽, 메인퀘스트/단계는 오른쪽)
                   Row(
                     children: [
-                      // 상태 태그 (완료/진행중/대기중)
+                      // 상태 태그 (완료/진행중/대기중) - 왼쪽
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
@@ -275,8 +274,8 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      // 메인 퀘스트 태그
+                      const Spacer(),
+                      // 메인 퀘스트 태그 - 오른쪽
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
@@ -293,7 +292,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // 단계 태그
+                      // 단계 태그 - 오른쪽
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(

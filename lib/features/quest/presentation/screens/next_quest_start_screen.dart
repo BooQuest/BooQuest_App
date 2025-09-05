@@ -97,12 +97,11 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-                  return FeedbackPopup(
+          return FeedbackPopup(
             onSubmit: (List<String> selectedReasons, String additionalComment) async {
               // 피드백 제출 및 부퀘스트 재생성
               await _handleFeedbackSubmit(selectedReasons, additionalComment);
               
-              // 팝업 닫기
               Navigator.of(context).pop();
             },
           );
@@ -252,9 +251,8 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
           ),
           success: (data) => Column(
             children: [
-              // 상단 바 (next_quest_setup_screen.dart와 동일한 구조)
+              // 상단 바 
               _buildTopBar(),
-              const SizedBox(height: 20),
               // 스크롤 가능한 콘텐츠
               Expanded(
                 child: SingleChildScrollView(
@@ -309,7 +307,7 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
     );
   }
 
-  /// 상단 바 (next_quest_setup_screen.dart와 동일한 구조)
+  /// 상단 바
   Widget _buildTopBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -349,24 +347,46 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
     );
   }
 
-  /// 안내 메시지 카드 (이미지와 동일)
+  /// 안내 메시지 카드 
   Widget _buildGuideMessageCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 첫 번째 줄: "이제 새로운 퀘스트를 시작할 수 있어요!" (굵은 글씨)
-          const Text(
-            '이제 새로운 퀘스트를 시작할 수 있어요!',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
+         
+          RichText(
+            text: const TextSpan(
+              children: [
+                TextSpan(
+                  text: '이제 ',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
+                ),
+                TextSpan(
+                  text: '새로운 퀘스트',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary, // 파란색
+                  ),
+                ),
+                TextSpan(
+                  text: '를 시작할 수 있어요!',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           // 두 번째 줄: "다음을 눌러 도전을 이어가 보세요." (작은 글씨)
           const Text(
             '다음을 눌러 도전을 이어가 보세요.',
@@ -381,7 +401,7 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
     );
   }
 
-  /// 퀘스트 카드 (이미지와 동일하게 하나만)
+  /// 퀘스트 카드
   Widget _buildQuestCards(MissionState state) {
     return state.maybeWhen(
       success: (data) {
@@ -436,10 +456,10 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 상단: 상태 태그들 (가로 배치)
+              // 상단: 상태 태그들 (진행 예정은 왼쪽, 메인퀘스트/단계는 오른쪽)
               Row(
                 children: [
-                  // 진행중 태그 (파란색)
+                  // 진행 예정 태그 (파란색) - 왼쪽
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -447,7 +467,7 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
-                      '진행중',
+                      '진행 예정',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -455,8 +475,8 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // 메인 퀘스트 태그
+                  const Spacer(),
+                  // 메인 퀘스트 태그 - 오른쪽
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -473,7 +493,7 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // 단계 태그
+                  // 단계 태그 - 오른쪽
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -566,6 +586,9 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
               // 부퀘스트 섹션 (이미지와 동일하게 항상 표시)
               const SizedBox(height: 20),
               _buildSubQuestSection(data), // API에서 받은 부퀘스트 데이터 전달
+              const SizedBox(height: 20),
+              // 재생성하기 버튼 (부퀘스트 섹션 밖으로 이동)
+              _buildRegenerateButton(),
             ],
           ),
         );
@@ -749,17 +772,11 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: AppColors.textSecondary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
+                    // 느낌표 아이콘 (배경 제거)
+                    const Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: AppColors.textSecondary,
                     ),
                     const Spacer(),
                     Text(
@@ -785,9 +802,9 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
                 const SizedBox(height: 16),
                 // 부퀘스트 아이템들
                 ...missionSteps.map((step) => _buildSubQuestItem(step)).toList(),
-                const SizedBox(height: 20),
-                // 하단 버튼들 (이미지와 동일)
-                _buildSubQuestButtons(),
+                const SizedBox(height: 16),
+                // 부업가이드 버튼 (부퀘스트 섹션 안에 추가)
+                _buildSideJobGuideButton(),
               ],
             ],
           ),
@@ -831,8 +848,37 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
     );
   }
 
-  /// 부퀘스트 하단 버튼들 (이미지와 동일)
-  Widget _buildSubQuestButtons() {
+  /// 부업가이드 버튼 (부퀘스트 섹션 안에)
+  Widget _buildSideJobGuideButton() {
+    return GestureDetector(
+      onTap: () {
+        // TODO: 부업가이드 팝업 표시
+        print('부업가이드 버튼 클릭');
+      },
+      child: Container(
+        width: double.infinity,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.cardBorder, width: 1),
+        ),
+        child: const Center(
+          child: Text(
+            '부업가이드 >',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 재생성하기 버튼 (부퀘스트 섹션 밖에)
+  Widget _buildRegenerateButton() {
     return GestureDetector(
       onTap: _showFeedbackPopup,
       child: Container(
@@ -843,24 +889,15 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: AppColors.cardBorder, width: 1),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              '재생성하기',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+        child: const Center(
+          child: Text(
+            '재생성하기',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
             ),
-            const SizedBox(width: 4),
-            const Icon(
-              Icons.refresh,
-              size: 14,
-              color: AppColors.textSecondary,
-            ),
-          ],
+          ),
         ),
       ),
     );

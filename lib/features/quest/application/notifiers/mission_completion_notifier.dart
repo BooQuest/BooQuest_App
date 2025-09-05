@@ -12,8 +12,6 @@ class MissionCompletionNotifier extends StateNotifier<MissionCompletionState> {
   /// 메인 퀘스트 완료 처리
   Future<void> completeMission(int missionId) async {
     try {
-      print('🎯 [Notifier] 메인 퀘스트 완료 시작: missionId=$missionId');
-      
       // 로딩 상태로 변경
       state = const MissionCompletionState.loading();
 
@@ -29,7 +27,13 @@ class MissionCompletionNotifier extends StateNotifier<MissionCompletionState> {
             authError: (message) => message,
             unknownError: (message) => message,
           );
-          print('❌ [Notifier] 메인 퀘스트 완료 실패: $errorMessage');
+          
+          // 이미 완료된 메인 퀘스트인 경우 특별 처리
+          if (errorMessage.contains('already-completed')) {
+            state = const MissionCompletionState.alreadyCompleted();
+            return;
+          }
+          
           state = MissionCompletionState.failure(errorMessage);
         },
         (data) {
@@ -38,6 +42,13 @@ class MissionCompletionNotifier extends StateNotifier<MissionCompletionState> {
       );
     } catch (e) {
       print('❌ [Notifier] 메인 퀘스트 완료 처리 중 오류: $e');
+      
+      // 이미 완료된 메인 퀘스트인 경우 특별 처리
+      if (e.toString().contains('already-completed')) {
+        state = const MissionCompletionState.alreadyCompleted();
+        return;
+      }
+      
       state = const MissionCompletionState.failure('메인 퀘스트 완료 처리 중 오류가 발생했습니다.');
     }
   }
