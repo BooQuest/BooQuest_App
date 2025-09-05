@@ -4,7 +4,6 @@ import 'package:booquest/features/auth/application/auth_notifier.dart';
 import 'package:booquest/features/auth/domain/auth_state.dart';
 import 'package:booquest/features/auth/presentation/login_page.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
-import 'package:booquest/core/storage/local_storage_service.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step1_character_selection_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step2_character_creation_screen.dart';
@@ -77,7 +76,7 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     // AuthNotifier의 상태를 직접 구독
     return StreamBuilder<AuthState>(
       stream: _authNotifier!.stream,
-      initialData: _authNotifier!.debugState,
+      initialData: _authNotifier!.getCurrentState(),
       builder: (context, snapshot) {
         final authState = snapshot.data ?? const AuthState();
 
@@ -211,57 +210,6 @@ class _OnboardingRouter extends StatelessWidget {
         // 결정된 화면 반환
         return snapshot.data ?? const Step1CharacterSelectionScreen();
       },
-    );
-  }
-}
-
-/// 에러 상태를 표시하는 위젯
-class _ErrorScreen extends StatelessWidget {
-  final String message;
-  final VoidCallback? onRetry;
-
-  const _ErrorScreen({
-    required this.message,
-    this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '오류가 발생했습니다',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              if (onRetry != null) ...[
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: onRetry,
-                  child: const Text('다시 시도'),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

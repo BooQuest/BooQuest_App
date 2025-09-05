@@ -22,6 +22,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return state;
   }
 
+  /// 현재 상태의 에러 메시지 반환
+  String? get currentErrorMessage => state.errorMessage;
+
+  /// 현재 상태의 사용자 정보 반환
+  Map<String, dynamic>? get currentUser => state.user;
+
+  /// 현재 상태의 온보딩 진행 정보 반환
+  Map<String, dynamic>? get currentOnboardingProgressInfo => state.onboardingProgressInfo;
+
   /// 앱 시작 시 저장된 인증 상태 확인
   /// 
   /// 로컬 스토리지에서 토큰과 사용자 정보를 확인하고,
