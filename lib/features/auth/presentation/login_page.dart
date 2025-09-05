@@ -72,7 +72,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       // 3. 로그인 결과 처리
       if (!loginSuccess) {
-        final errorMessage = widget.authNotifier.debugState.errorMessage ??
+        final errorMessage = widget.authNotifier.currentErrorMessage ??
             '로그인 중 오류가 발생했습니다.';
         _showErrorMessage(errorMessage);
       }
@@ -113,7 +113,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       // 3. 로그인 결과 처리
       if (!loginSuccess) {
-        final errorMessage = widget.authNotifier.debugState.errorMessage ??
+        final errorMessage = widget.authNotifier.currentErrorMessage ??
             '로그인 중 오류가 발생했습니다.';
         _showErrorMessage(errorMessage);
       }
@@ -238,75 +238,61 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   /// 카카오 로그인 버튼 빌드
   Widget _buildKakaoLoginButton() {
-    return Consumer(
-      builder: (context, ref, child) {
-        // 로딩 상태는 별도로 관리 (실제로는 _handleKakaoLogin에서 처리)
-        bool isLoading = false;
-        
-        return Container(
-          width: double.infinity,
-          height: _getButtonHeight(),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF4285F4).withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      height: _getButtonHeight(),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4285F4).withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: GestureDetector(
-              onTap: isLoading ? null : _handleKakaoLogin,
-              child: SvgPicture.asset(
-                'assets/images/login/kakao.svg',
-                width: double.infinity,
-                height: _getButtonHeight(),
-                fit: BoxFit.fill,
-              ),
-            ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: GestureDetector(
+          onTap: _handleKakaoLogin,
+          child: SvgPicture.asset(
+            'assets/images/login/kakao.svg',
+            width: double.infinity,
+            height: _getButtonHeight(),
+            fit: BoxFit.fill,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
   /// 네이버 로그인 버튼 빌드
   Widget _buildNaverLoginButton() {
-    return Consumer(
-      builder: (context, ref, child) {
-        // 로딩 상태는 별도로 관리 (실제로는 _handleNaverLogin에서 처리)
-        bool isLoading = false;
-        
-        return Container(
-          width: double.infinity,
-          height: _getButtonHeight(),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF03C75A).withValues(alpha: 0.3), // 네이버 브랜드 색상
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    return Container(
+      width: double.infinity,
+      height: _getButtonHeight(),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF03C75A).withValues(alpha: 0.3), // 네이버 브랜드 색상
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: GestureDetector(
-              onTap: isLoading ? null : _handleNaverLogin,
-              child: SvgPicture.asset(
-                'assets/images/login/naver.svg',
-                width: double.infinity,
-                height: _getButtonHeight(),
-                fit: BoxFit.cover,
-              ),
-            ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: GestureDetector(
+          onTap: _handleNaverLogin,
+          child: SvgPicture.asset(
+            'assets/images/login/naver.svg',
+            width: double.infinity,
+            height: _getButtonHeight(),
+            fit: BoxFit.cover,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
