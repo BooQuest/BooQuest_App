@@ -112,13 +112,13 @@ class VerificationCompleteScreen extends StatelessWidget {
   String _getVerificationMessage() {
     switch (method) {
       case 'link':
-        return '링크 인증 완료';
       case 'text':
-        return '텍스트 인증 완료';
       case 'photo':
-        return '사진 인증 완료';
+        return '추가 인증 완료';
       case 'main_quest':
         return '메인 퀘스트 완료';
+      case 'sub_quest':
+        return '부 퀘스트 완료';
       default:
         return '추가 인증 완료';
     }
@@ -126,10 +126,12 @@ class VerificationCompleteScreen extends StatelessWidget {
 
   /// EXP 메시지 반환
   String _getExpMessage() {
-    if (method == 'main_quest' && expReward != null) {
-      return '+EXP ${expReward}만큼 경험치가 올랐어요';
+    if (method == 'main_quest') {
+      return '+EXP 50만큼 경험치가 올랐어요';
+    } else if (method == 'sub_quest' || method == 'link' || method == 'text' || method == 'photo') {
+      return '+EXP 10만큼 경험치가 올랐어요';
     }
-    return '+EXP 5만큼 경험치가 올랐어요';
+    return '';
   }
 
   /// 확인 버튼

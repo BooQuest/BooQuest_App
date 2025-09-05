@@ -13,13 +13,17 @@ class MissionCompletionRepositoryImpl implements MissionCompletionRepository {
   @override
   Future<Either<MissionFailure, MissionCompletionEntity>> completeMission(int missionId) async {
     try {
-      print('🔧 [Repository] 메인 퀘스트 완료 처리 시작: missionId=$missionId');
-      
       final result = await _apiService.completeMission(missionId);
       
       return Right(result);
     } catch (e) {
-      print('❌ [Repository] 메인 퀘스트 완료 처리 실패: $e');
+      
+      // 이미 완료된 메인 퀘스트인 경우 특별 처리
+      if (e.toString().contains('already-completed')) {
+        // 특별한 실패 타입을 만들어서 notifier에서 구분할 수 있도록 함
+        return Left(MissionFailure.serverError('already-completed'));
+      }
+      
       return Left(MissionFailure.serverError(e.toString()));
     }
   }

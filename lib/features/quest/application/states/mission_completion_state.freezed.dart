@@ -23,6 +23,7 @@ mixin _$MissionCompletionState {
     required TResult Function() loading,
     required TResult Function(MissionCompletionEntity data) success,
     required TResult Function(String message) failure,
+    required TResult Function() alreadyCompleted,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
@@ -30,6 +31,7 @@ mixin _$MissionCompletionState {
     TResult? Function()? loading,
     TResult? Function(MissionCompletionEntity data)? success,
     TResult? Function(String message)? failure,
+    TResult? Function()? alreadyCompleted,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
@@ -37,6 +39,7 @@ mixin _$MissionCompletionState {
     TResult Function()? loading,
     TResult Function(MissionCompletionEntity data)? success,
     TResult Function(String message)? failure,
+    TResult Function()? alreadyCompleted,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -45,6 +48,7 @@ mixin _$MissionCompletionState {
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
     required TResult Function(_Failure value) failure,
+    required TResult Function(_AlreadyCompleted value) alreadyCompleted,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
@@ -52,6 +56,7 @@ mixin _$MissionCompletionState {
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
     TResult? Function(_Failure value)? failure,
+    TResult? Function(_AlreadyCompleted value)? alreadyCompleted,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
@@ -59,6 +64,7 @@ mixin _$MissionCompletionState {
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
     TResult Function(_Failure value)? failure,
+    TResult Function(_AlreadyCompleted value)? alreadyCompleted,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
 }
@@ -135,6 +141,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function() loading,
     required TResult Function(MissionCompletionEntity data) success,
     required TResult Function(String message) failure,
+    required TResult Function() alreadyCompleted,
   }) {
     return initial();
   }
@@ -146,6 +153,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? loading,
     TResult? Function(MissionCompletionEntity data)? success,
     TResult? Function(String message)? failure,
+    TResult? Function()? alreadyCompleted,
   }) {
     return initial?.call();
   }
@@ -157,6 +165,7 @@ class _$InitialImpl implements _Initial {
     TResult Function()? loading,
     TResult Function(MissionCompletionEntity data)? success,
     TResult Function(String message)? failure,
+    TResult Function()? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -172,6 +181,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
     required TResult Function(_Failure value) failure,
+    required TResult Function(_AlreadyCompleted value) alreadyCompleted,
   }) {
     return initial(this);
   }
@@ -183,6 +193,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
     TResult? Function(_Failure value)? failure,
+    TResult? Function(_AlreadyCompleted value)? alreadyCompleted,
   }) {
     return initial?.call(this);
   }
@@ -194,6 +205,7 @@ class _$InitialImpl implements _Initial {
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
     TResult Function(_Failure value)? failure,
+    TResult Function(_AlreadyCompleted value)? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -254,6 +266,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function() loading,
     required TResult Function(MissionCompletionEntity data) success,
     required TResult Function(String message) failure,
+    required TResult Function() alreadyCompleted,
   }) {
     return loading();
   }
@@ -265,6 +278,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function()? loading,
     TResult? Function(MissionCompletionEntity data)? success,
     TResult? Function(String message)? failure,
+    TResult? Function()? alreadyCompleted,
   }) {
     return loading?.call();
   }
@@ -276,6 +290,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function()? loading,
     TResult Function(MissionCompletionEntity data)? success,
     TResult Function(String message)? failure,
+    TResult Function()? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -291,6 +306,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
     required TResult Function(_Failure value) failure,
+    required TResult Function(_AlreadyCompleted value) alreadyCompleted,
   }) {
     return loading(this);
   }
@@ -302,6 +318,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
     TResult? Function(_Failure value)? failure,
+    TResult? Function(_AlreadyCompleted value)? alreadyCompleted,
   }) {
     return loading?.call(this);
   }
@@ -313,6 +330,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
     TResult Function(_Failure value)? failure,
+    TResult Function(_AlreadyCompleted value)? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -412,6 +430,7 @@ class _$SuccessImpl implements _Success {
     required TResult Function() loading,
     required TResult Function(MissionCompletionEntity data) success,
     required TResult Function(String message) failure,
+    required TResult Function() alreadyCompleted,
   }) {
     return success(data);
   }
@@ -423,6 +442,7 @@ class _$SuccessImpl implements _Success {
     TResult? Function()? loading,
     TResult? Function(MissionCompletionEntity data)? success,
     TResult? Function(String message)? failure,
+    TResult? Function()? alreadyCompleted,
   }) {
     return success?.call(data);
   }
@@ -434,6 +454,7 @@ class _$SuccessImpl implements _Success {
     TResult Function()? loading,
     TResult Function(MissionCompletionEntity data)? success,
     TResult Function(String message)? failure,
+    TResult Function()? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (success != null) {
@@ -449,6 +470,7 @@ class _$SuccessImpl implements _Success {
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
     required TResult Function(_Failure value) failure,
+    required TResult Function(_AlreadyCompleted value) alreadyCompleted,
   }) {
     return success(this);
   }
@@ -460,6 +482,7 @@ class _$SuccessImpl implements _Success {
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
     TResult? Function(_Failure value)? failure,
+    TResult? Function(_AlreadyCompleted value)? alreadyCompleted,
   }) {
     return success?.call(this);
   }
@@ -471,6 +494,7 @@ class _$SuccessImpl implements _Success {
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
     TResult Function(_Failure value)? failure,
+    TResult Function(_AlreadyCompleted value)? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (success != null) {
@@ -566,6 +590,7 @@ class _$FailureImpl implements _Failure {
     required TResult Function() loading,
     required TResult Function(MissionCompletionEntity data) success,
     required TResult Function(String message) failure,
+    required TResult Function() alreadyCompleted,
   }) {
     return failure(message);
   }
@@ -577,6 +602,7 @@ class _$FailureImpl implements _Failure {
     TResult? Function()? loading,
     TResult? Function(MissionCompletionEntity data)? success,
     TResult? Function(String message)? failure,
+    TResult? Function()? alreadyCompleted,
   }) {
     return failure?.call(message);
   }
@@ -588,6 +614,7 @@ class _$FailureImpl implements _Failure {
     TResult Function()? loading,
     TResult Function(MissionCompletionEntity data)? success,
     TResult Function(String message)? failure,
+    TResult Function()? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (failure != null) {
@@ -603,6 +630,7 @@ class _$FailureImpl implements _Failure {
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
     required TResult Function(_Failure value) failure,
+    required TResult Function(_AlreadyCompleted value) alreadyCompleted,
   }) {
     return failure(this);
   }
@@ -614,6 +642,7 @@ class _$FailureImpl implements _Failure {
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
     TResult? Function(_Failure value)? failure,
+    TResult? Function(_AlreadyCompleted value)? alreadyCompleted,
   }) {
     return failure?.call(this);
   }
@@ -625,6 +654,7 @@ class _$FailureImpl implements _Failure {
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
     TResult Function(_Failure value)? failure,
+    TResult Function(_AlreadyCompleted value)? alreadyCompleted,
     required TResult orElse(),
   }) {
     if (failure != null) {
@@ -644,4 +674,129 @@ abstract class _Failure implements MissionCompletionState {
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$FailureImplCopyWith<_$FailureImpl> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$AlreadyCompletedImplCopyWith<$Res> {
+  factory _$$AlreadyCompletedImplCopyWith(
+    _$AlreadyCompletedImpl value,
+    $Res Function(_$AlreadyCompletedImpl) then,
+  ) = __$$AlreadyCompletedImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$AlreadyCompletedImplCopyWithImpl<$Res>
+    extends _$MissionCompletionStateCopyWithImpl<$Res, _$AlreadyCompletedImpl>
+    implements _$$AlreadyCompletedImplCopyWith<$Res> {
+  __$$AlreadyCompletedImplCopyWithImpl(
+    _$AlreadyCompletedImpl _value,
+    $Res Function(_$AlreadyCompletedImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of MissionCompletionState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$AlreadyCompletedImpl implements _AlreadyCompleted {
+  const _$AlreadyCompletedImpl();
+
+  @override
+  String toString() {
+    return 'MissionCompletionState.alreadyCompleted()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$AlreadyCompletedImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(MissionCompletionEntity data) success,
+    required TResult Function(String message) failure,
+    required TResult Function() alreadyCompleted,
+  }) {
+    return alreadyCompleted();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(MissionCompletionEntity data)? success,
+    TResult? Function(String message)? failure,
+    TResult? Function()? alreadyCompleted,
+  }) {
+    return alreadyCompleted?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(MissionCompletionEntity data)? success,
+    TResult Function(String message)? failure,
+    TResult Function()? alreadyCompleted,
+    required TResult orElse(),
+  }) {
+    if (alreadyCompleted != null) {
+      return alreadyCompleted();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Loading value) loading,
+    required TResult Function(_Success value) success,
+    required TResult Function(_Failure value) failure,
+    required TResult Function(_AlreadyCompleted value) alreadyCompleted,
+  }) {
+    return alreadyCompleted(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Loading value)? loading,
+    TResult? Function(_Success value)? success,
+    TResult? Function(_Failure value)? failure,
+    TResult? Function(_AlreadyCompleted value)? alreadyCompleted,
+  }) {
+    return alreadyCompleted?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Loading value)? loading,
+    TResult Function(_Success value)? success,
+    TResult Function(_Failure value)? failure,
+    TResult Function(_AlreadyCompleted value)? alreadyCompleted,
+    required TResult orElse(),
+  }) {
+    if (alreadyCompleted != null) {
+      return alreadyCompleted(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _AlreadyCompleted implements MissionCompletionState {
+  const factory _AlreadyCompleted() = _$AlreadyCompletedImpl;
 }
