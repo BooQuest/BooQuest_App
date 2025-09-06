@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/main/application/states/mission_list_state.dart';
+import 'package:booquest/features/main/domain/entities/mission_entity.dart';
 import 'package:booquest/features/quest/presentation/widgets/subquest_section.dart';
 
 class MainQuestCard extends StatelessWidget {
@@ -34,7 +35,7 @@ class MainQuestCard extends StatelessWidget {
     return state.maybeWhen(
       success: (data) {
         // 5단계 완료 상태를 먼저 체크
-        final completedMissions = data.missions
+        final completedMissions = List<MissionEntity>.from(data.missions)
             .where((mission) => mission.status == 'COMPLETED')
             .toList()
           ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
@@ -302,7 +303,7 @@ class MainQuestCard extends StatelessWidget {
                       // 진행 중인 미션이 있으면 표시, 없으면 완료된 미션 중 가장 최근 것 표시
                       Builder(
                         builder: (context) {
-                          final inProgressMissions = data.missions.where((mission) => mission.status == 'IN_PROGRESS').toList();
+                          final inProgressMissions = List<MissionEntity>.from(data.missions).where((mission) => mission.status == 'IN_PROGRESS').toList();
                           
                           if (inProgressMissions.isNotEmpty) {
                             // 진행 중인 미션이 있으면 표시
@@ -330,7 +331,7 @@ class MainQuestCard extends StatelessWidget {
                             );
                           } else {
                             // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것 표시
-                            final completedMissions = data.missions
+                            final completedMissions = List<MissionEntity>.from(data.missions)
                                 .where((mission) => mission.status == 'COMPLETED')
                                 .toList()
                               ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
@@ -376,7 +377,7 @@ class MainQuestCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Builder(
                             builder: (context) {
-                              final inProgressMissions = data.missions.where((mission) => mission.status == 'IN_PROGRESS').toList();
+                              final inProgressMissions = List<MissionEntity>.from(data.missions).where((mission) => mission.status == 'IN_PROGRESS').toList();
                               
                               if (inProgressMissions.isNotEmpty) {
                                 return Text(
@@ -389,7 +390,7 @@ class MainQuestCard extends StatelessWidget {
                                 );
                               } else {
                                 // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것의 경험치 표시
-                                final completedMissions = data.missions
+                                final completedMissions = List<MissionEntity>.from(data.missions)
                                     .where((mission) => mission.status == 'COMPLETED')
                                     .toList()
                                   ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
@@ -414,19 +415,37 @@ class MainQuestCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: isSmallScreen ? 14 : 16),
-                // 오른쪽 아이콘
-                Container(
-                  width: isSmallScreen ? 55 : 60,
-                  height: isSmallScreen ? 55 : 60,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFE0E6),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.settings,
-                    size: isSmallScreen ? 27 : 30,
-                    color: const Color(0xFFE91E63),
-                  ),
+                // 오른쪽 아이콘 - 메인 퀘스트 단계에 따라 다른 이미지 표시
+                Builder(
+                  builder: (context) {
+                    // 현재 진행 중인 미션이나 완료된 미션 중 가장 최근 것의 단계 확인
+                    final inProgressMissions = List<MissionEntity>.from(data.missions).where((mission) => mission.status == 'IN_PROGRESS').toList();
+                    int currentStage = 1; // 기본값
+                    
+                    if (inProgressMissions.isNotEmpty) {
+                      currentStage = inProgressMissions.first.orderNo ?? 1;
+                    } else {
+                      // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것의 단계 사용
+                      final completedMissions = List<MissionEntity>.from(data.missions)
+                          .where((mission) => mission.status == 'COMPLETED')
+                          .toList()
+                        ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
+                      
+                      if (completedMissions.isNotEmpty) {
+                        currentStage = completedMissions.first.orderNo ?? 1;
+                      }
+                    }
+                    
+                    // currentStage를 1-5 범위로 제한
+                    currentStage = currentStage.clamp(1, 5);
+                    
+                    return Image.asset(
+                      'assets/images/quest/main_quest_$currentStage.png',
+                      width: isSmallScreen ? 55 : 60,
+                      height: isSmallScreen ? 55 : 60,
+                      fit: BoxFit.contain,
+                    );
+                  },
                 ),
               ],
             ),
@@ -434,7 +453,7 @@ class MainQuestCard extends StatelessWidget {
             // 진행률 바
             Builder(
               builder: (context) {
-                final inProgressMissions = data.missions.where((mission) => mission.status == 'IN_PROGRESS').toList();
+                final inProgressMissions = List<MissionEntity>.from(data.missions).where((mission) => mission.status == 'IN_PROGRESS').toList();
                 
                 if (inProgressMissions.isNotEmpty) {
                   // 진행 중인 미션이 있으면 진행률 바 표시
@@ -472,7 +491,7 @@ class MainQuestCard extends StatelessWidget {
                   );
                 } else {
                   // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것의 진행률 표시
-                  final completedMissions = data.missions
+                  final completedMissions = List<MissionEntity>.from(data.missions)
                       .where((mission) => mission.status == 'COMPLETED')
                       .toList()
                     ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));

@@ -11,6 +11,8 @@ import 'package:booquest/features/revenue/presentation/screens/total_revenue_scr
 import 'package:booquest/features/revenue/application/states/sidejob_summary_state.dart';
 import 'package:booquest/features/revenue/domain/entities/sidejob_summary_entity.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
+import 'package:booquest/features/main/infrastructure/providers/main_providers.dart';
 
 /// 부업 프로젝트 상세 화면 - Clean Architecture + Riverpod 구조
 class SidejobDetailScreen extends ConsumerStatefulWidget {
@@ -44,6 +46,29 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
+  }
+
+  /// 레벨과 타입에 따라 캐릭터 GIF 파일 경로를 반환하는 함수
+  String _getCharacterGifPath(int level) {
+    // 레벨 7 이상은 최대 레벨로 제한
+    final gifLevel = level > 7 ? 7 : level;
+    
+    // 로컬 스토리지에서 캐릭터 타입 가져오기
+    try {
+      final onboardingService = OnboardingStorageService.getInstanceSync();
+      final characterType = onboardingService.getCharacterType();
+      
+      // 타입에 따라 다른 GIF 파일 사용 (네이버 클라우드 스토리지 URL 사용)
+      if (characterType == 'WHITE') {
+        return 'https://kr.object.ncloudstorage.com/booquest-character/pleasure/pleasure_W$gifLevel.gif';
+      } else {
+        // BLACK이거나 null인 경우 기본값으로 B 사용
+        return 'https://kr.object.ncloudstorage.com/booquest-character/pleasure/pleasure_B$gifLevel.gif';
+      }
+    } catch (e) {
+      // 스토리지 접근 실패 시 기본값으로 B 사용
+      return 'https://kr.object.ncloudstorage.com/booquest-character/pleasure/pleasure_B$gifLevel.gif';
+    }
   }
 
 
@@ -321,6 +346,13 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.width < 400;
     
+    // 캐릭터 레벨 가져오기
+    final characterGrowthState = ref.watch(characterGrowthNotifierProvider);
+    final characterLevel = characterGrowthState.maybeWhen(
+      success: (characterData) => characterData.level,
+      orElse: () => 1, // 기본값
+    );
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -357,13 +389,42 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
             //_buildTag('경제·사회·재테크'),
           ],
         ),
-        SizedBox(height: isSmallScreen ? 16 : 20),
         Align(
           alignment: Alignment.centerRight,
-          child: SvgPicture.asset(
-            'assets/images/characters/sidejob_test2.svg',
-            width: isSmallScreen ? 140 : 160,
-            height: isSmallScreen ? 160 : 180,
+          child: Container(
+            width: isSmallScreen ? 180 : 200,
+            height: isSmallScreen ? 200 : 220,
+            child: ClipRect(
+              child: OverflowBox(
+                alignment: Alignment.bottomCenter,
+                child: Transform.scale(
+                  scale: 1.2, // 이미지를 1.2배 확대
+                  child: Image.network(
+                    _getCharacterGifPath(characterLevel), 
+                    width: isSmallScreen ? 180 : 200,
+                    height: isSmallScreen ? 200 : 220,
+                    fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return SizedBox(
+                      width: isSmallScreen ? 180 : 200,
+                      height: isSmallScreen ? 200 : 220,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
+                  },
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],

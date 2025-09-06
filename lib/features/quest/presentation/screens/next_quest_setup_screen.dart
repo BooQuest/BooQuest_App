@@ -211,7 +211,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
         }
 
         // orderNo 순서로 정렬
-        final sortedMissions = List<dynamic>.from(data.missions)
+        final sortedMissions = List<MissionEntity>.from(data.missions)
           ..sort((a, b) {
             final aOrder = a.orderNo ?? 0;
             final bOrder = b.orderNo ?? 0;
@@ -219,7 +219,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
           });
 
         return Column(
-          children: sortedMissions.map((mission) {
+          children: sortedMissions.map((MissionEntity mission) {
             final isCompleted = mission.status == 'COMPLETED';
             final isInProgress = mission.status == 'IN_PROGRESS';
             
@@ -844,7 +844,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
   }
   
   /// 부퀘스트 섹션 (완료된 퀘스트에만 표시)
-  Widget _buildSubQuestSection(dynamic mission) {
+  Widget _buildSubQuestSection(MissionEntity mission) {
     return StatefulBuilder(
       builder: (context, setState) {
         bool isExpanded = true; // 기본적으로 펼쳐진 상태
@@ -914,7 +914,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
   }
   
   /// 부퀘스트 아이템
-  Widget _buildSubQuestItem(dynamic step) {
+  Widget _buildSubQuestItem(MissionStep step) {
     final isCompleted = step.status == 'COMPLETED';
     
     return Padding(
