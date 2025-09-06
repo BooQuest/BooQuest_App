@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 
-class TutorialCompletionScreen extends StatelessWidget {
+class TutorialCompletionScreen extends StatefulWidget {
   final String userName;
+  final String? characterType;
   
   const TutorialCompletionScreen({
     super.key,
     required this.userName,
+    this.characterType,
   });
+
+  @override
+  State<TutorialCompletionScreen> createState() => _TutorialCompletionScreenState();
+}
+
+class _TutorialCompletionScreenState extends State<TutorialCompletionScreen> {
+  String? _characterType;
+
+  @override
+  void initState() {
+    super.initState();
+    // 전달받은 characterType 사용
+    _characterType = widget.characterType;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +44,11 @@ class TutorialCompletionScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: isSmallScreen ? 80 : 120),
-                    _buildCatImage(),
-                    SizedBox(height: isSmallScreen ? 30 : 40),
+                    SizedBox(height: isSmallScreen ? 20 : 30),
+                    _buildCatImage(context),
+                    SizedBox(height: isSmallScreen ? 12 : 16),
                     _buildCongratulatoryText(),
-                    SizedBox(height: isSmallScreen ? 80 : 100),
+                    SizedBox(height: isSmallScreen ? 20 : 30),
                   ],
                 ),
               ),
@@ -43,13 +60,44 @@ class TutorialCompletionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCatImage() {
-    return Container(
-      width: double.infinity,
-      height: 200,
-      child: Image.asset(
-        'assets/images/login/complete.png',
-        fit: BoxFit.contain,
+  Widget _buildCatImage(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
+    // character type에 따라 다른 이미지 URL 선택
+    final imageUrl = _characterType == 'WHITE' 
+        ? 'https://kr.object.ncloudstorage.com/booquest-character/welcome/welcome_1W.gif'
+        : 'https://kr.object.ncloudstorage.com/booquest-character/welcome/welcome_1B.gif';
+    
+    return Center(
+      child: SizedBox(
+        width: isSmallScreen ? 350 : 400, // 더 큰 크기로 변경
+        height: isSmallScreen ? 350 : 400, // 정사각형으로 설정
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12), // 둥근 모서리 추가
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.cover, // 빈공간 없이 채우기
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                      : null,
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Center(
+                child: Text(
+                  '이미지를 불러올 수 없습니다',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -58,7 +106,7 @@ class TutorialCompletionScreen extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '$userName님의',
+          '${widget.userName}님의',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,

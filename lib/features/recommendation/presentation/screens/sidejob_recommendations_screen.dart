@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
@@ -31,7 +30,6 @@ class SideJobRecommendationsScreen extends StatefulWidget {
 }
 
 class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScreen> {
-  static const double _horizontalPadding = 20.0;
   static const double _cardSpacing = 12.0;
 
   String _characterName = '';
@@ -110,75 +108,58 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // 실시간 반응형 값 계산 (오버플로우 방지)
-        final double screenHeight = constraints.maxHeight;
-        final double screenWidth = constraints.maxWidth;
-        
-        // 동적으로 계산되는 값들 (실시간 업데이트)
-        final double horizontalPadding = screenWidth * 0.05; // 화면 너비의 5%
-        final double topSpacing = screenHeight * 0.1; // 화면 높이의 10%
-        final double bottomSpacing = screenHeight * 0.04; // 화면 높이의 4%
-        
-        // 상단 여백 관련
-        final double topMargin = screenHeight * 0.05; // 화면 높이의 5%
-        final double titleTopSpacing = screenHeight * 0.05; // 화면 높이의 5%
-        final double titleToCardSpacing = screenHeight * 0.05; // 화면 높이의 5%
-        final double cardToBottomSpacing = screenHeight * 0.075; // 화면 높이의 7.5%
-        
-        // 하단 버튼 관련
-        final double buttonHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
-        
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: topMargin),
-                            _buildTopBar(screenWidth),
-                            SizedBox(height: titleTopSpacing),
-                            _buildTitle(screenWidth),
-                            SizedBox(height: titleToCardSpacing),
-                            _buildCardList(),
-                            SizedBox(height: cardToBottomSpacing),
-                          ],
-                        ),
-                      ),
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenSize.width * 0.05, 
                     ),
-                    _buildBottomBar(horizontalPadding, buttonHeight),
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: isSmallScreen ? 8 : 12),
+                        _buildTopBar(context),
+                        SizedBox(height: isSmallScreen ? 12 : 16),
+                        _buildTitle(context),
+                        SizedBox(height: isSmallScreen ? 16 : 20),
+                        _buildCardList(),
+                        SizedBox(height: isSmallScreen ? 40 : 50),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              if (_isLoading) const AILoadingOverlay(
-                title: 'AI가 추천을 탐색 중...',
-                subtitle: '취향, 패턴, 목표를 분석하고 있어요',
-              ),
-            ],
+                _buildBottomBar(context),
+              ],
+            ),
           ),
-        );
-      },
+          if (_isLoading) const AILoadingOverlay(
+            title: 'AI가 추천을 탐색 중...',
+            subtitle: '취향, 패턴, 목표를 분석하고 있어요',
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildTopBar(double screenWidth) {
-    final double iconSize = screenWidth * 0.05; // 화면 너비의 5% (반응형 아이콘 크기)
-    final double rightPadding = screenWidth * 0.1; // 화면 너비의 10% (반응형 오른쪽 패딩)
-    final double titleFontSize = screenWidth * 0.045; // 화면 너비의 4.5% (반응형 폰트 크기)
+  Widget _buildTopBar(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
     
     return Row(
       children: [
         IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, 
-            size: iconSize.clamp(18.0, 24.0), // 최소 18, 최대 24로 제한
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded, 
+            size: isSmallScreen ? 18 : 20, 
             color: AppColors.textPrimary
           ),
           padding: EdgeInsets.zero,
@@ -186,53 +167,67 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
           onPressed: _handleBack,
         ),
         Expanded(
-          child: Center(child: Text('부업 추천 3가지', 
-            style: TextStyle(
-              fontSize: titleFontSize.clamp(16.0, 20.0), // 최소 16, 최대 20으로 제한
-              fontWeight: FontWeight.w700, 
-              color: AppColors.textPrimary
+          child: Center(
+            child: Text(
+              '부업 추천 3가지', 
+              style: TextStyle(
+                fontSize: isSmallScreen ? 16 : 18, 
+                fontWeight: FontWeight.w700, 
+                color: AppColors.textPrimary
+              )
             )
-          )),
+          ),
         ),
-        SizedBox(width: rightPadding),
+        SizedBox(width: isSmallScreen ? 32 : 40),
       ],
     );
   }
 
-  Widget _buildTitle(double screenWidth) {
-    return Padding(
-      padding: EdgeInsets.only(left: screenWidth * 0.04), // 카드 내부 텍스트와 동일한 위치로 이동
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: RichText(
-          text: TextSpan(
-            style: TextStyle(
-              fontSize: screenWidth * 0.06, // 화면 너비의 6% (반응형 폰트 크기)
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-              height: 1.4,
-            ),
+  Widget _buildTitle(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextSpan(text: '${_characterName.isNotEmpty ? _characterName : '사용자'}님에게 딱 맞는\n'),
-              TextSpan(
-                text: '부업 3가지',
-                style: TextStyle(
-                  color: const Color(0xFF1976D2), // 파란색 강조
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 20 : 24,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    height: 1.4,
+                  ),
+                  children: [
+                    TextSpan(text: '${_characterName.isNotEmpty ? _characterName : '사용자'}님에게 딱 맞는\n'),
+                    TextSpan(
+                      text: '부업 3가지',
+                      style: TextStyle(
+                        color: const Color(0xFF1976D2),
+                      ),
+                    ),
+                    const TextSpan(text: '를 추천할게요\n'),
+                  ],
                 ),
               ),
-              const TextSpan(text: '를 추천할게요\n'),
-              TextSpan(
-                text: '다시 추천 받기를 원하거나 마음에 드는 부업을 선택해 주세요.',
+              SizedBox(height: isSmallScreen ? 6 : 8),
+              Text(
+                '다시 추천 받기를 원하거나 마음에 드는 부업을 선택해 주세요.',
                 style: TextStyle(
-                  fontSize: screenWidth * 0.04, // 화면 너비의 4% (반응형 폰트 크기)
+                  fontSize: isSmallScreen ? 14 : 16,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textPrimary,
+                  height: 1.4,
                 ),
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -241,14 +236,14 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     if (_recommendations.isEmpty) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          final double screenWidth = constraints.maxWidth;
-          final double fontSize = screenWidth * 0.04; // 화면 너비의 4% (반응형 폰트 크기)
+          final screenSize = MediaQuery.of(context).size;
+          final isSmallScreen = screenSize.height < 700;
           
           return Center(
             child: Text(
               '부업 추천 데이터가 없습니다.',
               style: TextStyle(
-                fontSize: fontSize.clamp(14.0, 18.0), // 최소 14, 최대 18으로 제한
+                fontSize: isSmallScreen ? 14 : 16, 
                 color: Colors.grey,
               ),
             ),
@@ -516,39 +511,37 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     );
   }
 
-  Widget _buildBottomBar(double horizontalPadding, double buttonHeight) {
+  Widget _buildBottomBar(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.height < 700;
+    
     return SafeArea(
       top: false,
       child: Padding(
         padding: EdgeInsets.only(
-          left: horizontalPadding,
-          right: horizontalPadding,
+          left: 20.0,
+          right: 20.0,
           bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: Container(
+        child: SizedBox(
           width: double.infinity,
-          height: buttonHeight.clamp(46.0, 60.0),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1976D2),
-            borderRadius: BorderRadius.circular(buttonHeight * 0.26),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () async {
-                await _handleRegenerate();
-              },
-              borderRadius: BorderRadius.circular(buttonHeight * 0.26),
-              child: Center(
-                child: Text(
-                  '전체 재생성하기',
-                  style: TextStyle(
-                    color: AppColors.buttonText,
-                    fontSize: buttonHeight * 0.39,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+          height: isSmallScreen ? 46 : 60,
+          child: ElevatedButton(
+            onPressed: () async {
+              await _handleRegenerate();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1976D2),
+              foregroundColor: AppColors.buttonText,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            child: Text(
+              '전체 재생성하기', 
+              style: TextStyle(
+                fontSize: isSmallScreen ? 16 : 18, 
+                fontWeight: FontWeight.w500
+              )
             ),
           ),
         ),
