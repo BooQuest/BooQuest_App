@@ -42,10 +42,11 @@ class MissionListRepositoryImpl {
         if (missionList.missions.isNotEmpty) {
           print('  - first mission title: ${missionList.missions.first.title}');
           print('  - first mission orderNo: ${missionList.missions.first.orderNo}');
+          print('  - first mission guide: ${missionList.missions.first.guide}');
           print('  - all missions:');
           for (int i = 0; i < missionList.missions.length; i++) {
             final mission = missionList.missions[i];
-            print('    [$i] orderNo: ${mission.orderNo}, title: ${mission.title}');
+            print('    [$i] orderNo: ${mission.orderNo}, title: ${mission.title}, guide: ${mission.guide}');
           }
         }
 

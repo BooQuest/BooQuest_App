@@ -1247,7 +1247,10 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                         // 부업가이드 버튼
                         Center(
                           child: GestureDetector(
-                            onTap: () => _showSidejobGuidePopup(context),
+                            onTap: () {
+                              print('🔍 부업가이드 버튼 1 클릭됨');
+                              _showSidejobGuidePopup(context);
+                            },
                             child: Container(
                               width: double.infinity,
                               height: 40,
@@ -1295,7 +1298,10 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                     // 부업가이드 버튼
                     Center(
                       child: GestureDetector(
-                        onTap: () => _showSidejobGuidePopup(context),
+                        onTap: () {
+                          print('🔍 부업가이드 버튼 2 클릭됨');
+                          _showSidejobGuidePopup(context);
+                        },
                         child: Container(
                           width: double.infinity,
                           height: 40,
@@ -1677,26 +1683,51 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
 
   /// 부업 가이드 팝업 표시
   void _showSidejobGuidePopup(BuildContext context) {
+    print('🔍 _showSidejobGuidePopup 호출됨');
     final missionListState = ref.read(missionListNotifierProvider);
+    print('🔍 missionListState: $missionListState');
     
     missionListState.when(
       initial: () => _showEmptyGuidePopup(context),
       loading: () => _showEmptyGuidePopup(context),
       success: (data) {
-        if (data.missions.isNotEmpty) {
+        print('🔍 success 케이스 - missions 개수: ${data.missions.length}');
+        // 현재 진행 중인 미션 찾기
+        final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+        print('🔍 inProgressMission: ${inProgressMission?.title}');
+        
+        if (inProgressMission != null) {
+          // 진행 중인 미션이 있으면 해당 미션만 전달
+          print('🔍 진행 중인 미션으로 팝업 표시');
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
-            builder: (BuildContext context) => SidejobGuidePopup(missions: data.missions),
+            builder: (BuildContext context) => SidejobGuidePopup(missions: [inProgressMission]),
           );
         } else {
-          _showEmptyGuidePopup(context);
+          // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것 사용
+          final completedMissions = data.missions
+              .where((mission) => mission.status == 'COMPLETED')
+              .toList()
+            ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
+          
+          print('🔍 completedMissions 개수: ${completedMissions.length}');
+          if (completedMissions.isNotEmpty) {
+            print('🔍 완료된 미션으로 팝업 표시: ${completedMissions.first.title}');
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (BuildContext context) => SidejobGuidePopup(missions: [completedMissions.first]),
+            );
+          } else {
+            print('🔍 빈 가이드 팝업 표시');
+            _showEmptyGuidePopup(context);
+          }
         }
       },
       failure: (message) {
-        // API 에러 시 에러 메시지만 표시
-        print('❌ 부업 가이드 팝업 표시 실패: $message');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('부업 가이드 로드 실패: $message'),
@@ -1709,6 +1740,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   
   /// 빈 가이드 팝업 표시 (데이터가 없을 때)
   void _showEmptyGuidePopup(BuildContext context) {
+    print('🔍 _showEmptyGuidePopup 호출됨');
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

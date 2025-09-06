@@ -12,8 +12,64 @@ class SidejobGuidePopup extends StatelessWidget {
     required this.missions,
   });
 
+  /// 가이드 데이터 파싱
+  Map<String, dynamic> _parseGuideData(String? guideText) {
+    if (guideText == null || guideText.isEmpty) {
+      return {
+        'title': '부업 가이드',
+        'description': '부업 성공을 위한 단계별 가이드입니다.',
+        'steps': [],
+      };
+    }
+
+    final lines = guideText.split('\n').where((line) => line.trim().isNotEmpty).toList();
+    final steps = <Map<String, String>>[];
+    String currentDescription = '';
+    
+    for (final line in lines) {
+      final trimmedLine = line.trim();
+      
+      if (trimmedLine.startsWith('**') && trimmedLine.contains('.')) {
+        // **1. 제목** 형식의 단계 - 번호 제거
+        final titleWithNumber = trimmedLine.substring(2).replaceAll('**', '').trim();
+        // "1. " 또는 "2. " 등의 번호 패턴 제거
+        final title = titleWithNumber.replaceAll(RegExp(r'^\d+\.\s*'), '');
+        steps.add({
+          'title': title,
+          'description': '',
+        });
+        currentDescription = '';
+      } else if (trimmedLine.startsWith('- ')) {
+        // - 설명 형식
+        final description = trimmedLine.substring(2).trim();
+        if (steps.isNotEmpty) {
+          if (currentDescription.isNotEmpty) {
+            currentDescription += ' ';
+          }
+          currentDescription += description;
+          steps.last['description'] = currentDescription;
+        }
+      }
+    }
+
+    print('🔍 파싱된 steps 개수: ${steps.length}');
+    for (int i = 0; i < steps.length; i++) {
+      print('  [$i] title: ${steps[i]['title']}, description: ${steps[i]['description']}');
+    }
+
+    return {
+      'title': '부업 가이드',
+      'description': '부업 성공을 위한 단계별 가이드입니다.',
+      'steps': steps,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 현재 미션의 가이드 데이터 파싱
+    final currentMission = missions.isNotEmpty ? missions.first : null;
+    final guideData = _parseGuideData(currentMission?.guide);
+    
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -41,47 +97,50 @@ class SidejobGuidePopup extends StatelessWidget {
           
           // 제목 영역
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
-                  missions.isNotEmpty ? missions.first.title : '부업 가이드',
-                  style: const TextStyle(
+                const Text(
+                  '키워드 & 콘텐츠 전략 설계',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  '이렇게 하세요!',
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 const Text(
-                  '이렇게 하세요!',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  missions.isNotEmpty && missions.first.guide != null 
-                      ? missions.first.guide! 
-                      : '아쉬웠던 점을 모두 선택해주세요.',
+                  '부업의 출발점이자 성장의 방향을\n결정짓는 핵심 단계예요.',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Color(0xFF666666),
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
           ),
           
-          // 동적 가이드 단계
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+          // 가이드 단계들 (회색 카드 배경)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F8F8), // 회색 배경
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
-              children: _buildDynamicGuideSteps(),
+              children: _buildGuideSteps(guideData['steps'] ?? []),
             ),
           ),
           
@@ -92,28 +151,38 @@ class SidejobGuidePopup extends StatelessWidget {
     );
   }
 
-  /// 동적 가이드 단계 생성
-  List<Widget> _buildDynamicGuideSteps() {
-    // orderNo 순서대로 정렬
-    final sortedMissions = List<MissionEntity>.from(missions)
-      ..sort((a, b) => (a.orderNo ?? 0).compareTo(b.orderNo ?? 0));
-    
+  /// 가이드 단계들 생성 
+  List<Widget> _buildGuideSteps(List<dynamic> steps) {
+    if (steps.isEmpty) {
+      return [
+        const Center(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              '가이드 정보가 없습니다.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF666666),
+              ),
+            ),
+          ),
+        ),
+      ];
+    }
+
     final List<Widget> widgets = [];
-    
-    for (int i = 0; i < sortedMissions.length; i++) {
-      final mission = sortedMissions[i];
-      
+    for (int i = 0; i < steps.length; i++) {
+      final step = steps[i] as Map<String, String>;
       widgets.add(
         _buildGuideStep(
           number: i + 1,
-          title: mission.title,
-          description: mission.guide ?? '가이드 정보가 없습니다.',
+          title: step['title'] ?? '',
+          description: step['description'] ?? '',
         ),
       );
       
-      // 마지막 항목이 아니면 간격 추가
-      if (i < sortedMissions.length - 1) {
-        widgets.add(const SizedBox(height: 20));
+      if (i < steps.length - 1) {
+        widgets.add(const SizedBox(height: 24));
       }
     }
     
@@ -129,26 +198,30 @@ class SidejobGuidePopup extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 단계 번호 원형 배경
+        // 단계 번호 원형 배경 (더 깔끔한 스타일)
         Container(
-          width: 28,
-          height: 28,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            color: const Color(0xFFE0E0E0), // 연한 회색
             shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFFD0D0D0),
+              width: 1,
+            ),
           ),
           child: Center(
             child: Text(
               number.toString(),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF666666), // 회색 숫자
               ),
             ),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 20),
         
         // 제목과 설명
         Expanded(
@@ -159,17 +232,19 @@ class SidejobGuidePopup extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: Colors.black,
+                  height: 1.2,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 description,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
-                  height: 1.4,
+                  color: Color(0xFF666666),
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
