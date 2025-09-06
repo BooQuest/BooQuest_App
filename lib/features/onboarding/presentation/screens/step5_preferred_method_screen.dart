@@ -28,6 +28,10 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
 
   @override
   Widget build(BuildContext context) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         // 실시간 반응형 값 계산 (오버플로우 방지)
@@ -45,8 +49,8 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
         final double titleToOptionsSpacing = screenHeight * 0.05; // 화면 높이의 5%
         final double optionsToButtonSpacing = screenHeight * 0.075; // 화면 높이의 7.5%
         
-        // 하단 버튼 관련
-        final double buttonHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
+        // 하단 버튼 관련 - isSmallScreen 반응형 적용
+        final double buttonHeight = isSmallScreen ? 46.0 : 60.0;
         
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -74,7 +78,7 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
                     padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 16),
                     child: Container(
                       width: double.infinity,
-                      height: buttonHeight.clamp(46.0, 60.0),
+                      height: buttonHeight,
                       decoration: BoxDecoration(
                         color: _selectedOption != null 
                             ? const Color(0xFF1976D2)
@@ -91,7 +95,7 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
                               '다음',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: buttonHeight * 0.39,
+                                fontSize: isSmallScreen ? 16.0 : 18.0,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -133,6 +137,10 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
   }
 
   Widget _buildTitle(double screenWidth) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
       child: Align(
@@ -140,7 +148,7 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
         child: RichText(
           text: TextSpan(
             style: TextStyle(
-              fontSize: screenWidth * 0.06, // 화면 너비의 6% (반응형 폰트 크기)
+              fontSize: (screenWidth * 0.06).clamp(16.0, isSmallScreen ? 20.0 : 24.0), // 최소 16, 최대 20(작은화면) 또는 24(큰화면)
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
               height: 1.4,
@@ -157,7 +165,7 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
               TextSpan(
                 text: '가장 \'나답게\' 표현할 수 있는 방식을 알려주세요.',
                 style: TextStyle(
-                  fontSize: screenWidth * 0.04, // 화면 너비의 4% (반응형 폰트 크기)
+                  fontSize: (screenWidth * 0.04).clamp(12.0, isSmallScreen ? 16.0 : 18.0), // 최소 12, 최대 16(작은화면) 또는 18(큰화면)
                   fontWeight: FontWeight.w400,
                   color: AppColors.textPrimary,
                 ),

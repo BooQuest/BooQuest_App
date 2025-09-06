@@ -55,6 +55,10 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         // 실시간 반응형 값 계산 (오버플로우 방지)
@@ -72,9 +76,9 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
         final double titleToInputSpacing = screenHeight * 0.075; // 화면 높이의 7.5%
         final double inputToButtonSpacing = screenHeight * 0.02; // 화면 높이의 2%
         
-        // 하단 버튼 관련
-        final double buttonHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
-        final double inputHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 48, 최대 56)
+        // 하단 버튼 관련 - isSmallScreen 반응형 적용
+        final double buttonHeight = isSmallScreen ? 46.0 : 60.0;
+        final double inputHeight = isSmallScreen ? 48.0 : 56.0;
         
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -103,7 +107,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
                         // 입력 필드
                         Container(
                           width: double.infinity,
-                          height: inputHeight.clamp(48.0, 56.0),
+                          height: inputHeight,
                           decoration: BoxDecoration(
                             color: AppColors.inputBackground,
                             border: Border.all(
@@ -118,7 +122,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
                               controller: _jobController,
                               focusNode: _jobFocusNode,
                               style: TextStyle(
-                                fontSize: inputHeight * 0.375,
+                                fontSize: isSmallScreen ? 14.0 : 16.0,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textSecondary,
                               ),
@@ -127,7 +131,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
                                 hintText: '마케팅 어시스턴트',
                                 hintStyle: TextStyle(
                                   color: AppColors.textHint,
-                                  fontSize: inputHeight * 0.375,
+                                  fontSize: isSmallScreen ? 14.0 : 16.0,
                                 ),
                               ),
                               textInputAction: TextInputAction.done,
@@ -139,7 +143,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
                         // 확인 버튼
                         Container(
                           width: double.infinity,
-                          height: buttonHeight.clamp(46.0, 60.0),
+                          height: buttonHeight,
                           decoration: BoxDecoration(
                             color: _isValid 
                                 ? const Color(0xFF1976D2)
@@ -156,7 +160,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
                                   '확인',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: buttonHeight * 0.39,
+                                    fontSize: isSmallScreen ? 16.0 : 18.0,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -200,6 +204,10 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
   }
 
   Widget _buildTitle(double screenWidth) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
       child: Align(
@@ -207,7 +215,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
         child: Text(
           '지금 어떤 일을 하고 계시나요?',
           style: TextStyle(
-            fontSize: screenWidth * 0.06,
+            fontSize: (screenWidth * 0.06).clamp(16.0, isSmallScreen ? 20.0 : 24.0), // 최소 16, 최대 20(작은화면) 또는 24(큰화면)
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
             height: 1.4,
