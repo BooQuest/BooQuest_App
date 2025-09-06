@@ -537,19 +537,11 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // 아이콘 (텍스트 오른쪽)
-                Container(
+                Image.asset(
+                  'assets/images/quest/main_quest_1.png',
                   width: _iconSize,
                   height: _iconSize,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFCE4EC), // 연한 붉은색 배경
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.settings,
-                    size: 24,
-                    color: Color(0xFFE91E63), // 붉은색 아이콘
-                  ),
+                  fit: BoxFit.contain,
                 ),
               ],
             ),
@@ -694,25 +686,33 @@ class _QuestStepsScreenState extends ConsumerState<QuestStepsScreen> {
                 }
               }
               
-              // 온보딩 완료 상태로 설정 
-              await _markOnboardingCompleted();
-              
-              // 사용자 이름 가져오기
+              // 사용자 이름과 캐릭터 정보 미리 가져오기 (데이터 삭제 전)
               final authStorage = await AuthStorageService.getInstance();
               final userName = authStorage.getNickname() ?? '';
+              
+              // 온보딩 스토리지에서 캐릭터 정보 가져오기
+              final onboardingStorage = await OnboardingStorageService.getInstance();
+              final characterName = onboardingStorage.getCharacterName() ?? userName;
+              final characterType = onboardingStorage.getCharacterType();
+              
+              // 온보딩 완료 상태로 설정 (데이터 삭제)
+              await _markOnboardingCompleted();
               
               // 다음 화면으로 이동
               if (context.mounted) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => TutorialCompletionScreen(userName: userName),
+                    builder: (_) => TutorialCompletionScreen(
+                      userName: characterName,
+                      characterType: characterType,
+                    ),
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.buttonActive,
+              backgroundColor: const Color(0xFF1976D2),
               foregroundColor: AppColors.buttonText,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               elevation: 0,
