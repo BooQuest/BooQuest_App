@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../constants.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/core/services/token_refresh_service.dart';
 
 /// Infrastructure 계층: HTTP 네트워크 클라이언트
 /// 
@@ -10,6 +11,7 @@ import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart'
 class NetworkClient {
   final AuthStorageService _authStorageService;
   late final Dio _dio;
+  static bool _hasTriedRefresh = false; // 토큰 갱신을 시도했는지 확인하는 전역 플래그
 
   /// 생성자에서 AuthStorageService를 주입받아 의존성을 명확히 합니다.
   NetworkClient(this._authStorageService) {
@@ -51,7 +53,6 @@ class NetworkClient {
               options.headers['Authorization'] = 'Bearer $token';
             }
           } catch (e) {
-            print('❌ 토큰 가져오기 실패: $e');
           }
           
           // 디버깅용 로그 (개발 환경에서만)
@@ -65,19 +66,19 @@ class NetworkClient {
           handler.next(options);
         },
         onResponse: (response, handler) {
-          // 응답 로그
-          print('✅ API 응답: ${response.statusCode} ${response.requestOptions.path}');
           handler.next(response);
         },
-        onError: (error, handler) {
-          // 에러 로그
-          print('❌ API 에러: ${error.response?.statusCode} ${error.requestOptions.path}');
-          print('❌ 에러 메시지: ${error.message}');
+        onError: (error, handler) async {
           
-          // 401 에러 시 토큰 만료 처리
+          // 401 에러 시 로컬 스토리지 데이터 삭제 및 로그인 페이지로 이동
           if (error.response?.statusCode == 401) {
-            print('🔒 토큰 만료 감지, 인증 데이터 초기화 필요');
-            // TODO: AuthNotifier를 통해 로그아웃 처리
+            
+              try {
+                // 로컬 스토리지 데이터 삭제
+                await _authStorageService.clearAuthData();
+                // AuthNotifier에서 자동으로 로그인 페이지로 이동 처리
+              } catch (e) {
+              }
           }
           
           handler.next(error);

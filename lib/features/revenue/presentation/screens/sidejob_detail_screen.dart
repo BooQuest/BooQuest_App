@@ -10,6 +10,7 @@ import 'package:booquest/features/revenue/application/providers/sidejob_summary_
 import 'package:booquest/features/revenue/presentation/screens/total_revenue_screen.dart';
 import 'package:booquest/features/revenue/application/states/sidejob_summary_state.dart';
 import 'package:booquest/features/revenue/domain/entities/sidejob_summary_entity.dart';
+import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
 
 /// 부업 프로젝트 상세 화면 - Clean Architecture + Riverpod 구조
 class SidejobDetailScreen extends ConsumerStatefulWidget {
@@ -212,7 +213,13 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
                 width: 40,
                 height: 40,
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsScreen(),
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.settings, color: AppColors.textPrimary),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -604,8 +611,18 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
                   width: isSmallScreen ? 24 : 28,
                   height: isSmallScreen ? 24 : 28,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE6F3FF), 
-                    borderRadius: BorderRadius.all(Radius.circular(isSmallScreen ? 6 : 8)),
+                    color: Colors.white, 
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      label == '완료한 퀘스트 수' 
+                        ? 'assets/images/quest.png'
+                        : 'assets/images/income.png',
+                      width: isSmallScreen ? 16 : 20,
+                      height: isSmallScreen ? 16 : 20,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
                 SizedBox(width: isSmallScreen ? 8 : 10),

@@ -35,9 +35,9 @@ class MissionProgressRepositoryImpl {
         final data = response.data!['data'] as Map<String, dynamic>;
         
         final missionProgress = MissionProgressEntity(
-          currentMissionId: data['currentMissionId'] as int,
-          currentMissionOrder: data['currentMissionOrder'] as int,
-          currentMissionTitle: data['currentMissionTitle'] as String,
+          currentMissionId: data['currentMissionId'] as int?,
+          currentMissionOrder: data['currentMissionOrder'] as int?,
+          currentMissionTitle: data['currentMissionTitle'] as String?,
           missionStepProgressPercentage: data['missionStepProgressPercentage'] as double,
         );
 

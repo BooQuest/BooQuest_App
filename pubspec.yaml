@@ -106,7 +106,7 @@ flutter:
   assets:
     - assets/images/characters/
     - assets/images/login/
-    - assets/images/char/
+    - assets/images/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

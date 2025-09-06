@@ -23,9 +23,9 @@ MissionProgressEntity _$MissionProgressEntityFromJson(
 
 /// @nodoc
 mixin _$MissionProgressEntity {
-  int get currentMissionId => throw _privateConstructorUsedError;
-  int get currentMissionOrder => throw _privateConstructorUsedError;
-  String get currentMissionTitle => throw _privateConstructorUsedError;
+  int? get currentMissionId => throw _privateConstructorUsedError;
+  int? get currentMissionOrder => throw _privateConstructorUsedError;
+  String? get currentMissionTitle => throw _privateConstructorUsedError;
   double get missionStepProgressPercentage =>
       throw _privateConstructorUsedError;
 
@@ -47,9 +47,9 @@ abstract class $MissionProgressEntityCopyWith<$Res> {
   ) = _$MissionProgressEntityCopyWithImpl<$Res, MissionProgressEntity>;
   @useResult
   $Res call({
-    int currentMissionId,
-    int currentMissionOrder,
-    String currentMissionTitle,
+    int? currentMissionId,
+    int? currentMissionOrder,
+    String? currentMissionTitle,
     double missionStepProgressPercentage,
   });
 }
@@ -72,25 +72,25 @@ class _$MissionProgressEntityCopyWithImpl<
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentMissionId = null,
-    Object? currentMissionOrder = null,
-    Object? currentMissionTitle = null,
+    Object? currentMissionId = freezed,
+    Object? currentMissionOrder = freezed,
+    Object? currentMissionTitle = freezed,
     Object? missionStepProgressPercentage = null,
   }) {
     return _then(
       _value.copyWith(
-            currentMissionId: null == currentMissionId
+            currentMissionId: freezed == currentMissionId
                 ? _value.currentMissionId
                 : currentMissionId // ignore: cast_nullable_to_non_nullable
-                      as int,
-            currentMissionOrder: null == currentMissionOrder
+                      as int?,
+            currentMissionOrder: freezed == currentMissionOrder
                 ? _value.currentMissionOrder
                 : currentMissionOrder // ignore: cast_nullable_to_non_nullable
-                      as int,
-            currentMissionTitle: null == currentMissionTitle
+                      as int?,
+            currentMissionTitle: freezed == currentMissionTitle
                 ? _value.currentMissionTitle
                 : currentMissionTitle // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             missionStepProgressPercentage: null == missionStepProgressPercentage
                 ? _value.missionStepProgressPercentage
                 : missionStepProgressPercentage // ignore: cast_nullable_to_non_nullable
@@ -111,9 +111,9 @@ abstract class _$$MissionProgressEntityImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int currentMissionId,
-    int currentMissionOrder,
-    String currentMissionTitle,
+    int? currentMissionId,
+    int? currentMissionOrder,
+    String? currentMissionTitle,
     double missionStepProgressPercentage,
   });
 }
@@ -133,25 +133,25 @@ class __$$MissionProgressEntityImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentMissionId = null,
-    Object? currentMissionOrder = null,
-    Object? currentMissionTitle = null,
+    Object? currentMissionId = freezed,
+    Object? currentMissionOrder = freezed,
+    Object? currentMissionTitle = freezed,
     Object? missionStepProgressPercentage = null,
   }) {
     return _then(
       _$MissionProgressEntityImpl(
-        currentMissionId: null == currentMissionId
+        currentMissionId: freezed == currentMissionId
             ? _value.currentMissionId
             : currentMissionId // ignore: cast_nullable_to_non_nullable
-                  as int,
-        currentMissionOrder: null == currentMissionOrder
+                  as int?,
+        currentMissionOrder: freezed == currentMissionOrder
             ? _value.currentMissionOrder
             : currentMissionOrder // ignore: cast_nullable_to_non_nullable
-                  as int,
-        currentMissionTitle: null == currentMissionTitle
+                  as int?,
+        currentMissionTitle: freezed == currentMissionTitle
             ? _value.currentMissionTitle
             : currentMissionTitle // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         missionStepProgressPercentage: null == missionStepProgressPercentage
             ? _value.missionStepProgressPercentage
             : missionStepProgressPercentage // ignore: cast_nullable_to_non_nullable
@@ -165,9 +165,9 @@ class __$$MissionProgressEntityImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$MissionProgressEntityImpl implements _MissionProgressEntity {
   const _$MissionProgressEntityImpl({
-    required this.currentMissionId,
-    required this.currentMissionOrder,
-    required this.currentMissionTitle,
+    this.currentMissionId,
+    this.currentMissionOrder,
+    this.currentMissionTitle,
     required this.missionStepProgressPercentage,
   });
 
@@ -175,11 +175,11 @@ class _$MissionProgressEntityImpl implements _MissionProgressEntity {
       _$$MissionProgressEntityImplFromJson(json);
 
   @override
-  final int currentMissionId;
+  final int? currentMissionId;
   @override
-  final int currentMissionOrder;
+  final int? currentMissionOrder;
   @override
-  final String currentMissionTitle;
+  final String? currentMissionTitle;
   @override
   final double missionStepProgressPercentage;
 
@@ -237,9 +237,9 @@ class _$MissionProgressEntityImpl implements _MissionProgressEntity {
 
 abstract class _MissionProgressEntity implements MissionProgressEntity {
   const factory _MissionProgressEntity({
-    required final int currentMissionId,
-    required final int currentMissionOrder,
-    required final String currentMissionTitle,
+    final int? currentMissionId,
+    final int? currentMissionOrder,
+    final String? currentMissionTitle,
     required final double missionStepProgressPercentage,
   }) = _$MissionProgressEntityImpl;
 
@@ -247,11 +247,11 @@ abstract class _MissionProgressEntity implements MissionProgressEntity {
       _$MissionProgressEntityImpl.fromJson;
 
   @override
-  int get currentMissionId;
+  int? get currentMissionId;
   @override
-  int get currentMissionOrder;
+  int? get currentMissionOrder;
   @override
-  String get currentMissionTitle;
+  String? get currentMissionTitle;
   @override
   double get missionStepProgressPercentage;
 

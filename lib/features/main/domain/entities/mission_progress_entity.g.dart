@@ -9,9 +9,9 @@ part of 'mission_progress_entity.dart';
 _$MissionProgressEntityImpl _$$MissionProgressEntityImplFromJson(
   Map<String, dynamic> json,
 ) => _$MissionProgressEntityImpl(
-  currentMissionId: (json['currentMissionId'] as num).toInt(),
-  currentMissionOrder: (json['currentMissionOrder'] as num).toInt(),
-  currentMissionTitle: json['currentMissionTitle'] as String,
+  currentMissionId: (json['currentMissionId'] as num?)?.toInt(),
+  currentMissionOrder: (json['currentMissionOrder'] as num?)?.toInt(),
+  currentMissionTitle: json['currentMissionTitle'] as String?,
   missionStepProgressPercentage: (json['missionStepProgressPercentage'] as num)
       .toDouble(),
 );

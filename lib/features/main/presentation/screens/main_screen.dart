@@ -24,15 +24,26 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const QuestScreen(),
-    const MyRecordScreen(),
-  ];
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    
+    // 화면 목록 초기화 (콜백 함수 포함)
+    _screens = [
+      HomeScreen(
+        onQuestTabRequested: () {
+          setState(() {
+            _currentIndex = 1; // 퀘스트 탭으로 이동
+          });
+          _loadDataForTab(1);
+        },
+      ),
+      const QuestScreen(),
+      const MyRecordScreen(),
+    ];
+    
     // 초기 로드 시 홈 화면 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDataForTab(0);
