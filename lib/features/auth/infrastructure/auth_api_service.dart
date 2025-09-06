@@ -45,10 +45,12 @@ class AuthApiService {
   /// Returns: 새로운 액세스 토큰과 리프레시 토큰
   Future<Response<Map<String, dynamic>>> refreshToken(String refreshToken) async {
     return await _networkClient.post<Map<String, dynamic>>(
-      '/api/auth/refresh',
-      data: {
-        'refreshToken': refreshToken,
-      },
+      '/api/auth/token/refresh',
+      options: Options(
+        headers: {
+          'X-Refresh-Token': refreshToken,
+        },
+      ),
     );
   }
 

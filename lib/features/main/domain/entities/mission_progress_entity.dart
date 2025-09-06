@@ -7,9 +7,9 @@ part 'mission_progress_entity.g.dart';
 @freezed
 class MissionProgressEntity with _$MissionProgressEntity {
   const factory MissionProgressEntity({
-    required int currentMissionId,
-    required int currentMissionOrder,
-    required String currentMissionTitle,
+    int? currentMissionId,
+    int? currentMissionOrder,
+    String? currentMissionTitle,
     required double missionStepProgressPercentage,
   }) = _MissionProgressEntity;
 

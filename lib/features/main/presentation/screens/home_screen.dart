@@ -8,7 +8,9 @@ import 'package:booquest/features/main/presentation/screens/settings_screen.dart
 
 /// 홈 화면 - 사용자 캐릭터 정보와 퀘스트 진행 상황을 표시
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback? onQuestTabRequested;
+  
+  const HomeScreen({super.key, this.onQuestTabRequested});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -95,70 +97,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         
                         // Boo avatar placeholder - 레벨별 캐릭터 표시
                         characterGrowthState.maybeWhen(
-                          success: (data) => Container(
-                            width: isSmallScreen ? 280 : 320, 
-                            height: isSmallScreen ? 200 : 240,
-                            child: ClipRect(
-                              child: OverflowBox(
-                                alignment: Alignment.topCenter,
-                                child: Image.network(
-                                  _getCharacterGifPath(data.level),
-                                  width: isSmallScreen ? 280 : 320,
-                                  height: isSmallScreen ? 280 : 320,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return SizedBox(
-                                      width: isSmallScreen ? 280 : 320,
-                                      height: isSmallScreen ? 200 : 240,
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                              : null,
+                          success: (data) {
+                            // 레벨 5부터는 높이를 늘려서 전체가 잘 보이도록 함
+                            final isHighLevel = data.level >= 5;
+                            final containerHeight = isHighLevel 
+                                ? (isSmallScreen ? 280.0 : 320.0)  // 레벨 5+ : 높이 증가
+                                : (isSmallScreen ? 200.0 : 240.0); // 레벨 4 이하 : 기존 높이
+                            final imageHeight = isHighLevel 
+                                ? (isSmallScreen ? 320.0 : 360.0)  // 레벨 5+ : 이미지 높이 증가
+                                : (isSmallScreen ? 280.0 : 320.0); // 레벨 4 이하 : 기존 이미지 높이
+                            
+                            return Container(
+                              width: isSmallScreen ? 280 : 320, 
+                              height: containerHeight,
+                              child: ClipRect(
+                                child: OverflowBox(
+                                  alignment: Alignment.topCenter,
+                                  child: Image.network(
+                                    _getCharacterGifPath(data.level),
+                                    width: isSmallScreen ? 280 : 320,
+                                    height: imageHeight,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return SizedBox(
+                                        width: isSmallScreen ? 280 : 320,
+                                        height: containerHeight,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
-                                  },
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                          orElse: () => Container(
-                            width: isSmallScreen ? 280 : 320, 
-                            height: isSmallScreen ? 200 : 240,
-                            child: ClipRect(
-                              child: OverflowBox(
-                                alignment: Alignment.topCenter,
-                                child: Image.network(
-                                  'https://kr.object.ncloudstorage.com/booquest-character/char/Standing_1B.gif', // 기본값
-                                  width: isSmallScreen ? 280 : 320,
-                                  height: isSmallScreen ? 280 : 320,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return SizedBox(
-                                      width: isSmallScreen ? 280 : 320,
-                                      height: isSmallScreen ? 200 : 240,
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          value: loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                              : null,
+                            );
+                          },
+                          orElse: () {
+                            // 기본값은 레벨 1이므로 기존 높이 유지
+                            return Container(
+                              width: isSmallScreen ? 280 : 320, 
+                              height: isSmallScreen ? 200 : 240,
+                              child: ClipRect(
+                                child: OverflowBox(
+                                  alignment: Alignment.topCenter,
+                                  child: Image.network(
+                                    'https://kr.object.ncloudstorage.com/booquest-character/char/Standing_1B.gif', // 기본값
+                                    width: isSmallScreen ? 280 : 320,
+                                    height: isSmallScreen ? 280 : 320,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return SizedBox(
+                                        width: isSmallScreen ? 280 : 320,
+                                        height: isSmallScreen ? 200 : 240,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            value: loadingProgress.expectedTotalBytes != null
+                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                : null,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
-                                  },
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                         SizedBox(height: isSmallScreen ? 6 : 8), 
                         // Level badge and name - 레벨과 이름을 동적으로 표시
@@ -263,30 +279,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: characterGrowthState.maybeWhen(
-                                          success: (data) => Text(
-                                            '${data.name} 성장률',
-                                            style: TextStyle(
-                                              fontSize: isSmallScreen ? 18 : 20,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                          ),
-                                          orElse: () => Text(
-                                            '성장률',
-                                            style: TextStyle(
-                                              fontSize: isSmallScreen ? 18 : 20, 
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                          ),
-                                        ),
+                                  characterGrowthState.maybeWhen(
+                                    success: (data) => Text(
+                                      '${data.name} 성장률',
+                                      style: TextStyle(
+                                        fontSize: isSmallScreen ? 18 : 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
                                       ),
-                                      const Icon(Icons.chevron_right, color: AppColors.textPrimary),
-                                    ],
+                                    ),
+                                    orElse: () => Text(
+                                      '성장률',
+                                      style: TextStyle(
+                                        fontSize: isSmallScreen ? 18 : 20, 
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
                                   ),
                               SizedBox(height: isSmallScreen ? 20 : 24),
 
@@ -397,13 +406,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 success: (data) => Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // 상단 제목만 표시 (자세히보기와 화살표 아이콘 제거)
-                                    Text(
-                                      '퀘스트 진행률',
-                                      style: TextStyle(
-                                        fontSize: isSmallScreen ? 18 : 20, 
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
+                                    // 상단 제목과 화살표 아이콘 (클릭 가능)
+                                    GestureDetector(
+                                      onTap: () {
+                                        // 퀘스트 탭으로 이동
+                                        widget.onQuestTabRequested?.call();
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              '퀘스트 진행률',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 18 : 20, 
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                          const Icon(Icons.chevron_right, color: AppColors.textPrimary),
+                                        ],
                                       ),
                                     ),
                                     SizedBox(height: isSmallScreen ? 20 : 24),
@@ -420,74 +442,107 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            // 단계 태그와 퀘스트 제목을 가로로 배치
-                                            Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                // 단계 태그
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFF2C2C2C),
-                                                    borderRadius: BorderRadius.circular(8),
-                                                  ),
-                                                  child: Text(
-                                                    '${data.currentMissionOrder}단계',
-                                                    style: TextStyle(
-                                                      fontSize: isSmallScreen ? 12 : 13, 
-                                                      fontWeight: FontWeight.w700,
-                                                      color: Colors.white, 
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 12),
-                                                // 퀘스트 제목
-                                                Expanded(
-                                                  child: Text(
-                                                    data.currentMissionTitle,
-                                                    style: TextStyle(
-                                                      fontSize: isSmallScreen ? 18 : 20,
-                                                      fontWeight: FontWeight.w700,
-                                                      color: AppColors.textPrimary,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(height: isSmallScreen ? 14 : 16), 
-                                                                                      // 진행률 바와 퍼센트
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Container(
-                                                    height: isSmallScreen ? 10 : 12,
+                                            // 퀘스트 정보가 있는 경우와 없는 경우를 구분
+                                            if (data.currentMissionOrder != null && data.currentMissionTitle != null) ...[
+                                              // 단계 태그와 퀘스트 제목을 가로로 배치
+                                              Row(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  // 단계 태그
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0xFFE6F3FF),
-                                                      borderRadius: BorderRadius.circular(4),
+                                                      color: const Color(0xFF2C2C2C),
+                                                      borderRadius: BorderRadius.circular(8),
                                                     ),
-                                                    child: FractionallySizedBox(
-                                                      alignment: Alignment.centerLeft,
-                                                      widthFactor: data.missionStepProgressPercentage / 100.0,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          color: const Color(0xFF4A90E2),
-                                                          borderRadius: BorderRadius.circular(4),
+                                                    child: Text(
+                                                      '${data.currentMissionOrder}단계',
+                                                      style: TextStyle(
+                                                        fontSize: isSmallScreen ? 12 : 13, 
+                                                        fontWeight: FontWeight.w700,
+                                                        color: Colors.white, 
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  // 퀘스트 제목
+                                                  Expanded(
+                                                    child: Text(
+                                                      data.currentMissionTitle!,
+                                                      style: TextStyle(
+                                                        fontSize: isSmallScreen ? 18 : 20,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: AppColors.textPrimary,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: isSmallScreen ? 14 : 16), 
+                                              // 진행률 바와 퍼센트
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Container(
+                                                      height: isSmallScreen ? 10 : 12,
+                                                      decoration: BoxDecoration(
+                                                        color: const Color(0xFFE6F3FF),
+                                                        borderRadius: BorderRadius.circular(4),
+                                                      ),
+                                                      child: FractionallySizedBox(
+                                                        alignment: Alignment.centerLeft,
+                                                        widthFactor: data.missionStepProgressPercentage / 100.0,
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                            color: const Color(0xFF4A90E2),
+                                                            borderRadius: BorderRadius.circular(4),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                                const SizedBox(width: 12),
-                                                Text(
-                                                  '${data.missionStepProgressPercentage.toInt()}%',
-                                                  style: TextStyle(
-                                                    fontSize: isSmallScreen ? 12 : 14,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: AppColors.textPrimary,
+                                                  const SizedBox(width: 12),
+                                                  Text(
+                                                    '${data.missionStepProgressPercentage.toInt()}%',
+                                                    style: TextStyle(
+                                                      fontSize: isSmallScreen ? 12 : 14,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: AppColors.textPrimary,
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
+                                                ],
+                                              ),
+                                            ] else ...[
+                                              // 퀘스트 정보가 없는 경우 - 완료된 상태 또는 로딩 중
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    width: 50,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                      color: const Color(0xFFF8F8F8),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.check_circle_outline,
+                                                      size: 24,
+                                                      color: AppColors.textSecondary,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: isSmallScreen ? 8 : 12),
+                                                  Expanded(
+                                                    child: Text(
+                                                      '진행 중인 퀘스트가 없습니다',
+                                                      style: TextStyle(
+                                                        fontSize: isSmallScreen ? 14 : 16,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: AppColors.textPrimary,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
@@ -497,43 +552,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 loading: () => Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      '퀘스트 진행률',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
+                                    GestureDetector(
+                                      onTap: () {
+                                        // 퀘스트 탭으로 이동
+                                        widget.onQuestTabRequested?.call();
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              '퀘스트 진행률',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 18 : 20,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                          const Icon(Icons.chevron_right, color: AppColors.textPrimary),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
-                                    Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.white,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: AppColors.cardBorder, width: 1),
-                                      ),
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                failure: (failure) => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      '퀘스트 진행률',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: isSmallScreen ? 20 : 24),
                                     Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(
@@ -542,27 +582,137 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         border: Border.all(color: AppColors.cardBorder, width: 1),
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(16),
+                                        padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
                                         child: Column(
                                           children: [
-                                            const Text(
-                                              '미션 진행 상황을 불러올 수 없습니다',
+                                            // 로딩 아이콘
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE6F3FF),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Center(
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A90E2)),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: isSmallScreen ? 16 : 20),
+                                            // 로딩 메시지
+                                            Text(
+                                              '퀘스트 정보를 불러오는 중...',
                                               style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: isSmallScreen ? 14 : 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                failure: (failure) => Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        // 퀘스트 탭으로 이동
+                                        widget.onQuestTabRequested?.call();
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              '퀘스트 진행률',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 18 : 20,
                                                 fontWeight: FontWeight.w700,
                                                 color: AppColors.textPrimary,
                                               ),
                                             ),
-                                            const SizedBox(height: 8),
-                                            ElevatedButton(
-                                              onPressed: () async {
+                                          ),
+                                          const Icon(Icons.chevron_right, color: AppColors.textPrimary),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: isSmallScreen ? 20 : 24),
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: AppColors.cardBorder, width: 1),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
+                                        child: Column(
+                                          children: [
+                                            // 에러 아이콘
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFFFF5F5),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.error_outline,
+                                                size: 24,
+                                                color: Color(0xFFE53E3E),
+                                              ),
+                                            ),
+                                            SizedBox(height: isSmallScreen ? 16 : 20),
+                                            // 에러 메시지
+                                            Text(
+                                              '퀘스트 정보를 불러올 수 없어요',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 14 : 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            SizedBox(height: isSmallScreen ? 8 : 12),
+                                            Text(
+                                              '잠시 후 다시 시도해주세요',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 12 : 14,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.textSecondary,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            SizedBox(height: isSmallScreen ? 16 : 20),
+                                            // 다시 시도 버튼
+                                            GestureDetector(
+                                              onTap: () async {
                                                 final authStorage = await AuthStorageService.getInstance();
                                                 final sideJobId = authStorage.getSideJobId();
                                                 if (sideJobId != null) {
                                                   ref.read(missionProgressNotifierProvider.notifier).getMissionProgress(sideJobId);
                                                 }
                                               },
-                                              child: const Text('다시 시도'),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFF4A90E2),
+                                                  borderRadius: BorderRadius.circular(20),
+                                                ),
+                                                child: Text(
+                                                  '다시 시도',
+                                                  style: TextStyle(
+                                                    fontSize: isSmallScreen ? 12 : 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -573,15 +723,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 orElse: () => Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      '퀘스트 진행률',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
+                                    GestureDetector(
+                                      onTap: () {
+                                        // 퀘스트 탭으로 이동
+                                        widget.onQuestTabRequested?.call();
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              '퀘스트 진행률',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 18 : 20,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                          const Icon(Icons.chevron_right, color: AppColors.textPrimary),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
+                                    SizedBox(height: isSmallScreen ? 20 : 24),
                                     Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(
@@ -589,10 +752,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(color: AppColors.cardBorder, width: 1),
                                       ),
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
+                                        child: Column(
+                                          children: [
+                                            // 로딩 아이콘
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE6F3FF),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Center(
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A90E2)),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: isSmallScreen ? 16 : 20),
+                                            // 로딩 메시지
+                                            Text(
+                                              '퀘스트 정보를 준비하고 있어요',
+                                              style: TextStyle(
+                                                fontSize: isSmallScreen ? 14 : 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),

@@ -88,9 +88,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         print('  - Status Code: ${response.statusCode}');
         print('  - Response Data: ${response.data}');
         
-        // 401 에러인 경우 로그인 페이지로 이동
+        // 401 에러인 경우 (refresh token도 만료됨) 로그인 페이지로 이동
         if (response.statusCode == 401) {
-          print('🚫 401 Unauthorized - 로그인 페이지로 이동');
+          print('🚫 401 Unauthorized - refresh token도 만료됨, 로그인 페이지로 이동');
           await _storageService.clearAuthData();
           state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
         } else {
@@ -99,9 +99,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       }
     } catch (e) {
-      // 401 에러인 경우 로그인 페이지로 이동
+      // 401 에러인 경우 (refresh token도 만료됨) 로그인 페이지로 이동
       if (e is DioException && e.response?.statusCode == 401) {
-        print('🚫 401 Unauthorized (catch) - 로그인 페이지로 이동');
+        print('🚫 401 Unauthorized (catch) - refresh token도 만료됨, 로그인 페이지로 이동');
         await _storageService.clearAuthData();
         state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
         return;

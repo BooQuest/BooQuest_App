@@ -27,23 +27,52 @@ class CommonBottomNavigation extends StatelessWidget {
         fontSize: 12,
         fontWeight: FontWeight.w400,
       ),
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home),
+          icon: Image.asset(
+            'assets/images/home.png',
+            width: 24,
+            height: 24,
+            color: Colors.grey,
+          ),
+          activeIcon: Image.asset(
+            'assets/images/home.png',
+            width: 24,
+            height: 24,
+            color: Colors.black,
+          ),
           label: '홈',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.flag_outlined),
-          activeIcon: Icon(Icons.flag),
+          icon: Image.asset(
+            'assets/images/quest.png',
+            width: 24,
+            height: 24,
+            color: Colors.grey,
+          ),
+          activeIcon: Image.asset(
+            'assets/images/quest.png',
+            width: 24,
+            height: 24,
+            color: Colors.black,
+          ),
           label: '퀘스트',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.archive_outlined),
-          activeIcon: Icon(Icons.archive),
+          icon: Image.asset(
+            'assets/images/myrecord.png',
+            width: 24,
+            height: 24,
+            color: Colors.grey,
+          ),
+          activeIcon: Image.asset(
+            'assets/images/myrecord.png',
+            width: 24,
+            height: 24,
+            color: Colors.black,
+          ),
           label: '나의 기록',
         ),
-
       ],
     );
   }
