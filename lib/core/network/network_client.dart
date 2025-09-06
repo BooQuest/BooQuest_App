@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../constants.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/features/auth/application/auth_notifier.dart';
 import 'package:booquest/core/services/token_refresh_service.dart';
 
 /// Infrastructure 계층: HTTP 네트워크 클라이언트
@@ -70,13 +71,18 @@ class NetworkClient {
         },
         onError: (error, handler) async {
           
-          // 401 에러 시 로컬 스토리지 데이터 삭제 및 로그인 페이지로 이동
-          if (error.response?.statusCode == 401) {
+          // 401, 502 에러 시 로컬 스토리지 데이터 삭제 및 로그인 페이지로 이동
+          if (error.response?.statusCode == 401 || error.response?.statusCode == 502) {
             
               try {
                 // 로컬 스토리지 데이터 삭제
-                await _authStorageService.clearAuthData();
-                // AuthNotifier에서 자동으로 로그인 페이지로 이동 처리
+                await _authStorageService.clearAuthData();                print('🚫 토큰 만료로 인한 로그아웃 처리 완료');
+                
+                // AuthNotifier 강제 로그아웃 호출
+                final authNotifier = AuthNotifier.instance;
+                if (authNotifier != null) {
+                  await authNotifier.forceLogout();
+                }
               } catch (e) {
               }
           }

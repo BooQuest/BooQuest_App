@@ -12,8 +12,16 @@ import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart'
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthApiService _apiService;
   final AuthStorageService _storageService;
+  
+  // 싱글톤 인스턴스
+  static AuthNotifier? _instance;
 
-  AuthNotifier(this._apiService, this._storageService) : super(const AuthState());
+  AuthNotifier(this._apiService, this._storageService) : super(const AuthState()) {
+    _instance = this;
+  }
+  
+  // 싱글톤 인스턴스 접근
+  static AuthNotifier? get instance => _instance;
 
   // ========== 초기화 ==========
 
@@ -240,6 +248,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.unauthenticated('로그아웃 중 오류가 발생했습니다.');
     }
+  }
+
+  /// 토큰 만료 시 강제 로그아웃 (NetworkClient에서 호출)
+  Future<void> forceLogout() async {
+    print('🚫 토큰 만료로 인한 강제 로그아웃');
+    await _storageService.clearAuthData();
+    state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
   }
 
   /// 회원탈퇴 수행
