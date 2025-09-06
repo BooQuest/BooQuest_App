@@ -104,7 +104,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20),
       child: SizedBox(
-        height: 48,
+        height: _isSmallScreen ? 44 : 48,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -121,8 +121,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: SizedBox(
-                width: 40,
-                height: 40,
+                width: _isSmallScreen ? 36 : 40,
+                height: _isSmallScreen ? 36 : 40,
                 child: IconButton(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -131,7 +131,11 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.settings, color: AppColors.textPrimary),
+                  icon: Icon(
+                    Icons.settings, 
+                    color: AppColors.textPrimary,
+                    size: _isSmallScreen ? 18 : 20,
+                  ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),

@@ -28,6 +28,9 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
   final TextEditingController _textController = TextEditingController();
   static const int maxLength = 500;
 
+  // 반응형을 위한 화면 크기 계산 (home_screen.dart와 동일한 구조)
+  bool get _isSmallScreen => MediaQuery.of(context).size.width < 400;
+
   final List<Widget> _screens = [
     const HomeScreen(),
     const QuestScreen(),
@@ -79,19 +82,19 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
         _buildTopBar(),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20, vertical: _isSmallScreen ? 12 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleSection(),
-                const SizedBox(height: 40),
+                SizedBox(height: _isSmallScreen ? 32 : 40),
                 _buildTextInputField(),
               ],
             ),
           ),
         ),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(_isSmallScreen ? 16 : 20),
           child: _buildVerifyButton(),
         ),
       ],
@@ -101,9 +104,9 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
   /// 상단 바 구성 (quest_screen.dart와 동일한 구조)
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20),
       child: SizedBox(
-        height: 48,
+        height: _isSmallScreen ? 44 : 48,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -111,14 +114,14 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
             Align(
               alignment: Alignment.centerLeft,
               child: SizedBox(
-                width: 40,
-                height: 40,
+                width: _isSmallScreen ? 36 : 40,
+                height: _isSmallScreen ? 36 : 40,
                 child: IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back_ios,
                     color: AppColors.textPrimary,
-                    size: 20,
+                    size: _isSmallScreen ? 18 : 20,
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -126,11 +129,11 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
               ),
             ),
             // 중앙 제목
-            const Center(
+            Center(
               child: Text(
                 '퀘스트',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: _isSmallScreen ? 16 : 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -140,16 +143,16 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
             Align(
               alignment: Alignment.centerRight,
               child: SizedBox(
-                width: 40,
-                height: 40,
+                width: _isSmallScreen ? 36 : 40,
+                height: _isSmallScreen ? 36 : 40,
                 child: IconButton(
                   onPressed: () {
                     // TODO: 설정 화면으로 이동
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.settings,
                     color: AppColors.textPrimary,
-                    size: 20,
+                    size: _isSmallScreen ? 18 : 20,
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -168,30 +171,30 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 메인 제목 (2줄로 분리)
-        const Text(
+        Text(
           '부업 활동에 관한 소감을',
           style: TextStyle(
-            fontSize: 26,
+            fontSize: _isSmallScreen ? 22 : 26,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
             height: 1.2,
           ),
         ),
-        const Text(
+        Text(
           '간단히 남겨주세요',
           style: TextStyle(
-            fontSize: 26,
+            fontSize: _isSmallScreen ? 22 : 26,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
             height: 1.2,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: _isSmallScreen ? 12 : 16),
         // 부제목/설명
-        const Text(
+        Text(
           '짧게 적어도 충분해요.',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
             height: 1.4,
@@ -205,11 +208,11 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
   Widget _buildTextInputField() {
     return Container(
       width: double.infinity,
-      height: 200,
-      padding: const EdgeInsets.all(16),
+      height: _isSmallScreen ? 180 : 200,
+      padding: EdgeInsets.all(_isSmallScreen ? 14 : 16),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(_isSmallScreen ? 10 : 12),
         border: Border.all(
           color: AppColors.cardBorder,
           width: 1,
@@ -228,16 +231,16 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
               },
               maxLines: null,
               expands: true,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '인증 소감을 작성해주세요. ex: 블로그 글 1편 작성 완료!',
                 hintStyle: TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 16,
+                  fontSize: _isSmallScreen ? 14 : 16,
                 ),
                 border: InputBorder.none,
               ),
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: _isSmallScreen ? 14 : 16,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -245,8 +248,8 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
           // 글자 수 카운터
           Text(
             '${_textController.text.length}/$maxLength',
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: _isSmallScreen ? 12 : 14,
               color: AppColors.textSecondary,
             ),
           ),
@@ -261,17 +264,17 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
     
     return Container(
       width: double.infinity,
-      height: 56,
+      height: _isSmallScreen ? 50 : 56,
       decoration: BoxDecoration(
         color: isEnabled ? AppColors.primary : AppColors.textSecondary.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(_isSmallScreen ? 10 : 12),
       ),
       child: TextButton(
         onPressed: isEnabled ? _onVerifyPressed : null,
         child: Text(
           '인증하기',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: _isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w600,
             color: isEnabled ? AppColors.white : AppColors.textSecondary.withValues(alpha: 0.6),
           ),

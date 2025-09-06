@@ -145,7 +145,7 @@ class ExperienceBoostPopup extends ConsumerWidget {
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1976D2),
+                      color: const Color(0xFFE3F2FD),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: TextButton(
@@ -163,7 +163,7 @@ class ExperienceBoostPopup extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Color(0xFF1976D2),
                         ),
                       ),
                     ),
