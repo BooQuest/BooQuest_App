@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
 import 'package:booquest/features/main/application/states/sidejob_progress_state.dart';
+import 'package:booquest/features/main/domain/entities/sidejob_progress_entity.dart';
 import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
 import 'package:booquest/features/main/application/states/mission_list_state.dart';
 import 'package:booquest/features/main/domain/entities/mission_entity.dart';
@@ -29,27 +30,78 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   int _selectedTabIndex = 0; // 0: 진행 중, 1: 예정
   String? _userNickname;
   int? _sideJobId;
-  int? _selectedStepId; // 선택된 부퀘스트 스텝 ID (하나만 선택 가능)
+  int? _selectedStepId; // 선택된 부퀘스트 스텝 ID 
+  bool _isSubQuestExpanded = true; // 부퀘스트 섹션 펼침/접힘 상태
 
-  // 반응형을 위한 화면 크기 계산 (home_screen.dart와 동일한 구조)
   bool get _isSmallScreen => MediaQuery.of(context).size.width < 400;
 
   @override
   void initState() {
     super.initState();
-    _loadUserNickname();
+    _loadUserData();
   }
 
-  Future<void> _loadUserNickname() async {
+  Future<void> _loadUserData() async {
     try {
       final authStorage = await AuthStorageService.getInstance();
       final nickname = authStorage.getNickname();
+      final sideJobId = authStorage.getSideJobId();
       setState(() {
         _userNickname = nickname;
+        _sideJobId = sideJobId;
       });
     } catch (e) {
-      print('❌ 닉네임 로드 실패: $e');
     }
+  }
+
+  /// 진행 상황 텍스트를 반환하는 함수
+  String _getProgressText(SideJobProgressEntity data) {
+    // 모든 단계가 완료된 경우
+    if (data.progressPercent >= 100) {
+      return '${data.totalStages}단계 모두 완료 · 축하합니다!';
+    }
+    // 진행률이 0%가 아닌 경우 (어떤 단계든 진행 중이거나 완료된 상태)
+    else if (data.progressPercent > 0) {
+      // 진행률을 기반으로 현재 단계 계산
+      final currentStage = ((data.progressPercent / 100.0) * data.totalStages).ceil();
+      return '$currentStage단계 진행 중 · 목표까지 ${data.totalStages - currentStage}단계 남음';
+    }
+    // 아직 시작하지 않은 경우
+    else {
+      return '';
+    }
+  }
+
+  /// 미션 데이터를 기반으로 진행 상황 텍스트를 반환하는 함수
+  String _getProgressTextFromMissions(SideJobProgressEntity data, MissionListState missionState) {
+    return missionState.maybeWhen(
+      success: (missionData) {
+        // IN_PROGRESS 상태인 미션 찾기
+        final inProgressMissions = missionData.missions.where((mission) => mission.status == 'IN_PROGRESS').toList();
+        
+        if (inProgressMissions.isNotEmpty) {
+          // 진행 중인 미션이 있으면 해당 단계 표시
+          final currentOrder = inProgressMissions.first.orderNo ?? 1;
+          return '$currentOrder단계 진행 중 · 목표까지 ${data.totalStages - currentOrder}단계 남음';
+        }
+        
+        // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것 찾기
+        final completedMissions = missionData.missions
+            .where((mission) => mission.status == 'COMPLETED')
+            .toList()
+          ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
+        
+        if (completedMissions.isNotEmpty) {
+          // 완료된 미션이 있으면 해당 단계 완료 표시
+          final completedOrder = completedMissions.first.orderNo ?? 1;
+          return '$completedOrder단계 완료 · 다음 단계 준비 중';
+        }
+        
+        // 미션이 아예 없는 경우
+        return '';
+      },
+      orElse: () => _getProgressText(data), // 미션 데이터가 없으면 기본 로직 사용
+    );
   }
 
   @override
@@ -64,7 +116,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             end: Alignment.bottomCenter,
             colors: [
               Colors.white, 
-              Color(0xFFE6F3FF),
+              Color(0xFFF5F9FF),
             ],
           ),
         ),
@@ -81,7 +133,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildOverallProgressCard(sideJobProgressState),
+                      _buildOverallProgressCard(sideJobProgressState, missionListState),
                       SizedBox(height: _isSmallScreen ? 20 : 24),
                       _buildTabBar(),
                       SizedBox(height: _isSmallScreen ? 16 : 20),
@@ -101,7 +153,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   }
 
   Widget _buildTopBar() {
-    return Padding(
+    return Container(
+      color: Colors.white, 
       padding: EdgeInsets.symmetric(horizontal: _isSmallScreen ? 16 : 20),
       child: SizedBox(
         height: _isSmallScreen ? 44 : 48,
@@ -131,11 +184,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                       ),
                     );
                   },
-                  icon: Icon(
-                    Icons.settings, 
-                    color: AppColors.textPrimary,
-                    size: _isSmallScreen ? 18 : 20,
-                  ),
+                  icon: const Icon(Icons.settings, color: Color(0xFF2C2C2C)),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
@@ -147,7 +196,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     );
   }
 
-  Widget _buildOverallProgressCard(SideJobProgressState state) {
+  Widget _buildOverallProgressCard(SideJobProgressState state, MissionListState missionListState) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(_isSmallScreen ? 16 : 20),
@@ -189,7 +238,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                   ),
                   SizedBox(height: _isSmallScreen ? 6 : 8),
                   Text(
-                    '${data.currentOrder}단계 진행 중 · 목표까지 ${data.totalStages - data.currentOrder}단계 남음',
+                    _getProgressTextFromMissions(data, missionListState),
                     style: TextStyle(
                       fontSize: _isSmallScreen ? 12 : 14,
                       fontWeight: FontWeight.w500,
@@ -755,28 +804,75 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
                                 ],
                               );
                             } else {
-                              // 완료된 미션도 없으면 메시지 표시
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    '진행중인 메인 퀘스트가 없습니다',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.textSecondary,
-                                    ),
+                              // 완료된 미션도 없는 경우
+                              return Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(32),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8F9FA),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                                    width: 1,
                                   ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    '새로운 퀘스트를 시작해보세요!',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.textSecondary,
+                                ),
+                                child: Column(
+                                  children: [
+                                    // 완료 아이콘
+                                    Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.celebration,
+                                        size: 40,
+                                        color: Color(0xFF4CAF50),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 20),
+                                    // 축하 메시지
+                                    const Text(
+                                      '축하합니다!',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      '모든 메인 퀘스트를\n성공적으로 완료하셨습니다!',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.textSecondary,
+                                        height: 1.4,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    // 완료 배지
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF4CAF50),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Text(
+                                        '🎉 모든 단계 완료',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               );
                             }
                           }
@@ -1139,203 +1235,231 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   }
 
   Widget _buildSubQuestSection(MissionListState state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isSubQuestExpanded = !_isSubQuestExpanded;
+        });
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8F8F8),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '부 퀘스트',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(
-              Icons.info_outline,
-              size: 16,
-              color: AppColors.textSecondary,
-            ),
-            const Spacer(),
-            state.maybeWhen(
-              success: (data) {
-                // IN_PROGRESS 상태인 미션 찾기
-                final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
-                if (inProgressMission != null) {
-                  final completedCount = inProgressMission.steps.where((step) => step.status == 'COMPLETED').length;
-                  return Text(
-                    '($completedCount/5) 완료',
-                    style: const TextStyle(
-                      fontSize: 14,
+            Row(
+              children: [
+                const Text(
+                  '부 퀘스트',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const Spacer(),
+                state.maybeWhen(
+                  success: (data) {
+                    // IN_PROGRESS 상태인 미션 찾기
+                    final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+                    if (inProgressMission != null) {
+                      final completedCount = inProgressMission.steps.where((step) => step.status == 'COMPLETED').length;
+                      return Text(
+                        '($completedCount/5) 완료',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
+                        ),
+                      );
+                    } else {
+                      // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것의 완료 개수 표시
+                      final completedMissions = data.missions
+                          .where((mission) => mission.status == 'COMPLETED')
+                          .toList()
+                        ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
+                      
+                      if (completedMissions.isNotEmpty) {
+                        final latestCompletedMission = completedMissions.first;
+                        final completedCount = latestCompletedMission.steps.where((step) => step.status == 'COMPLETED').length;
+                        return Text(
+                          '($completedCount/5) 완료',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          ),
+                        );
+                      } else {
+                        return const Text(
+                          '',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  orElse: () => const Text(
+                    '',
+                    style: TextStyle(
+                      fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textSecondary,
                     ),
-                  );
-                } else {
-                  // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것의 완료 개수 표시
-                  final completedMissions = data.missions
-                      .where((mission) => mission.status == 'COMPLETED')
-                      .toList()
-                    ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
-                  
-                  if (completedMissions.isNotEmpty) {
-                    final latestCompletedMission = completedMissions.first;
-                    final completedCount = latestCompletedMission.steps.where((step) => step.status == 'COMPLETED').length;
-                    return Text(
-                      '($completedCount/5) 완료',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
-                      ),
-                    );
-                  } else {
-                    return const Text(
-                      '',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
-                      ),
-                    );
-                  }
-                }
-              },
-              orElse: () => const Text(
-                '',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                AnimatedRotation(
+                  duration: const Duration(milliseconds: 300),
+                  turns: _isSubQuestExpanded ? 0.0 : 0.5,
+                  child: Icon(
+                    Icons.keyboard_arrow_up,
+                    size: 20,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 4),
-            const Icon(
-              Icons.keyboard_arrow_up,
-              size: 20,
-              color: AppColors.textSecondary,
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-                    state.maybeWhen(
-              success: (data) {
-                // IN_PROGRESS 상태인 미션 찾기
-                final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
-                
-                // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것 찾기
-                if (inProgressMission == null) {
-                  final completedMissions = data.missions
-                      .where((mission) => mission.status == 'COMPLETED')
-                      .toList()
-                    ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
-                  
-                  if (completedMissions.isNotEmpty) {
-                    final latestCompletedMission = completedMissions.first;
-                    // seq 순서대로 정렬
-                    final sortedSteps = List<MissionStep>.from(latestCompletedMission.steps)
-                      ..sort((a, b) => a.seq.compareTo(b.seq));
-                    
-                    return Column(
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: _isSubQuestExpanded
+                  ? Column(
                       children: [
-                        ...sortedSteps.map((step) => _buildSubQuestItem(
-                          step.id,
-                          step.title,
-                          step.status == 'COMPLETED',
-                          step.status == 'PLANNED',
-                        )).toList(),
                         const SizedBox(height: 16),
-                        // 부업가이드 버튼
-                        Center(
-                          child: GestureDetector(
-                            onTap: () {
-                              print('🔍 부업가이드 버튼 1 클릭됨');
-                              _showSidejobGuidePopup(context);
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.cardBorder, width: 1),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '부업 가이드 >',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
+                        state.maybeWhen(
+                          success: (data) {
+                            // IN_PROGRESS 상태인 미션 찾기
+                            final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
+                            
+                            // 진행 중인 미션이 없으면 완료된 미션 중 가장 최근 것 찾기
+                            if (inProgressMission == null) {
+                              final completedMissions = data.missions
+                                  .where((mission) => mission.status == 'COMPLETED')
+                                  .toList()
+                                ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
+                              
+                              if (completedMissions.isNotEmpty) {
+                                final latestCompletedMission = completedMissions.first;
+                                // seq 순서대로 정렬
+                                final sortedSteps = List<MissionStep>.from(latestCompletedMission.steps)
+                                  ..sort((a, b) => a.seq.compareTo(b.seq));
+                                
+                                return Column(
+                                  children: [
+                                    ...sortedSteps.map((step) => _buildSubQuestItem(
+                                      step.id,
+                                      step.title,
+                                      step.status == 'COMPLETED',
+                                      step.status == 'PLANNED',
+                                    )).toList(),
+                                    const SizedBox(height: 16),
+                                    // 부업가이드 버튼
+                                    Center(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          print('🔍 부업가이드 버튼 1 클릭됨');
+                                          _showSidejobGuidePopup(context);
+                                        },
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: AppColors.cardBorder, width: 1),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '부업 가이드 >',
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return Column(
+                                  children: [],
+                                );
+                              }
+                            }
+                            
+                            // 진행 중인 미션이 있으면 기존 로직
+                            // seq 순서대로 정렬
+                            final sortedSteps = List<MissionStep>.from(inProgressMission.steps)
+                              ..sort((a, b) => a.seq.compareTo(b.seq));
+                            
+                            return Column(
+                              children: [
+                                ...sortedSteps.map((step) => _buildSubQuestItem(
+                                  step.id,
+                                  step.title,
+                                  step.status == 'COMPLETED',
+                                  step.status == 'PLANNED',
+                                )).toList(),
+                                const SizedBox(height: 16),
+                                // 부업가이드 버튼
+                                Center(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      print('🔍 부업가이드 버튼 2 클릭됨');
+                                      _showSidejobGuidePopup(context);
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: AppColors.cardBorder, width: 1),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '부업 가이드 >',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              ],
+                            );
+                          },
+                          orElse: () => Column(
+                            children: [],
                           ),
                         ),
                       ],
-                    );
-                  } else {
-                    return Column(
-                      children: [],
-                    );
-                  }
-                }
-                
-                // 진행 중인 미션이 있으면 기존 로직
-                // seq 순서대로 정렬
-                final sortedSteps = List<MissionStep>.from(inProgressMission.steps)
-                  ..sort((a, b) => a.seq.compareTo(b.seq));
-                
-                return Column(
-                  children: [
-                    ...sortedSteps.map((step) => _buildSubQuestItem(
-                      step.id,
-                      step.title,
-                      step.status == 'COMPLETED',
-                      step.status == 'PLANNED',
-                    )).toList(),
-                    const SizedBox(height: 16),
-                    // 부업가이드 버튼
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          print('🔍 부업가이드 버튼 2 클릭됨');
-                          _showSidejobGuidePopup(context);
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.cardBorder, width: 1),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '부업 가이드 >',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-          orElse: () => Column(
-              children: [
-              ],
+                    )
+                  : const SizedBox.shrink(),
             ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -1350,7 +1474,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: isCompleted 
                     ? AppColors.textSecondary 
@@ -1493,7 +1617,21 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   /// 메인 퀘스트 완료 처리
   Future<void> _handleMainQuestCompletion(BuildContext context, int missionId) async {
     try {
-      print('🎉 메인 퀘스트 완료 처리 시작: missionId=$missionId');
+      
+      // 현재 미션의 orderNo 확인
+      final missionListState = ref.read(missionListNotifierProvider);
+      int? currentOrderNo;
+      
+      missionListState.maybeWhen(
+        success: (data) {
+          final mission = data.missions.firstWhere(
+            (m) => m.id == missionId,
+            orElse: () => data.missions.first,
+          );
+          currentOrderNo = mission.orderNo;
+        },
+        orElse: () {},
+      );
       
       // 메인 퀘스트 완료 API 호출
       await ref.read(missionCompletionNotifierProvider.notifier).completeMission(missionId);
@@ -1506,8 +1644,13 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           initial: () {},
           loading: () {},
           success: (data) {
-            // 일반적인 완료 처리 - 성공 팝업 표시
-            _showMainQuestSuccessPopup(context, data);
+            // 5단계 완료인 경우 특별 처리
+            if (currentOrderNo == 5) {
+              _showFinalQuestCompletionScreen(context, data);
+            } else {
+              // 일반적인 완료 처리 - 성공 팝업 표시
+              _showMainQuestSuccessPopup(context, data);
+            }
             
             // 데이터 새로고침은 MainScreen에서 관리
             // 필요시 여기서 특정 API만 호출
@@ -1522,25 +1665,49 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             );
           },
           alreadyCompleted: () {
-            // 이미 완료된 메인 퀘스트 - 바로 다음 퀘스트 설정 화면으로 이동
+            // 이미 완료된 메인 퀘스트 - 5단계가 아닌 경우에만 다음 퀘스트 설정 화면으로 이동
+            if (currentOrderNo != 5) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const NextQuestSetupScreen(),
+                ),
+              );
+            } else {
+              // 5단계 완료인 경우 특별 처리
+              _showFinalQuestCompletionScreen(context, null);
+            }
+          },
+        );
+      }
+    } catch (e) {
+      // 현재 미션의 orderNo 확인 (catch 블록에서도 필요)
+      final missionListState = ref.read(missionListNotifierProvider);
+      int? currentOrderNo;
+      
+      missionListState.maybeWhen(
+        success: (data) {
+          final mission = data.missions.firstWhere(
+            (m) => m.id == missionId,
+            orElse: () => data.missions.first,
+          );
+          currentOrderNo = mission.orderNo;
+        },
+        orElse: () {},
+      );
+      
+      // 이미 완료된 메인 퀘스트인 경우
+      if (e.toString().contains('already-completed')) {
+        if (mounted) {
+          // 5단계 완료인 경우 특별 처리
+          if (currentOrderNo == 5) {
+            _showFinalQuestCompletionScreen(context, null);
+          } else {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const NextQuestSetupScreen(),
               ),
             );
-          },
-        );
-      }
-    } catch (e) {
-      
-      // 이미 완료된 메인 퀘스트인 경우
-      if (e.toString().contains('already-completed')) {
-        if (mounted) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const NextQuestSetupScreen(),
-            ),
-          );
+          }
         }
         return;
       }
@@ -1685,24 +1852,32 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     );
   }
 
+  /// 최종 퀘스트 완료 화면 표시 (5단계 완료 시)
+  void _showFinalQuestCompletionScreen(BuildContext context, dynamic data) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VerificationCompleteScreen(
+          method: 'final_quest',
+          content: '모든 메인 퀘스트 완료',
+          expReward: data?.totalExpReward ?? 50,
+        ),
+      ),
+    );
+  }
+
   /// 부업 가이드 팝업 표시
   void _showSidejobGuidePopup(BuildContext context) {
-    print('🔍 _showSidejobGuidePopup 호출됨');
     final missionListState = ref.read(missionListNotifierProvider);
-    print('🔍 missionListState: $missionListState');
     
     missionListState.when(
       initial: () => _showEmptyGuidePopup(context),
       loading: () => _showEmptyGuidePopup(context),
       success: (data) {
-        print('🔍 success 케이스 - missions 개수: ${data.missions.length}');
         // 현재 진행 중인 미션 찾기
         final inProgressMission = data.missions.where((mission) => mission.status == 'IN_PROGRESS').firstOrNull;
-        print('🔍 inProgressMission: ${inProgressMission?.title}');
         
         if (inProgressMission != null) {
           // 진행 중인 미션이 있으면 해당 미션만 전달
-          print('🔍 진행 중인 미션으로 팝업 표시');
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -1716,9 +1891,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
               .toList()
             ..sort((a, b) => (b.orderNo ?? 0).compareTo(a.orderNo ?? 0));
           
-          print('🔍 completedMissions 개수: ${completedMissions.length}');
           if (completedMissions.isNotEmpty) {
-            print('🔍 완료된 미션으로 팝업 표시: ${completedMissions.first.title}');
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -1726,7 +1899,6 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
               builder: (BuildContext context) => SidejobGuidePopup(missions: [completedMissions.first]),
             );
           } else {
-            print('🔍 빈 가이드 팝업 표시');
             _showEmptyGuidePopup(context);
           }
         }
@@ -1744,7 +1916,6 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
   
   /// 빈 가이드 팝업 표시 (데이터가 없을 때)
   void _showEmptyGuidePopup(BuildContext context) {
-    print('🔍 _showEmptyGuidePopup 호출됨');
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

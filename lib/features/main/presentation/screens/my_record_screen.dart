@@ -28,45 +28,56 @@ class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
     final isSmallScreen = screenSize.width < 400;
     
     return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(),
-            SizedBox(height: isSmallScreen ? 16 : 20), 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20), 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '나의 활동',
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 18 : 20, 
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white, 
+              Color(0xFFF5F9FF),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildTopBar(),
+              SizedBox(height: isSmallScreen ? 16 : 20), 
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20), 
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '나의 활동',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 18 : 20, 
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 10 : 12), 
-                    _MyActivityCard(),
-                    SizedBox(height: isSmallScreen ? 28 : 32), 
-                    Text(
-                      '부업 프로젝트 관리',
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 18 : 20, 
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                      SizedBox(height: isSmallScreen ? 10 : 12), 
+                      _MyActivityCard(),
+                      SizedBox(height: isSmallScreen ? 28 : 32), 
+                      Text(
+                        '부업 프로젝트 관리',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 18 : 20, 
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 10 : 12), 
-                    _ProjectCard(),
-                    SizedBox(height: isSmallScreen ? 16 : 20),
-                  ],
+                      SizedBox(height: isSmallScreen ? 10 : 12), 
+                      _ProjectCard(),
+                      SizedBox(height: isSmallScreen ? 16 : 20),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -77,7 +88,8 @@ class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.width < 400;
     
-    return Padding(
+    return Container(
+      color: Colors.white, 
       padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16 : 20),
       child: SizedBox(
         height: 48,
@@ -107,7 +119,7 @@ class _MyRecordScreenState extends ConsumerState<MyRecordScreen> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.settings, color: AppColors.textPrimary),
+                  icon: const Icon(Icons.settings, color: Color(0xFF2C2C2C)),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),

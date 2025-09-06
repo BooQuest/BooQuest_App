@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/quest/presentation/screens/next_quest_setup_screen.dart';
 import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
 import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
+import 'package:booquest/features/main/infrastructure/providers/main_providers.dart';
 
 /// 인증 완료 화면 - 축하 메시지와 EXP 획득 정보 표시
 class VerificationCompleteScreen extends ConsumerWidget {
@@ -20,8 +21,34 @@ class VerificationCompleteScreen extends ConsumerWidget {
     this.expReward,
   });
 
+  /// 레벨과 타입에 따라 pleasure GIF 파일 경로를 반환하는 함수
+  String _getPleasureGifPath(int level) {
+    // 레벨 7 이상은 최대 레벨로 제한
+    final gifLevel = level > 7 ? 7 : level;
+    
+    // 로컬 스토리지에서 캐릭터 타입 가져오기
+    try {
+      final onboardingService = OnboardingStorageService.getInstanceSync();
+      final characterType = onboardingService.getCharacterType();
+      
+      // 타입에 따라 다른 GIF 파일 사용 (네이버 클라우드 스토리지 URL 사용)
+      if (characterType == 'WHITE') {
+        return 'https://kr.object.ncloudstorage.com/booquest-character/pleasure/pleasure_W$gifLevel.gif';
+      } else {
+        // BLACK이거나 null인 경우 기본값으로 B 사용
+        return 'https://kr.object.ncloudstorage.com/booquest-character/pleasure/pleasure_B$gifLevel.gif';
+      }
+    } catch (e) {
+      // 스토리지 접근 실패 시 기본값으로 B 사용
+      return 'https://kr.object.ncloudstorage.com/booquest-character/pleasure/pleasure_B$gifLevel.gif';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // CharacterGrowthState를 관찰하여 현재 레벨 정보 가져오기
+    final characterGrowthState = ref.watch(characterGrowthNotifierProvider);
+    
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -34,25 +61,54 @@ class VerificationCompleteScreen extends ConsumerWidget {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              // 캐릭터 이미지 (배경 + 메인 이미지)
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // 배경 이미지 (뒤쪽)
-                  SvgPicture.asset(
-                    'assets/images/characters/completed2.svg',
-                    width: 300,
-                    height: 300,
-                    fit: BoxFit.contain,
-                  ),
-                  // 메인 이미지 (앞쪽)
-                  Image.asset(
-                    'assets/images/characters/completed.png',
-                    width: 300,
-                    height: 300,
-                    fit: BoxFit.contain,
-                  ),
-                ],
+              // 캐릭터 GIF 이미지
+              characterGrowthState.maybeWhen(
+                success: (data) => Image.network(
+                  _getPleasureGifPath(data.level),
+                  width: 400,
+                  height: 400,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return SizedBox(
+                      width: 400,
+                      height: 400,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.pets, size: 120, color: AppColors.textHint);
+                  },
+                ),
+                orElse: () => Image.network(
+                  'https://kr.object.ncloudstorage.com/booquest-character/pleasure/pleasure_B1.gif', // 기본값
+                  width: 400,
+                  height: 400,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return SizedBox(
+                      width: 400,
+                      height: 400,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.pets, size: 120, color: AppColors.textHint);
+                  },
+                ),
               ),
               const SizedBox(height: 32),
               // 축하 메시지
@@ -108,6 +164,8 @@ class VerificationCompleteScreen extends ConsumerWidget {
   String _getCongratulationMessage() {
     if (method == 'main_quest') {
       return '축하드려요!';
+    } else if (method == 'final_quest') {
+      return '축하합니다!';
     }
     return '축하드려요!';
   }
@@ -123,6 +181,8 @@ class VerificationCompleteScreen extends ConsumerWidget {
         return '메인 퀘스트 완료';
       case 'sub_quest':
         return '부 퀘스트 완료';
+      case 'final_quest':
+        return '모든 메인 퀘스트를\n성공적으로 완료하셨습니다!';
       default:
         return '추가 인증 완료';
     }
@@ -134,6 +194,8 @@ class VerificationCompleteScreen extends ConsumerWidget {
       return '+EXP 50만큼 경험치가 올랐어요';
     } else if (method == 'sub_quest' || method == 'link' || method == 'text' || method == 'photo') {
       return '+EXP 10만큼 경험치가 올랐어요';
+    } else if (method == 'final_quest') {
+      return '+EXP 50만큼 경험치가 올랐어요';
     }
     return '';
   }
@@ -170,6 +232,25 @@ class VerificationCompleteScreen extends ConsumerWidget {
           builder: (context) => const NextQuestSetupScreen(),
         ),
       );
+    } else if (method == 'final_quest') {
+      // 최종 퀘스트 완료 시: 데이터 리로드 후 quest screen으로 돌아가기
+      try {
+        // sideJobId 가져오기
+        final authStorage = await AuthStorageService.getInstance();
+        final sideJobId = authStorage.getSideJobId();
+        
+        if (sideJobId != null) {
+          // 데이터 리로드
+          await Future.wait([
+            ref.read(sideJobProgressNotifierProvider.notifier).getSideJobProgress(sideJobId),
+            ref.read(missionListNotifierProvider.notifier).getMissionList('', sideJobId),
+          ]);
+        }
+      } catch (e) {
+      }
+      
+      // quest screen으로 돌아가기
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       // 다른 인증 완료 시: 데이터 리로드 후 quest screen으로 돌아가기
       try {

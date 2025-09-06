@@ -175,14 +175,11 @@ class ExperienceBoostPopup extends ConsumerWidget {
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1976D2),
+                      color: const Color(0xFF9E9E9E),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // TODO: 광고보기 기능 구현
-                      },
+                      onPressed: null, 
                       child: const Text(
                         '광고보기',
                         style: TextStyle(

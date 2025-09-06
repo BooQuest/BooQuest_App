@@ -136,7 +136,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
               const Text(
                 '메인 퀘스트를 ',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF4CAF50), // 초록색
                 ),
@@ -144,7 +144,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
               const Text(
                 '성공적으로',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
@@ -156,7 +156,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
           const Text(
             '클리어했네요!',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.w700,
               color: Colors.black,
             ),
@@ -615,17 +615,10 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.textSecondary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Icon(
-                    Icons.info_outline,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
+                const Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: AppColors.textSecondary,
                 ),
                 const Spacer(),
                 Text(
@@ -883,17 +876,10 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: AppColors.textSecondary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: AppColors.textSecondary,
                     ),
                     const Spacer(),
                     Text(
