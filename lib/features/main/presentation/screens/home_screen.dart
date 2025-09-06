@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
+import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/main/infrastructure/providers/main_providers.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
@@ -17,6 +18,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // 데이터 로드는 MainScreen에서 중앙 집중식으로 관리
   // initState와 _loadData 메서드 제거
+
+  /// 레벨과 타입에 따라 캐릭터 GIF 파일 경로를 반환하는 함수
+  String _getCharacterGifPath(int level) {
+    // 레벨 7 이상은 최대 레벨로 제한
+    final gifLevel = level > 7 ? 7 : level;
+    
+    // 로컬 스토리지에서 캐릭터 타입 가져오기
+    try {
+      final onboardingService = OnboardingStorageService.getInstanceSync();
+      final characterType = onboardingService.getCharacterType();
+      
+      // 타입에 따라 다른 GIF 파일 사용 (네이버 클라우드 스토리지 URL 사용)
+      if (characterType == 'WHITE') {
+        return 'https://kr.object.ncloudstorage.com/booquest-character/char/Standing_${gifLevel}W.gif';
+      } else {
+        // BLACK이거나 null인 경우 기본값으로 B 사용
+        return 'https://kr.object.ncloudstorage.com/booquest-character/char/Standing_${gifLevel}B.gif';
+      }
+    } catch (e) {
+      // 스토리지 접근 실패 시 기본값으로 B 사용
+      return 'https://kr.object.ncloudstorage.com/booquest-character/char/Standing_${gifLevel}B.gif';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,21 +92,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           text: '사람들이 가장 많이 접속하는 시간 ⏰ (저녁 7시~10시)에 콘텐츠를 올려보세요',
                           isSmallScreen: isSmallScreen,
                         ),
-                        SizedBox(height: isSmallScreen ? 0 : 0), 
                         
-                        // Boo avatar placeholder
-                        Container(
-                          width: isSmallScreen ? 250 : 300, 
-                          height: isSmallScreen ? 250 : 300, 
-                          child: Image.asset(
-                            'assets/images/characters/Character1.png',
-                            width: isSmallScreen ? 250 : 300,
-                            height: isSmallScreen ? 250 : 300,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              print('이미지 로드 에러: $error');
-                              return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
-                            },
+                        // Boo avatar placeholder - 레벨별 캐릭터 표시
+                        characterGrowthState.maybeWhen(
+                          success: (data) => Container(
+                            width: isSmallScreen ? 280 : 320, 
+                            height: isSmallScreen ? 200 : 240,
+                            child: ClipRect(
+                              child: OverflowBox(
+                                alignment: Alignment.topCenter,
+                                child: Image.network(
+                                  _getCharacterGifPath(data.level),
+                                  width: isSmallScreen ? 280 : 320,
+                                  height: isSmallScreen ? 280 : 320,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return SizedBox(
+                                      width: isSmallScreen ? 280 : 320,
+                                      height: isSmallScreen ? 200 : 240,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          orElse: () => Container(
+                            width: isSmallScreen ? 280 : 320, 
+                            height: isSmallScreen ? 200 : 240,
+                            child: ClipRect(
+                              child: OverflowBox(
+                                alignment: Alignment.topCenter,
+                                child: Image.network(
+                                  'https://kr.object.ncloudstorage.com/booquest-character/char/Standing_1B.gif', // 기본값
+                                  width: isSmallScreen ? 280 : 320,
+                                  height: isSmallScreen ? 280 : 320,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return SizedBox(
+                                      width: isSmallScreen ? 280 : 320,
+                                      height: isSmallScreen ? 200 : 240,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
+                                  },
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(height: isSmallScreen ? 6 : 8), 
@@ -147,7 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ],
                           ),
                         ),
-                        SizedBox(height: isSmallScreen ? 20 : 28), 
+                        SizedBox(height: isSmallScreen ? 16 : 20), 
                       ],
                     ),
                   ),
@@ -543,41 +618,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildTopBar() {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return Container(
       color: Colors.white, 
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SizedBox(
         height: 48,
-        child: Stack(
-          alignment: Alignment.center,
+        child: Row(
           children: [
-            const Center(
-              child: Text(
-                '홈',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
+            Text(
+              'BOOQUEST',
+              style: TextStyle(
+                fontSize: isSmallScreen ? 20 : 24,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF2C2C2C),
               ),
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.settings, color: AppColors.textPrimary),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
+            const Spacer(),
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.settings, color: Color(0xFF2C2C2C)),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
             ),
           ],

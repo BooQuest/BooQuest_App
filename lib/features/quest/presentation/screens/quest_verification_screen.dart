@@ -8,6 +8,9 @@ import 'package:booquest/features/main/presentation/screens/my_record_screen.dar
 import 'package:booquest/features/quest/presentation/screens/link_verification_screen.dart';
 import 'package:booquest/features/quest/presentation/screens/text_verification_screen.dart';
 import 'package:booquest/features/quest/presentation/screens/photo_verification_screen.dart';
+import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
+import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 
 /// 퀘스트 인증 화면 - 퀘스트 수행 결과를 간단하게 인증
 class QuestVerificationScreen extends ConsumerStatefulWidget {
@@ -41,6 +44,28 @@ class _QuestVerificationScreenState extends ConsumerState<QuestVerificationScree
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  /// 뒤로가기 버튼 클릭 처리 - 데이터 새로고침 후 quest_screen으로 돌아가기
+  Future<void> _onBackPressed() async {
+    try {
+      // sideJobId 가져오기
+      final authStorage = await AuthStorageService.getInstance();
+      final sideJobId = authStorage.getSideJobId();
+      
+      if (sideJobId != null) {
+        // 데이터 리로드
+        await Future.wait([
+          ref.read(sideJobProgressNotifierProvider.notifier).getSideJobProgress(sideJobId),
+          ref.read(missionListNotifierProvider.notifier).getMissionList('', sideJobId),
+        ]);
+      }
+    } catch (e) {
+      // 에러가 발생해도 화면은 닫기
+    }
+    
+    // quest_screen으로 돌아가기
+    Navigator.of(context).pop();
   }
 
   @override
@@ -109,7 +134,7 @@ class _QuestVerificationScreenState extends ConsumerState<QuestVerificationScree
                 width: _isSmallScreen ? 36 : 40,
                 height: _isSmallScreen ? 36 : 40,
                 child: IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _onBackPressed,
                   icon: Icon(
                     Icons.arrow_back_ios,
                     color: AppColors.textPrimary,

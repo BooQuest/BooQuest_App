@@ -38,6 +38,7 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
   int? _nextMissionId;
   String? _nextMissionTitle;
   String? _nextMissionDesignNotes;
+  bool _isSubQuestExpanded = true; // 부퀘스트 섹션 펼침/접힘 상태
 
 
 
@@ -102,6 +103,7 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
               // 피드백 제출 및 부퀘스트 재생성
               await _handleFeedbackSubmit(selectedReasons, additionalComment);
               
+              // 팝업 닫기
               Navigator.of(context).pop();
             },
           );
@@ -195,6 +197,11 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
             backgroundColor: Colors.green,
           ),
         );
+        
+        // 부퀘스트 섹션 확장
+        setState(() {
+          _isSubQuestExpanded = true;
+        });
       }
     } catch (e) {
       print('Error regenerating sub-quests: $e');
@@ -355,39 +362,39 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-         
-          RichText(
-            text: const TextSpan(
-              children: [
-                TextSpan(
-                  text: '이제 ',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
+          // 첫 번째 줄: "이제" (검은색) + "새로운 퀘스트를" (파란색)
+          Row(
+            children: [
+              const Text(
+                '이제 ',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
                 ),
-                TextSpan(
-                  text: '새로운 퀘스트',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary, // 파란색
-                  ),
+              ),
+              const Text(
+                '새로운 퀘스트를',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary, // 파란색
                 ),
-                TextSpan(
-                  text: '를 시작할 수 있어요!',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // 두 번째 줄: "시작할 수 있어요!" (검은색)
+          const Text(
+            '시작할 수 있어요!',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 8),
-          // 두 번째 줄: "다음을 눌러 도전을 이어가 보세요." (작은 글씨)
+          // 세 번째 줄: 설명 (회색)
           const Text(
             '다음을 눌러 도전을 이어가 보세요.',
             style: TextStyle(
@@ -741,27 +748,23 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
   
   /// 부퀘스트 섹션 (생성된 부퀘스트 표시)
   Widget _buildSubQuestSection(List<MissionStepEntity> missionSteps) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        bool isExpanded = true; // 기본적으로 펼쳐진 상태
-        
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8F8F8),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isExpanded = !isExpanded;
-                  });
-                },
-                child: Row(
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isSubQuestExpanded = !_isSubQuestExpanded;
+        });
+      },
+      child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F8F8),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
                     const Text(
                       '부 퀘스트',
@@ -788,29 +791,34 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(
-                      isExpanded 
-                          ? Icons.keyboard_arrow_up // 펼쳐진 상태: 위쪽 화살표
-                          : Icons.keyboard_arrow_down, // 접힌 상태: 아래쪽 화살표
-                      size: 20,
-                      color: AppColors.textSecondary,
+                    AnimatedRotation(
+                      duration: const Duration(milliseconds: 300),
+                      turns: _isSubQuestExpanded ? 0.0 : 0.5,
+                      child: Icon(
+                        Icons.keyboard_arrow_up,
+                        size: 20,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              if (isExpanded) ...[
-                const SizedBox(height: 16),
-                // 부퀘스트 아이템들
-                ...missionSteps.map((step) => _buildSubQuestItem(step)).toList(),
-                const SizedBox(height: 16),
-                // 부업가이드 버튼 (부퀘스트 섹션 안에 추가)
-                _buildSideJobGuideButton(),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: _isSubQuestExpanded
+                      ? Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            // 부퀘스트 아이템들
+                            ...missionSteps.map((step) => _buildSubQuestItem(step)).toList(),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ],
-            ],
+            ),
           ),
         );
-      },
-    );
   }
   
   /// 부퀘스트 아이템 (이미지와 동일하게 체크박스)
@@ -848,34 +856,6 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
     );
   }
 
-  /// 부업가이드 버튼 (부퀘스트 섹션 안에)
-  Widget _buildSideJobGuideButton() {
-    return GestureDetector(
-      onTap: () {
-        // TODO: 부업가이드 팝업 표시
-        print('부업가이드 버튼 클릭');
-      },
-      child: Container(
-        width: double.infinity,
-        height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.cardBorder, width: 1),
-        ),
-        child: const Center(
-          child: Text(
-            '부업가이드 >',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   /// 재생성하기 버튼 (부퀘스트 섹션 밖에)
   Widget _buildRegenerateButton() {
