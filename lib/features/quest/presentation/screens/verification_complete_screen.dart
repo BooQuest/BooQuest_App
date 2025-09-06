@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/quest/presentation/screens/next_quest_setup_screen.dart';
+import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
+import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
 
 /// 인증 완료 화면 - 축하 메시지와 EXP 획득 정보 표시
-class VerificationCompleteScreen extends StatelessWidget {
+class VerificationCompleteScreen extends ConsumerWidget {
   final String method; // 인증 방식 (link, text, photo, main_quest)
   final String content; // 인증 내용
   final int? expReward; // 획득 경험치 (메인 퀘스트 완료 시 사용)
@@ -17,7 +21,7 @@ class VerificationCompleteScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -90,7 +94,7 @@ class VerificationCompleteScreen extends StatelessWidget {
               // 확인 버튼
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: _buildConfirmButton(context),
+                child: _buildConfirmButton(context, ref),
               ),
               const SizedBox(height: 20),
             ],
@@ -135,7 +139,7 @@ class VerificationCompleteScreen extends StatelessWidget {
   }
 
   /// 확인 버튼
-  Widget _buildConfirmButton(BuildContext context) {
+  Widget _buildConfirmButton(BuildContext context, WidgetRef ref) {
     return Container(
       width: double.infinity,
       height: 56,
@@ -144,7 +148,7 @@ class VerificationCompleteScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextButton(
-        onPressed: () => _onConfirmPressed(context),
+        onPressed: () => _onConfirmPressed(context, ref),
         child: const Text(
           '확인',
           style: TextStyle(
@@ -158,7 +162,7 @@ class VerificationCompleteScreen extends StatelessWidget {
   }
 
   /// 확인 버튼 클릭 처리
-  void _onConfirmPressed(BuildContext context) {
+  void _onConfirmPressed(BuildContext context, WidgetRef ref) async {
     if (method == 'main_quest') {
       // 메인 퀘스트 완료 시: 다음 퀘스트 설정 화면으로 이동
       Navigator.of(context).pushReplacement(
@@ -167,7 +171,24 @@ class VerificationCompleteScreen extends StatelessWidget {
         ),
       );
     } else {
-      // 다른 인증 완료 시: 기존 로직 (메인 화면으로 돌아가기)
+      // 다른 인증 완료 시: 데이터 리로드 후 quest screen으로 돌아가기
+      try {
+        // sideJobId 가져오기
+        final authStorage = await AuthStorageService.getInstance();
+        final sideJobId = authStorage.getSideJobId();
+        
+        if (sideJobId != null) {
+          // 데이터 리로드
+          await Future.wait([
+            ref.read(sideJobProgressNotifierProvider.notifier).getSideJobProgress(sideJobId),
+            ref.read(missionListNotifierProvider.notifier).getMissionList('', sideJobId),
+          ]);
+        }
+      } catch (e) {
+        print('데이터 리로드 중 오류: $e');
+      }
+      
+      // quest screen으로 돌아가기
       Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
