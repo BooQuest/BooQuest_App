@@ -108,6 +108,7 @@ flutter:
     - assets/images/login/
     - assets/images/
     - assets/images/quest/
+    - assets/images/onboarding/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

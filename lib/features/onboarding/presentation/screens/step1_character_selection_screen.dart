@@ -139,6 +139,10 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
 
   @override
   Widget build(BuildContext context) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         // 실시간 반응형 값 계산 (오버플로우 방지)
@@ -159,8 +163,8 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
         final double characterImageHeight = screenHeight * 0.35; // 화면 높이의 35%
         final double pageIndicatorSpacing = screenWidth * 0.02; // 화면 너비의 2%
         
-        // 하단 버튼 관련
-        final double buttonHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
+        // 하단 버튼 관련 - isSmallScreen 반응형 적용
+        final double buttonHeight = isSmallScreen ? 46.0 : 60.0;
         final double buttonBottomPadding = screenHeight * 0.02; // 화면 높이의 2%
         
         // 프로그레스 바 관련
@@ -185,7 +189,7 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
                             child: Text(
                               '새로운 성장을 함께할 \n파트너를 선택해 주세요',
                               style: TextStyle(
-                                fontSize: screenWidth * 0.06, // 화면 너비의 6% (반응형 폰트 크기)
+                                fontSize: (screenWidth * 0.06).clamp(16.0, isSmallScreen ? 20.0 : 24.0), // 최소 16, 최대 20(작은화면) 또는 24(큰화면)
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary,
                                 height: 1.4,
@@ -225,7 +229,7 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
                   padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, buttonBottomPadding),
                   child: Container(
                     width: double.infinity,
-                    height: buttonHeight.clamp(46.0, 60.0), // 최소 46, 최대 60으로 제한
+                    height: buttonHeight,
                     decoration: BoxDecoration(
                       color: const Color(0xFF1976D2), // 파란색 배경
                       borderRadius: BorderRadius.circular(buttonHeight * 0.26), // 버튼 높이의 26% (반응형 둥근 모서리)
@@ -240,7 +244,7 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
                             '선택',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: buttonHeight * 0.39, // 버튼 높이의 39% (반응형 폰트 크기)
+                              fontSize: isSmallScreen ? 16.0 : 18.0,
                               fontWeight: FontWeight.w700,
                             ),
                           ),

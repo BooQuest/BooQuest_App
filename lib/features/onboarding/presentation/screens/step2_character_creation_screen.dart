@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step1_character_selection_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step3_job_question_screen.dart';
@@ -24,32 +23,6 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
   // Debouncer 추가
   late final Debouncer _saveDebouncer;
 
-  // 초기 로딩 시에만 반응형으로 계산 (키보드 올라온 후 고정값 유지)
-  late final double _screenHeight = MediaQuery.of(context).size.height;
-  late final double _screenWidth = MediaQuery.of(context).size.width;
-  
-  // 초기 반응형 값들 (한 번만 계산하고 고정)
-  late final double _horizontalPadding = _screenWidth * 0.05; // 화면 너비의 5%
-  late final double _topSpacing = _screenHeight * 0.1; // 화면 높이의 10%
-  late final double _avatarToTextSpacing = _screenHeight * 0.025; // 화면 높이의 2.5%
-  late final double _textToCharacterSpacing = _screenHeight * 0.05; // 화면 높이의 5%
-  late final double _characterToInputSpacing = _screenHeight * 0.075; // 화면 높이의 7.5%
-  late final double _inputToButtonSpacing = _screenHeight * 0.02; // 화면 높이의 2%
-  late final double _topRowCompensation = _screenHeight * 0.02; // 화면 높이의 2%
-  
-  // 캐릭터 이미지 관련
-  late final double _characterImageHeight = _screenHeight * 0.35; // 화면 높이의 35%
-  
-  // 상단 여백 관련
-  late final double _topMargin = _screenHeight * 0.05; // 화면 높이의 5%
-  late final double _titleTopSpacing = _screenHeight * 0.05; // 화면 높이의 5%
-  
-  // 하단 버튼 관련
-  late final double _buttonHeight = _screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
-  late final double _inputHeight = _screenHeight * 0.06; // 화면 높이의 6% (최소 48, 최대 56)
-  
-  // 프로그레스 바 관련
-  late final double _progressBarHeight = _screenHeight * 0.008; // 화면 높이의 0.8%
 
   @override
   void initState() {
@@ -152,6 +125,11 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
 
   @override
   Widget build(BuildContext context) {
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
+    final isLandscape = screenSize.width > screenSize.height;
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         // 실시간 반응형 값 계산 (오버플로우 방지)
@@ -166,20 +144,16 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
         // 상단 여백 관련
         final double topMargin = screenHeight * 0.05; // 화면 높이의 5%
         final double titleTopSpacing = screenHeight * 0.05; // 화면 높이의 5%
-        final double textToCharacterSpacing = screenHeight * 0.05; // 화면 높이의 5%
-        final double characterToInputSpacing = screenHeight * 0.075; // 화면 높이의 7.5%
-        final double inputToButtonSpacing = screenHeight * 0.02; // 화면 높이의 2%
-        final double topRowCompensation = screenHeight * 0.02; // 화면 높이의 2%
+        final double titleBottomSpacing = screenHeight * 0.05; // 화면 높이의 5%
         
-        // 캐릭터 이미지 관련
-        final double characterImageHeight = screenHeight * 0.35; // 화면 높이의 35%
+        // 캐릭터 이미지 관련 - 가로 모드에서는 더 큰 높이 사용
+        final double characterImageHeight = isLandscape 
+            ? screenHeight * 0.5  // 가로 모드에서는 화면 높이의 50%
+            : screenHeight * 0.35; // 세로 모드에서는 화면 높이의 35%
         
-        // 하단 버튼 관련
-        final double buttonHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 46, 최대 60)
-        final double inputHeight = screenHeight * 0.06; // 화면 높이의 6% (최소 48, 최대 56)
-        
-        // 프로그레스 바 관련
-        final double progressBarHeight = screenHeight * 0.008; // 화면 높이의 0.8%
+        // 하단 버튼 관련 - isSmallScreen 반응형 적용
+        final double buttonHeight = isSmallScreen ? 46.0 : 60.0;
+        final double inputHeight = isSmallScreen ? 48.0 : 56.0;
         
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -194,25 +168,29 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                         children: [
                           SizedBox(height: topMargin),
                           _buildTopRow(screenWidth),
-                                                  SizedBox(height: titleTopSpacing),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              '어떻게 불러드리면 될까요?',
-                              style: TextStyle(
-                                fontSize: screenWidth * 0.06, // 화면 너비의 6% (반응형 폰트 크기)
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                                height: 1.4,
+                          SizedBox(height: titleTopSpacing),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '어떻게 불러드리면 될까요?',
+                                style: TextStyle(
+                                  fontSize: (screenWidth * 0.06).clamp(16.0, isSmallScreen ? 20.0 : 24.0), // 최소 16, 최대 20(작은화면) 또는 24(큰화면)
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                          SizedBox(height: textToCharacterSpacing),
-                          _buildCharacterSection(characterImageHeight),
-                          SizedBox(height: characterToInputSpacing),
+                          SizedBox(height: titleBottomSpacing),
+                          SizedBox(
+                            height: characterImageHeight,
+                            child: Center(
+                              child: _buildCharacterSection(characterImageHeight),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -224,7 +202,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                         // 입력 필드
                         Container(
                           width: double.infinity,
-                          height: inputHeight.clamp(48.0, 56.0),
+                          height: inputHeight,
                           decoration: BoxDecoration(
                             color: AppColors.inputBackground,
                             border: Border.all(
@@ -239,7 +217,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                               controller: _nameController,
                               focusNode: _nameFocusNode,
                               style: TextStyle(
-                                fontSize: inputHeight * 0.375,
+                                fontSize: isSmallScreen ? 14.0 : 16.0,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textSecondary,
                               ),
@@ -248,7 +226,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                                 hintText: '이름을 입력하세요',
                                 hintStyle: TextStyle(
                                   color: AppColors.textHint,
-                                  fontSize: inputHeight * 0.375,
+                                  fontSize: isSmallScreen ? 14.0 : 16.0,
                                 ),
                               ),
                               textInputAction: TextInputAction.done,
@@ -260,7 +238,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                         // 확인 버튼
                         Container(
                           width: double.infinity,
-                          height: buttonHeight.clamp(46.0, 60.0),
+                          height: buttonHeight,
                           decoration: BoxDecoration(
                             color: _isNameValid 
                                 ? const Color(0xFF1976D2)
@@ -277,7 +255,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                                   '확인',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: buttonHeight * 0.39,
+                                    fontSize: isSmallScreen ? 16.0 : 18.0,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -312,7 +290,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
           constraints: const BoxConstraints(),
           onPressed: _goBack,
         ),
-        Expanded(
+        const Expanded(
           child: Center(child: OnboardingProgress(currentStep: 1)),  // 6단계 중 두번째
         ),
         SizedBox(width: rightPadding),
@@ -320,118 +298,61 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
     );
   }
 
-  Widget _buildTitle(double screenWidth) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        '어떻게 불러드리면 될까요?',
-        style: TextStyle(
-          fontSize: screenWidth * 0.06, // 화면 너비의 6% (반응형 폰트 크기)
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-          height: 1.4,
-        ),
-      ),
-    );
-  }
 
   Widget _buildCharacterSection(double characterImageHeight) {
-    return Center(
-      child: Image.asset(
-        'assets/images/characters/create_char.png',
-        height: characterImageHeight.clamp(300.0, 500.0), // 최소 300, 최대 500으로 제한
-      ),
-    );
-  }
-
-  Widget _buildBottomBar(double screenWidth, double buttonHeight, double inputHeight, double inputToButtonSpacing) {
-    final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: screenWidth * 0.05,
-        right: screenWidth * 0.05,
-        bottom: 16 + bottomInset,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildNameInputField(screenWidth, inputHeight),
-          SizedBox(height: inputToButtonSpacing),
-          _buildConfirmButton(buttonHeight),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNameInputField(double screenWidth, double inputHeight) {
-    final double horizontalPadding = screenWidth * 0.04; // 화면 너비의 4% (반응형 패딩)
+    // 반응형을 위한 화면 크기 계산
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 400;
     
-    return Container(
-      width: double.infinity,
-      height: inputHeight.clamp(48.0, 56.0), // 최소 48, 최대 56으로 제한
-      alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        color: AppColors.inputBackground,
-        border: Border.all(
-          color: AppColors.inputBorder,
-          width: 1,
-        ),
-        borderRadius: BorderRadius.circular(inputHeight * 0.125), // 입력창 높이의 12.5% (반응형 둥근 모서리)
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-        child: TextField(
-          controller: _nameController,
-          focusNode: _nameFocusNode,
-          style: TextStyle(
-            fontSize: inputHeight * 0.375, // 입력창 높이의 37.5% (반응형 폰트 크기)
-            fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary,
-          ),
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: '이름을 입력하세요',
-            hintStyle: TextStyle(
-              color: AppColors.textHint,
-              fontSize: inputHeight * 0.375, // 입력창 높이의 37.5% (반응형 폰트 크기)
-            ),
-          ),
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _onConfirmPressed(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConfirmButton(double buttonHeight) {
-    return SizedBox(
-      width: double.infinity,
-      height: buttonHeight.clamp(46.0, 60.0), // 최소 46, 최대 60으로 제한
-      child: Container(
-        decoration: BoxDecoration(
-          color: _isNameValid 
-              ? const Color(0xFF1976D2) // 파란색 배경
-              : const Color(0xFFCCCCCC), // 비활성화 시 회색
-          borderRadius: BorderRadius.circular(buttonHeight * 0.26), // 버튼 높이의 26% (반응형 둥근 모서리)
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: _isNameValid ? _onConfirmPressed : null,
-            borderRadius: BorderRadius.circular(buttonHeight * 0.26),
-            child: Center(
-              child: Text(
-                '확인',
-                style: TextStyle(
-                  color: _isNameValid ? Colors.white : Colors.grey[600],
-                  fontSize: buttonHeight * 0.39, // 버튼 높이의 39% (반응형 폰트 크기)
-                  fontWeight: FontWeight.w700,
+    return Center(
+      child: SizedBox(
+        height: characterImageHeight > 0 ? characterImageHeight : (isSmallScreen ? 350.0 : 400.0), // characterImageHeight 우선 사용
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+              Positioned(
+                top: 0,
+                child: Container(
+                  width: isSmallScreen ? 180.0 : 220.0, 
+                  height: isSmallScreen ? 180.0 : 220.0, 
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/onboarding/onboarding_create_1.png',
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
-          ),
+            // 하단 고양이 캐릭터 (작게, 약간 겹치게)
+            Positioned(
+              top: isSmallScreen ? 160.0 : 180.0, // 겹치도록 위치 조정
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Transform.translate(
+                  offset: Offset(isSmallScreen ? -25.0 : -30.0, 0),
+                  child: Image.asset(
+                    'assets/images/onboarding/onboarding_create_2.png',
+                    height: isSmallScreen ? 130.0 : 150.0, 
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
 }

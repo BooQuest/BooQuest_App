@@ -55,8 +55,17 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    
+    // 가로 모드일 때는 더 작은 높이 사용
+    final popupHeight = isLandscape 
+        ? screenHeight * 0.6  // 가로 모드에서는 60%
+        : screenHeight * 0.4; // 세로 모드에서는 40%
+    
     return Container(
-      height: MediaQuery.of(context).size.height * 0.5, // 화면의 50%로 고정
+      width: double.infinity, // 화면 너비 100% 명시적 설정
+      height: popupHeight,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -70,7 +79,10 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
           // 상단 드래그 핸들
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 20),
+              margin: EdgeInsets.only(
+                top: 12, 
+                bottom: isLandscape ? 12 : 16,
+              ),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
@@ -86,28 +98,28 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '최적의 추천을 위해',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: isLandscape ? 18 : 20,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF202020),
+                    color: const Color(0xFF202020),
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   '조금 더 자세히 알고 싶어요',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: isLandscape ? 16 : 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF202020),
+                    color: const Color(0xFF202020),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '최대 3개까지 선택 가능해요.',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isLandscape ? 14 : 16,
                     fontWeight: FontWeight.w400,
                     color: Colors.grey[600],
                   ),
@@ -116,43 +128,52 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
             ),
           ),
           
-          const SizedBox(height: 24),
+          SizedBox(height: isLandscape ? 12 : 16),
           
           // 세부 옵션 리스트 (스크롤 가능)
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Wrap(
-                spacing: 16, // 간격을 8에서 16으로 증가
-                runSpacing: 16, // 줄 간격도 8에서 16으로 증가
+                spacing: isLandscape ? 8 : 12,
+                runSpacing: isLandscape ? 8 : 12,
                 children: _getAllDetailOptions().map((detail) => _buildSelectableDetailChip(detail)).toList(),
               ),
             ),
           ),
           
-          const SizedBox(height: 24),
+          SizedBox(height: isLandscape ? 12 : 16),
           
-          // 다음 버튼
+          // 완료 버튼
           Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-            child: SizedBox(
+            padding: EdgeInsets.only(
+              left: 20, 
+              right: 20, 
+              bottom: isLandscape ? 16 : 20,
+            ),
+            child: Container(
               width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _selectedDetails.isNotEmpty ? widget.onConfirm : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _selectedDetails.isNotEmpty ? AppColors.buttonActive : Colors.grey[400],
-                  foregroundColor: AppColors.buttonText,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  '다음',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+              height: isLandscape ? 44 : 48,
+              decoration: BoxDecoration(
+                color: _selectedDetails.isNotEmpty 
+                    ? const Color(0xFF1976D2)
+                    : const Color(0xFFCCCCCC),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _selectedDetails.isNotEmpty ? widget.onConfirm : null,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Center(
+                    child: Text(
+                      '완료',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isLandscape ? 15 : 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
