@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- 카메라 및 저장소 접근 권한 -->
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -48,10 +49,23 @@
             android:name="com.kakao.sdk.AppKey"
             android:value="635d855eae5acd47eaaaf28fc6b49ca8" />
         
+        <!-- 네이버 로그인 설정 -->
+        <meta-data
+            android:name="com.naver.sdk.clientId"
+            android:value="TM5eDkpd_rKv82eBNyJd" />
+        <meta-data
+            android:name="com.naver.sdk.clientSecret"
+            android:value="unToCI8V3H" />
+        <meta-data
+            android:name="com.naver.sdk.clientName"
+            android:value="Booquest" />
+        
         <!-- 카카오 로그인을 위한 Activity 설정 -->
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            tools:replace="android:theme">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
