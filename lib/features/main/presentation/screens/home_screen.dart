@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
-import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/main/infrastructure/providers/main_providers.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
@@ -28,8 +27,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     
     // 로컬 스토리지에서 캐릭터 타입 가져오기
     try {
-      final onboardingService = OnboardingStorageService.getInstanceSync();
-      final characterType = onboardingService.getCharacterType();
+      final authStorage = AuthStorageService.getInstanceSync();
+      final characterType = authStorage.getCharacterType();
       
       // 타입에 따라 다른 GIF 파일 사용 (네이버 클라우드 스토리지 URL 사용)
       if (characterType == 'WHITE') {

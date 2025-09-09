@@ -11,8 +11,8 @@ import 'package:booquest/features/revenue/presentation/screens/total_revenue_scr
 import 'package:booquest/features/revenue/application/states/sidejob_summary_state.dart';
 import 'package:booquest/features/revenue/domain/entities/sidejob_summary_entity.dart';
 import 'package:booquest/features/main/presentation/screens/settings_screen.dart';
-import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/main/infrastructure/providers/main_providers.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 
 /// 부업 프로젝트 상세 화면 - Clean Architecture + Riverpod 구조
 class SidejobDetailScreen extends ConsumerStatefulWidget {
@@ -41,8 +41,6 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // userSideJobId 값 출력
-    print('SidejobDetailScreen - userSideJobId: ${widget.userSideJobId}');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
@@ -55,8 +53,8 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
     
     // 로컬 스토리지에서 캐릭터 타입 가져오기
     try {
-      final onboardingService = OnboardingStorageService.getInstanceSync();
-      final characterType = onboardingService.getCharacterType();
+      final authStorage = AuthStorageService.getInstanceSync();
+      final characterType = authStorage.getCharacterType();
       
       // 타입에 따라 다른 GIF 파일 사용 (네이버 클라우드 스토리지 URL 사용)
       if (characterType == 'WHITE') {
@@ -150,35 +148,43 @@ class _SidejobDetailScreenState extends ConsumerState<SidejobDetailScreen> {
   Widget build(BuildContext context) {
     final summaryState = ref.watch(sideJobSummaryNotifierProvider);
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white, 
-              Color(0xFFE6F3FF),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          // 뒤로가기 시 콜백 호출
+          widget.onBack?.call();
+        }
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white, 
+                Color(0xFFE6F3FF),
+              ],
+            ),
+          ),
+          child: SafeArea(
+          child: IndexedStack(
+            index: _currentIndex,
+            children: [
+              // Home 화면
+              const HomeScreen(),
+              // Quest 화면  
+              const QuestScreen(),
+              // MyRecord 상세 화면 (현재 화면)
+              _buildMyRecordDetailContent(summaryState),
             ],
           ),
+          ),
         ),
-        child: SafeArea(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: [
-            // Home 화면
-            const HomeScreen(),
-            // Quest 화면  
-            const QuestScreen(),
-            // MyRecord 상세 화면 (현재 화면)
-            _buildMyRecordDetailContent(summaryState),
-          ],
+        bottomNavigationBar: CommonBottomNavigation(
+          currentIndex: _currentIndex,
+          onTap: _onTabTapped,
         ),
-        ),
-      ),
-      bottomNavigationBar: CommonBottomNavigation(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
       ),
     );
   }

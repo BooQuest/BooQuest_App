@@ -40,7 +40,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _userEmail = email;
       });
     } catch (e) {
-      print('❌ 이메일 로드 실패: $e');
+      // 이메일 로드 실패
     }
   }
 
@@ -53,7 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _buildNumber = packageInfo.buildNumber;
       });
     } catch (e) {
-      print('❌ 앱 정보 로드 실패: $e');
+      // 앱 정보 로드 실패
     }
   }
 
@@ -82,10 +82,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
-        print('❌ URL 실행 실패: $url');
+        // URL 실행 실패
       }
     } catch (e) {
-      print('❌ URL 실행 중 오류 발생: $e');
+      // URL 실행 중 오류 발생
     }
   }
 
@@ -101,18 +101,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // API 호출을 위한 AuthNotifier 생성
           final authNotifier = await createAuthNotifier();
           await authNotifier.logout();
-          print('✅ 로그아웃 API 호출 완료');
+          // 로그아웃 API 호출 완료
         } else {
-          print('⚠️ Refresh token이 없어서 API 호출 생략');
+          // Refresh token이 없어서 API 호출 생략
         }
       } catch (e) {
-        print('❌ 로그아웃 API 호출 실패: $e');
+        // 로그아웃 API 호출 실패
         // API 실패해도 로컬 데이터는 삭제
       }
       
       // 2. 로컬 데이터 삭제 (API 성공/실패 무관)
       await authStorage.clearAuthData();
-      print('✅ 로컬 데이터 삭제 완료');
+      // 로컬 데이터 삭제 완료
       
       // 3. Navigator를 완전히 리셋하여 AuthWrapper가 다시 초기화되도록 함
       if (mounted) {
@@ -122,7 +122,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         );
       }
     } catch (e) {
-      print('❌ 로그아웃 처리 중 오류 발생: $e');
+      // 로그아웃 처리 중 오류 발생
       // 에러가 발생해도 로그인 페이지로 이동
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
@@ -156,8 +156,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _buildAccountSection(),
                     SizedBox(height: _isSmallScreen ? 24 : 32),
                     _buildSecuritySection(),
-                    SizedBox(height: _isSmallScreen ? 24 : 32),
-                    _buildPaymentSection(),
+                    // SizedBox(height: _isSmallScreen ? 24 : 32),
+                    // _buildPaymentSection(),
                     SizedBox(height: _isSmallScreen ? 24 : 32),
                     _buildSupportSection(),
                     SizedBox(height: _isSmallScreen ? 32 : 40),
@@ -346,10 +346,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         SizedBox(height: _isSmallScreen ? 10 : 12),
         _buildSettingItem('문의하기/버그제보', onTap: () => _launchUrl('https://forms.gle/Em41EDxHkC3Nbixx8')),
-        SizedBox(height: _isSmallScreen ? 6 : 8),
-        _buildSettingItem('FAQ', onTap: () => ServicePreparingDialog.show(context)),
-        SizedBox(height: _isSmallScreen ? 6 : 8),
-        _buildSettingItem('리뷰 남기기', onTap: () => ServicePreparingDialog.show(context)),
+        // SizedBox(height: _isSmallScreen ? 6 : 8),
+        // _buildSettingItem('FAQ', onTap: () => ServicePreparingDialog.show(context)),
+        // SizedBox(height: _isSmallScreen ? 6 : 8),
+        // _buildSettingItem('리뷰 남기기', onTap: () => ServicePreparingDialog.show(context)),
       ],
     );
   }
@@ -367,7 +367,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: Row(
         children: [
           Text(
-            '버전·필드 정보',
+            '버전·빌드 정보',
             style: TextStyle(
               fontSize: _isSmallScreen ? 14 : 16,
               fontWeight: FontWeight.w500,

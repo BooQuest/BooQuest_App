@@ -92,21 +92,33 @@ class _AddIncomeModalState extends ConsumerState<AddIncomeModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double maxHeight = screenHeight * 0.9;
+    
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardHeight),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxHeight,
         ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: SafeArea(
+            child: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               // 드래그 핸들
               Center(
                 child: Container(
@@ -180,7 +192,10 @@ class _AddIncomeModalState extends ConsumerState<AddIncomeModal> {
                   child: _buildButtonContent(),
                 ),
               ),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -420,7 +435,7 @@ class _AddIncomeModalState extends ConsumerState<AddIncomeModal> {
         Row(
           children: [
             const Text(
-              '일자 *',
+              '일자',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

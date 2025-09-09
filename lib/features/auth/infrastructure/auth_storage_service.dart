@@ -12,6 +12,9 @@ class AuthStorageService {
   static const String _sideJobIdKey = 'auth_side_job_id';
   static const String _accessTokenKey = 'auth_access_token';
   static const String _refreshTokenKey = 'auth_refresh_token';
+  static const String _providerAccessTokenKey = 'auth_provider_access_token';
+  static const String _providerKey = 'auth_provider';
+  static const String _characterTypeKey = 'auth_character_type';
   static const String _isAuthenticatedKey = 'auth_is_authenticated';
 
   static AuthStorageService? _instance;
@@ -121,6 +124,36 @@ class AuthStorageService {
     return _preferences?.getString(_refreshTokenKey);
   }
 
+  /// Provider Access Token 저장
+  Future<void> setProviderAccessToken(String token) async {
+    await _preferences?.setString(_providerAccessTokenKey, token);
+  }
+
+  /// Provider Access Token 조회
+  String? getProviderAccessToken() {
+    return _preferences?.getString(_providerAccessTokenKey);
+  }
+
+  /// Provider 저장
+  Future<void> setProvider(String provider) async {
+    await _preferences?.setString(_providerKey, provider);
+  }
+
+  /// Provider 조회
+  String? getProvider() {
+    return _preferences?.getString(_providerKey);
+  }
+
+  /// Character Type 저장
+  Future<void> setCharacterType(String characterType) async {
+    await _preferences?.setString(_characterTypeKey, characterType);
+  }
+
+  /// Character Type 조회
+  String? getCharacterType() {
+    return _preferences?.getString(_characterTypeKey);
+  }
+
   // ========== 인증 상태 관련 ==========
 
   /// 인증 상태 저장
@@ -142,6 +175,7 @@ class AuthStorageService {
     required String nickname,
     String? profileImageUrl,
     int? sideJobId,
+    String? characterType,
   }) async {
     await _preferences?.setInt(_userIdKey, userId);
     await _preferences?.setString(_emailKey, email);
@@ -153,6 +187,10 @@ class AuthStorageService {
     
     if (sideJobId != null) {
       await _preferences?.setInt(_sideJobIdKey, sideJobId);
+    }
+    
+    if (characterType != null) {
+      await _preferences?.setString(_characterTypeKey, characterType);
     }
   }
 
@@ -169,6 +207,7 @@ class AuthStorageService {
       'nickname': getNickname(),
       'profileImageUrl': getProfileImageUrl(),
       'sideJobId': getSideJobId(),
+      'characterType': getCharacterType(),
     };
   }
 
@@ -180,6 +219,15 @@ class AuthStorageService {
     await setAccessToken(accessToken);
     await setRefreshToken(refreshToken);
     await setIsAuthenticated(true);
+  }
+
+  /// 소셜 로그인 정보 저장
+  Future<void> saveSocialLoginInfo({
+    required String providerAccessToken,
+    required String provider,
+  }) async {
+    await setProviderAccessToken(providerAccessToken);
+    await setProvider(provider);
   }
 
   /// 토큰 정보 조회
@@ -201,6 +249,9 @@ class AuthStorageService {
     await _preferences?.remove(_sideJobIdKey);
     await _preferences?.remove(_accessTokenKey);
     await _preferences?.remove(_refreshTokenKey);
+    await _preferences?.remove(_providerAccessTokenKey);
+    await _preferences?.remove(_providerKey);
+    await _preferences?.remove(_characterTypeKey);
     await _preferences?.remove(_isAuthenticatedKey);
   }
 
@@ -208,6 +259,9 @@ class AuthStorageService {
   Future<void> clearTokens() async {
     await _preferences?.remove(_accessTokenKey);
     await _preferences?.remove(_refreshTokenKey);
+    await _preferences?.remove(_providerAccessTokenKey);
+    await _preferences?.remove(_providerKey);
+    await _preferences?.remove(_characterTypeKey);
     await setIsAuthenticated(false);
   }
 
@@ -227,8 +281,11 @@ class AuthStorageService {
     print('Email: ${getEmail()}');
     print('Nickname: ${getNickname()}');
     print('ProfileImageUrl: ${getProfileImageUrl()}');
+    print('CharacterType: ${getCharacterType()}');
     print('AccessToken: ${getAccessToken()?.substring(0, 20)}...');
     print('RefreshToken: ${getRefreshToken()?.substring(0, 20)}...');
+    print('ProviderAccessToken: ${getProviderAccessToken()?.substring(0, 20)}...');
+    print('Provider: ${getProvider()}');
     print('IsAuthenticated: ${getIsAuthenticated()}');
     print('========================');
   }

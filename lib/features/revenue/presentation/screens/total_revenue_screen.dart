@@ -68,24 +68,32 @@ class _TotalRevenueScreenState extends ConsumerState<TotalRevenueScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: [
-            // Home 화면
-            const HomeScreen(),
-            // Quest 화면  
-            const SizedBox.shrink(),
-            // TotalRevenue 화면 (현재 화면)
-            _buildTotalRevenueContent(),
-          ],
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          // 뒤로가기 시 콜백 호출
+          widget.onBack?.call();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: SafeArea(
+          child: IndexedStack(
+            index: _currentIndex,
+            children: [
+              // Home 화면
+              const HomeScreen(),
+              // Quest 화면  
+              const SizedBox.shrink(),
+              // TotalRevenue 화면 (현재 화면)
+              _buildTotalRevenueContent(),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: CommonBottomNavigation(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
+        bottomNavigationBar: CommonBottomNavigation(
+          currentIndex: _currentIndex,
+          onTap: _onTabTapped,
+        ),
       ),
     );
   }
