@@ -44,38 +44,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 로컬 스토리지에서 토큰과 사용자 정보를 확인하고,
   /// 유효한 경우 서버에서 최신 사용자 정보를 가져옵니다.
   Future<void> checkAuthStatus() async {
-    print('🚀 checkAuthStatus 시작 - 앱 실행 시 인증 상태 확인');
     state = state.loading();
 
     try {
       // 1. 로컬 스토리지에서 인증 데이터 확인
       if (!_storageService.hasAuthData()) {
-        print('🚫 로컬 인증 데이터 없음 - 미인증 상태');
         state = state.unauthenticated();
         return;
       }
       
-      print('✅ 로컬 인증 데이터 존재 - 서버에서 사용자 정보 검증 시작');
-
       // 2. 서버에서 사용자 정보 검증 및 갱신
       final response = await _apiService.getUserInfo();
       
-      print('🔍 checkAuthStatus - getUserInfo API 응답:');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
-
       if (response.statusCode == 200 && 
           response.data != null && 
           response.data!['success'] == true) {
         
         final userData = response.data!['data'] as Map<String, dynamic>;
-        
-        print('🔍 user/me API 응답 데이터 상세:');
-        print('  - 전체 userData: $userData');
-        print('  - id: ${userData['id']}');
-        print('  - email: ${userData['email']}');
-        print('  - nickname: ${userData['nickname']}');
-        print('  - profileImageUrl: ${userData['profileImageUrl']}');
         
         // 3. 로컬 스토리지 업데이트
         await _storageService.saveUserInfo(
@@ -84,21 +69,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
           nickname: userData['nickname'],
           profileImageUrl: userData['profileImageUrl'],
           sideJobId: _extractSideJobId(userData),
+          characterType: userData['characterType'],
         );
-        
-        print('💾 saveUserInfo 호출 완료');
 
         // 4. 인증 성공 상태로 전환 (onboardingProgressInfo 포함)
         state = state.authenticated(userData);
       } else {
-        // 토큰이 유효하지 않은 경우
-        print('❌ 사용자 정보 인증 실패:');
-        print('  - Status Code: ${response.statusCode}');
-        print('  - Response Data: ${response.data}');
-        
+
         // 401 에러인 경우 (refresh token도 만료됨) 로그인 페이지로 이동
         if (response.statusCode == 401) {
-          print('🚫 401 Unauthorized - refresh token도 만료됨, 로그인 페이지로 이동');
           await _storageService.clearAuthData();
           state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
         } else {
@@ -109,7 +88,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       // 401 에러인 경우 (refresh token도 만료됨) 로그인 페이지로 이동
       if (e is DioException && e.response?.statusCode == 401) {
-        print('🚫 401 Unauthorized (catch) - refresh token도 만료됨, 로그인 페이지로 이동');
         await _storageService.clearAuthData();
         state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
         return;
@@ -117,20 +95,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
       
       // 500 에러인 경우도 서버 에러이므로 로그인 페이지로 이동
       if (e is DioException && e.response?.statusCode == 500) {
-        print('🚫 500 Server Error (catch) - 로그인 페이지로 이동');
         await _storageService.clearAuthData();
         state = state.unauthenticated('서버 오류가 발생했습니다. 다시 로그인해주세요.');
         return;
       }
       
       // 네트워크 오류 등의 경우, 로컬 데이터로 인증 상태 유지
-      print('⚠️ getUserInfo API 호출 중 에러 발생: $e');
       final localUserData = _storageService.getUserInfo();
       if (localUserData != null) {
-        print('📱 로컬 사용자 정보로 인증 상태 유지');
         state = state.authenticated(localUserData);
       } else {
-        print('🚫 로컬 사용자 정보 없음 - 미인증 상태');
         state = state.unauthenticated('인증 상태 확인 중 오류가 발생했습니다.');
       }
     }
@@ -164,12 +138,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         
         // 온보딩 진행 정보 (login 응답에도 추가됨)
         final onboardingProgressInfo = responseData['onboardingProgressInfo'] as Map<String, dynamic>?;
-        if (onboardingProgressInfo != null) {
-          print('📊 로그인 응답 - 온보딩 진행 정보:');
-          print('  - sideJobRecommended: ${onboardingProgressInfo['sideJobRecommended']}');
-          print('  - missionRecommended: ${onboardingProgressInfo['missionRecommended']}');
-          print('  - sideJobCreated: ${onboardingProgressInfo['sideJobCreated']}');
-        }
 
         // 1. 사용자 정보 저장
         Map<String, dynamic> userForState = {};
@@ -180,7 +148,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           int? sideJobId;
           if (onboardingProgressInfo != null) {
             sideJobId = onboardingProgressInfo['selectedSideJobId'] as int?;
-            print('🔍 로그인 응답에서 selectedSideJobId 추출: $sideJobId');
           }
           
           await _storageService.saveUserInfo(
@@ -189,6 +156,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
             nickname: userInfo['nickname'],
             profileImageUrl: userInfo['profileImageUrl'],
             sideJobId: sideJobId,
+            characterType: userInfo['characterType'],
           );
           userForState = Map<String, dynamic>.from(userInfo);
         }
@@ -206,7 +174,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
           );
         }
 
-        // 3. 인증 성공 상태로 전환 (onboardingProgressInfo 포함)
+        // 3. 소셜 로그인 정보 저장 (탈퇴 시 필요)
+        await _storageService.saveSocialLoginInfo(
+          providerAccessToken: accessToken,
+          provider: provider,
+        );
+
+        // 4. 인증 성공 상태로 전환 (onboardingProgressInfo 포함)
         state = state.authenticated(userForState);
         return true;
       } else {
@@ -237,7 +211,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       } catch (e) {
         // 서버 요청 실패해도 로컬 데이터는 삭제
-        print('서버 로그아웃 요청 실패: $e');
       }
 
       // 2. 로컬 데이터 삭제
@@ -252,7 +225,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 토큰 만료 시 강제 로그아웃 (NetworkClient에서 호출)
   Future<void> forceLogout() async {
-    print('🚫 토큰 만료로 인한 강제 로그아웃');
     await _storageService.clearAuthData();
     state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
   }
@@ -263,28 +235,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 실패 시 현재 상태를 유지하고 에러 메시지를 반환합니다.
   Future<bool> withdraw() async {
     try {
-      // 1. 서버에 회원탈퇴 요청
-      final response = await _apiService.withdraw();
+      // 1. 소셜 플랫폼 액세스 토큰 조회
+      final providerAccessToken = _storageService.getProviderAccessToken();
+      
+      // 2. 서버에 회원탈퇴 요청 (소셜 플랫폼 액세스 토큰 포함)
+      final response = await _apiService.withdraw(
+        providerAccessToken: providerAccessToken,
+      );
       
       if (response.statusCode == 200 && 
           response.data != null && 
           response.data!['success'] == true) {
         
-        print('✅ 회원탈퇴 성공: ${response.data}');
-        
-        // 2. 로컬 데이터 삭제
+        // 3. 로컬 데이터 삭제
         await _storageService.clearAuthData();
         
-        // 3. 미인증 상태로 전환
+        // 4. 미인증 상태로 전환
         state = state.unauthenticated();
         return true;
       } else {
         final message = response.data?['message'] ?? '회원탈퇴에 실패했습니다.';
-        print('❌ 회원탈퇴 실패: $message');
         return false;
       }
     } catch (e) {
-      print('❌ 회원탈퇴 중 오류 발생: $e');
       return false;
     }
   }
@@ -352,22 +325,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
           nickname: userData['nickname'],
           profileImageUrl: userData['profileImageUrl'],
           sideJobId: userData['sideJobId'] as int?,
+          characterType: userData['characterType'],
         );
 
         state = state.authenticated(userData);
       }
     } catch (e) {
       // 사용자 정보 갱신 실패는 에러로 처리하지 않음
-      print('사용자 정보 갱신 실패: $e');
     }
   }
 
   /// 디버그용: 현재 인증 상태 출력
   void printAuthStatus() {
-    print('=== Auth Status ===');
-    print('State: $state');
     _storageService.printAuthData();
-    print('==================');
   }
 
   /// 사용자 데이터에서 sideJobId를 추출하는 헬퍼 메서드
@@ -379,7 +349,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
       return null;
     } catch (e) {
-      print('Error extracting sideJobId: $e');
       return null;
     }
   }

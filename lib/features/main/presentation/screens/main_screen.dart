@@ -40,7 +40,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           _loadDataForTab(1);
         },
       ),
-      const QuestScreen(),
+      QuestScreen(
+        onHomeTabRequested: () {
+          setState(() {
+            _currentIndex = 1; // 퀘스트 탭으로 이동
+          });
+          _loadDataForTab(1);
+        },
+      ),
       const MyRecordScreen(),
     ];
     

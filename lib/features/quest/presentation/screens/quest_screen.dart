@@ -24,7 +24,9 @@ import 'package:booquest/features/quest/infrastructure/providers/mission_step_co
 import 'package:booquest/features/quest/infrastructure/providers/mission_completion_providers.dart';
 
 class QuestScreen extends ConsumerStatefulWidget {
-  const QuestScreen({super.key});
+  final VoidCallback? onHomeTabRequested;
+  
+  const QuestScreen({super.key, this.onHomeTabRequested});
 
   @override
   ConsumerState<QuestScreen> createState() => _QuestScreenState();
@@ -332,7 +334,9 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             if (currentOrderNo != 5) {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const NextQuestSetupScreen(),
+                  builder: (context) => NextQuestSetupScreen(
+                    onHomeTabRequested: widget.onHomeTabRequested,
+                  ),
                 ),
               );
             } else {
@@ -367,7 +371,9 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           } else {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const NextQuestSetupScreen(),
+                builder: (context) => NextQuestSetupScreen(
+                  onHomeTabRequested: widget.onHomeTabRequested,
+                ),
               ),
             );
           }
@@ -510,6 +516,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           method: 'main_quest',
           content: '메인 퀘스트 완료',
           expReward: data.totalExpReward,
+          onHomeTabRequested: widget.onHomeTabRequested,
         ),
       ),
     );
@@ -523,6 +530,7 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           method: 'final_quest',
           content: '모든 메인 퀘스트 완료',
           expReward: data?.totalExpReward ?? 50,
+          onHomeTabRequested: widget.onHomeTabRequested,
         ),
       ),
     );

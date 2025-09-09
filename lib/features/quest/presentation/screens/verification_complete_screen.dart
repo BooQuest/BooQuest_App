@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
-import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/quest/presentation/screens/next_quest_setup_screen.dart';
 import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
@@ -13,12 +12,14 @@ class VerificationCompleteScreen extends ConsumerWidget {
   final String method; // 인증 방식 (link, text, photo, main_quest)
   final String content; // 인증 내용
   final int? expReward; // 획득 경험치 (메인 퀘스트 완료 시 사용)
+  final VoidCallback? onHomeTabRequested;
 
   const VerificationCompleteScreen({
     super.key,
     required this.method,
     required this.content,
     this.expReward,
+    this.onHomeTabRequested,
   });
 
   /// 레벨과 타입에 따라 pleasure GIF 파일 경로를 반환하는 함수
@@ -28,8 +29,8 @@ class VerificationCompleteScreen extends ConsumerWidget {
     
     // 로컬 스토리지에서 캐릭터 타입 가져오기
     try {
-      final onboardingService = OnboardingStorageService.getInstanceSync();
-      final characterType = onboardingService.getCharacterType();
+      final authStorage = AuthStorageService.getInstanceSync();
+      final characterType = authStorage.getCharacterType();
       
       // 타입에 따라 다른 GIF 파일 사용 (네이버 클라우드 스토리지 URL 사용)
       if (characterType == 'WHITE') {
@@ -229,7 +230,9 @@ class VerificationCompleteScreen extends ConsumerWidget {
       // 메인 퀘스트 완료 시: 다음 퀘스트 설정 화면으로 이동
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const NextQuestSetupScreen(),
+          builder: (context) => NextQuestSetupScreen(
+            onHomeTabRequested: onHomeTabRequested,
+          ),
         ),
       );
     } else if (method == 'final_quest') {

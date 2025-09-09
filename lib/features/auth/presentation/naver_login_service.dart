@@ -1,5 +1,6 @@
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:flutter_naver_login/interface/types/naver_login_status.dart';
+import 'dart:io';
 
 /// 네이버 로그인 서비스
 /// 
@@ -20,23 +21,48 @@ class NaverLoginService {
   /// 3. 실패 시 null 반환
   Future<String?> login() async {
     try {
+      
+      // 기존 토큰 정리 (토큰 만료 문제 방지)
+      try {
+        await FlutterNaverLogin.logOut();
+        await Future.delayed(const Duration(milliseconds: 500));
+      } catch (e) {
+
+      }
+      
       // 네이버 로그인 실행
       final result = await FlutterNaverLogin.logIn();
       
       if (result.status == NaverLoginStatus.loggedIn) {
-        print('✅ 네이버 로그인 성공');
-        print('  - Access Token: ${result.accessToken?.accessToken}');
         
-        // 로그인 성공 시 액세스 토큰만 반환
-        // 실제 서버 인증은 AuthNotifier.loginWithSocial에서 처리
-        return result.accessToken?.accessToken;
+        // 네이버 플러그인 설계상 logIn() 결과에 accessToken이 포함되지 않음
+        // 별도로 getCurrentAccessToken()을 호출해야 함
+        try {
+          final token = await FlutterNaverLogin.getCurrentAccessToken();
+          
+          if (token.accessToken.isNotEmpty) {
+            print('✅ Access Token 획득 성공: ${token.accessToken}');
+            return token.accessToken;
+          } else {
+            print('⚠️ Access Token이 비어있음. 리프레시 시도...');
+            
+            // 리프레시 토큰으로 갱신 시도
+            final refreshedToken = await FlutterNaverLogin.refreshAccessTokenWithRefreshToken();
+
+            if (refreshedToken.accessToken.isNotEmpty) {
+              return refreshedToken.accessToken;
+            } else {
+              return null;
+            }
+          }
+        } catch (e) {
+          return null;
+        }
       } else {
-        print('❌ 네이버 로그인 실패: ${result.status}');
-        print('  - Error Message: ${result.errorMessage}');
+        
         return null;
       }
     } catch (e) {
-      print('❌ 네이버 로그인 중 예외 발생: $e');
       return null;
     }
   }

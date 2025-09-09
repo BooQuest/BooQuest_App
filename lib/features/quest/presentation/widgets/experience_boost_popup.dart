@@ -138,61 +138,56 @@ class ExperienceBoostPopup extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             // 버튼들
-            Row(
-              children: [
-                // 인증하기 버튼
-                Expanded(
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(8),
+            // 인증하기 버튼 (전체 너비)
+            Container(
+              width: double.infinity,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE3F2FD),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // 인증 화면으로 이동
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => QuestVerificationScreen(stepId: stepId),
                     ),
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        // 인증 화면으로 이동
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => QuestVerificationScreen(stepId: stepId),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        '인증하기',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1976D2),
-                        ),
-                      ),
-                    ),
+                  );
+                },
+                child: const Text(
+                  '인증하기',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1976D2),
                   ),
                 ),
-                const SizedBox(width: 12),
-                // 광고보기 버튼
-                Expanded(
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF9E9E9E),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextButton(
-                      onPressed: null, 
-                      child: const Text(
-                        '광고보기',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
+            // 광고보기 버튼 (주석처리)
+            // const SizedBox(width: 12),
+            // Expanded(
+            //   child: Container(
+            //     height: 48,
+            //     decoration: BoxDecoration(
+            //       color: const Color(0xFF9E9E9E),
+            //       borderRadius: BorderRadius.circular(8),
+            //     ),
+            //     child: TextButton(
+            //       onPressed: null, 
+            //       child: const Text(
+            //         '광고보기',
+            //         style: TextStyle(
+            //           fontSize: 14,
+            //           fontWeight: FontWeight.w600,
+            //           color: Colors.white,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

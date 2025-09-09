@@ -352,7 +352,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
 
       final generateRequest = SideJobRequestData(
         userId: userId,
-        nickname: nickname,
+        nickname: characterName,
         job: job,
         hobbies: hobbies,
         expressionStyle: expressionStyle,
@@ -580,7 +580,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       // SideJobRequestData 재사용
       final generateRequest = SideJobRequestData(
         userId: userId,
-        nickname: nickname,
+        nickname: characterName,
         job: job,
         hobbies: hobbies,
         expressionStyle: expressionStyle,

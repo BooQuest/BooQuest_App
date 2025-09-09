@@ -19,7 +19,6 @@ class UserDataService {
     String strengthType,
   ) async {
     try {
-      print('🔍 사용자 데이터 수집 시작...');
 
       // 병렬로 모든 데이터 수집
       final results = await Future.wait([
@@ -42,19 +41,17 @@ class UserDataService {
 
       // 필수 데이터 검증
       if (userId == null) {
-        print('❌ 사용자 ID가 없습니다');
         return const Left(SideJobFailure.userDataError('사용자 ID를 찾을 수 없습니다'));
       }
 
       if (nickname == null || nickname.isEmpty) {
-        print('❌ 사용자 닉네임이 없습니다');
         return const Left(SideJobFailure.userDataError('사용자 닉네임을 찾을 수 없습니다'));
       }
 
       // SideJobRequestData 생성
       final requestData = SideJobRequestData(
         userId: userId,
-        nickname: nickname,
+        nickname: characterName ?? '',
         job: job ?? '',
         hobbies: hobbies ?? [],
         expressionStyle: expressionStyle ?? '',
@@ -63,21 +60,9 @@ class UserDataService {
         characterName: characterName ?? '',
       );
 
-      print('✅ 사용자 데이터 수집 완료:');
-      print('  - userId: $userId');
-      print('  - nickname: $nickname');
-      print('  - job: $job');
-      print('  - hobbies: $hobbies');
-      print('  - expressionStyle: $expressionStyle');
-      print('  - strengthType: $strengthType');
-      print('  - characterType: $characterType');
-      print('  - characterName: $characterName');
-
       return Right(requestData);
 
     } catch (error, stackTrace) {
-      print('❌ 사용자 데이터 수집 중 예외 발생: $error');
-      print('Stack trace: $stackTrace');
       return Left(SideJobFailure.userDataError(error.toString()));
     }
   }

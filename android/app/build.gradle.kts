@@ -30,18 +30,29 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = "booquest"  // 키스토어에서 설정한 alias
+            keyPassword = "booquest55"  // 실제 키 비밀번호
+            storeFile = file("../../booquest-release-key.jks")  // 키스토어 파일 경로 (프로젝트 루트)
+            storePassword = "booquest55"  // 실제 스토어 비밀번호
+        }
+    }
+
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        debug {
             signingConfig = signingConfigs.getByName("debug")
+        }
+        release {
+            signingConfig = signingConfigs.getByName("release")  // release 키 사용
             
-            // ProGuard 설정 추가 (릴리즈 빌드 시 코드 난독화 및 최적화)
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            // ProGuard 및 리소스 축소 비활성화 (네이버 로그인 문제 해결을 위해 임시)
+            isMinifyEnabled = false
+            isShrinkResources = false
+            // proguardFiles(
+            //     getDefaultProguardFile("proguard-android.txt"),
+            //     "proguard-rules.pro"
+            // )
         }
     }
 }
@@ -55,6 +66,6 @@ dependencies {
     implementation("com.kakao.sdk:v2-user:2.20.1")
     implementation("com.kakao.sdk:v2-auth:2.20.1")
     
-    // 네이버 로그인 SDK 의존성 추가
-    implementation("com.navercorp.nid:oauth:5.9.1")
+    // 네이버 로그인 SDK 의존성 추가 (안정적인 버전으로 다운그레이드)
+    implementation("com.navercorp.nid:oauth:5.8.0")
 }
