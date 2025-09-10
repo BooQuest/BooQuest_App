@@ -8,6 +8,7 @@ import 'package:booquest/features/main/application/states/mission_list_state.dar
 import 'package:booquest/features/main/domain/entities/mission_entity.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/quest/presentation/screens/next_quest_start_screen.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 다음 퀘스트 설정 화면 - 메인 퀘스트 완료 후 다음 퀘스트 준비
 class NextQuestSetupScreen extends ConsumerStatefulWidget {
@@ -20,12 +21,15 @@ class NextQuestSetupScreen extends ConsumerStatefulWidget {
 class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
   String? _userNickname;
   int? _sideJobId;
+  InterstitialAd? _interstitialAd;
+  bool _isAdReady = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
+      _loadInterstitialAd(); // ✅ 광고 로드
     });
   }
 
@@ -771,40 +775,43 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
 
   /// 하단 버튼
   Widget _buildBottomButton(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 20.0,
-          right: 20.0,
-          bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
-        ),
-                  child: Row(
-            children: [
-              Expanded(
-              child: SizedBox(
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // 다음 퀘스트 진행하기 버튼 클릭 시 NextQuestStartScreen으로 이동
+  return SafeArea(
+    top: false,
+    child: Padding(
+      padding: EdgeInsets.only(
+        left: 20.0,
+        right: 20.0,
+        bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () {
+                  /// 실제 퀘스트 시작 로직
+                  void startNextQuest() {
                     // 완료된 메인퀘스트의 다음 단계 정보를 전달
                     final missionListState = ref.read(missionListNotifierProvider);
                     missionListState.maybeWhen(
                       success: (data) {
+                        // 완료된 메인퀘스트들 중 가장 최근 것 찾기
                         final completedMissions = data.missions.where((m) => m.status == 'COMPLETED').toList();
                         if (completedMissions.isNotEmpty) {
-                          // 가장 최근에 완료된 메인퀘스트 찾기 (orderNo가 가장 큰 것)
-                          final latestCompletedMission = completedMissions.reduce((a, b) => 
-                            (a.orderNo ?? 0) > (b.orderNo ?? 0) ? a : b);
-                          
-                          // 다음 메인퀘스트 단계 찾기 (orderNo가 +1인 것)
+                          // 가장 최근에 완료된 메인퀘스트 (orderNo가 가장 큰 것)
+                          final latestCompletedMission = completedMissions.reduce(
+                            (a, b) => (a.orderNo ?? 0) > (b.orderNo ?? 0) ? a : b,
+                          );
+
+                          // 다음 메인퀘스트 단계 찾기 (orderNo + 1)
                           final nextMissionOrder = (latestCompletedMission.orderNo ?? 0) + 1;
                           final nextMission = data.missions.firstWhere(
                             (m) => m.orderNo == nextMissionOrder,
                             orElse: () => data.missions.first, // fallback
                           );
-                          
-                          // 다음 메인퀘스트 정보 전달
+
+                          // NextQuestStartScreen으로 이동
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => NextQuestStartScreen(
@@ -820,28 +827,72 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
                       },
                       orElse: () {},
                     );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    '다음 퀘스트 진행하기',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  }
+
+                  /// 광고가 준비되어 있으면 광고 먼저 실행
+                  if (_isAdReady && _interstitialAd != null) {
+                    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+                      // 광고 닫힌 후 호출
+                      onAdDismissedFullScreenContent: (ad) {
+                        ad.dispose();
+                        _interstitialAd = null;
+                        _isAdReady = false;
+                        _loadInterstitialAd(); // 다음 광고 미리 로딩
+                        startNextQuest(); // 광고 끝나고 퀘스트 시작
+                      },
+                      // 광고 실행 실패 시
+                      onAdFailedToShowFullScreenContent: (ad, error) {
+                        ad.dispose();
+                        _interstitialAd = null;
+                        _isAdReady = false;
+                        startNextQuest(); // 실패해도 퀘스트는 진행
+                      },
+                    );
+                    _interstitialAd!.show();
+                  } else {
+                    // 광고 준비가 안 된 경우 그냥 바로 퀘스트 시작
+                    startNextQuest();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  '다음 퀘스트 진행하기',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+  void _loadInterstitialAd() {
+  InterstitialAd.load(
+    adUnitId: 'ca-app-pub-3940256099942544/1033173712', // ✅ 테스트용 ID
+    request: const AdRequest(),
+    adLoadCallback: InterstitialAdLoadCallback(
+      onAdLoaded: (ad) {
+        _interstitialAd = ad;
+        _isAdReady = true;
+      },
+      onAdFailedToLoad: (error) {
+        print('❌ 전면 광고 로드 실패: $error');
+        _interstitialAd = null;
+        _isAdReady = false;
+      },
+    ),
+  );
+}
   
   /// 부퀘스트 섹션 (완료된 퀘스트에만 표시)
   Widget _buildSubQuestSection(MissionEntity mission) {
