@@ -57,4 +57,7 @@ dependencies {
     
     // 네이버 로그인 SDK 의존성 추가
     implementation("com.navercorp.nid:oauth:5.9.1")
+
+    //Admob 의존성 추가
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
 }

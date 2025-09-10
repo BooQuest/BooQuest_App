@@ -15,6 +15,8 @@ import 'package:booquest/features/sidejob/infrastructure/sidejob_providers.dart'
 import 'package:booquest/features/sidejob/domain/sidejob_entity.dart';
 import 'package:booquest/features/sidejob/domain/sidejob_failure.dart';
 import 'package:booquest/features/missions/domain/entities/subquest_request_data.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:async';
 
 /// 부업 추천 화면
 class SideJobRecommendationsScreen extends StatefulWidget {
@@ -37,11 +39,15 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   late List<Map<String, dynamic>> _recommendations;
   List<Map<String, dynamic>>? _subQuests; // 부퀘스트 데이터
 
+  InterstitialAd? _interstitialAd;
+  bool _isAdLoaded = false;
+
   @override
   void initState() {
     super.initState();
     _recommendations = List.from(widget.recommendations);
     _loadCharacterName();
+    _loadInterstitialAd();
     // 화면 진입 시 기존 추천 목록 자동 로드 (온보딩에서 넘어온 경우 제외)
     // - widget.recommendations가 비어있을 때만 호출
     // - 앱 최초 진입 또는 뒤로가기에서 재진입 시 최근 추천 목록 표시
@@ -276,29 +282,155 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   @override
   void dispose() {
     super.dispose();
-  }
+  }  
+  
 
   void _handleCardSelect(int index) async {
     final rec = _recommendations[index];
     final sideJobIdStr = rec['id']?.toString() ?? '';
-    if (sideJobIdStr.isEmpty) {
-      return;
-    }
-    
+    if (sideJobIdStr.isEmpty) return;
+
     final sideJobId = int.tryParse(sideJobIdStr) ?? 0;
     final sideJobTitle = rec['title']?.toString() ?? '';
     final sideJobDesignNotes = rec['description']?.toString() ?? '';
 
-    // userId 추출 (AuthStorageService via UserDataUtils)
     final userId = await UserDataUtils.instance.getUserId() ?? 0;
 
-    _createMissions(
+    setState(() => _isLoading = true);
+
+    // 병렬로 광고 시청 + 미션 생성 진행
+    final missionFuture = _createMissionsWithoutNavigation(
       userId: userId,
       sideJobId: sideJobId,
       sideJobTitle: sideJobTitle,
       sideJobDesignNotes: sideJobDesignNotes,
     );
+
+    final adFuture = _showAdAndWait();
+
+    // 두 작업이 끝난 후 화면 이동
+    await Future.wait([missionFuture, adFuture]);
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => QuestStepsScreen(
+            missionSteps: _missionSteps,
+            subQuests: _subQuests,
+            selectedSideJobId: sideJobId,
+            sideJobTitle: sideJobTitle,
+            sideJobDesignNotes: sideJobDesignNotes,
+          ),
+        ),
+      );
+    }
   }
+
+  Future<void> _showAdAndWait() async {
+    final completer = Completer<void>();
+
+    if (_interstitialAd != null && _isAdLoaded) {
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+          _interstitialAd = null;
+          _isAdLoaded = false;
+          _loadInterstitialAd(); // 다음 광고 미리 로드
+          completer.complete();
+        },
+        onAdFailedToShowFullScreenContent: (ad, error) {
+          ad.dispose();
+          _interstitialAd = null;
+          _isAdLoaded = false;
+          _loadInterstitialAd(); // 다음 광고 미리 로드
+          completer.complete();
+        },
+      );
+
+      _interstitialAd!.show();
+    } else {
+      completer.complete(); // 광고 없으면 바로 통과
+    }
+
+    return completer.future;
+  }
+
+  late List<Map<String, dynamic>> _missionSteps;
+
+  Future<void> _createMissionsWithoutNavigation({
+    required int userId,
+    required int sideJobId,
+    required String sideJobTitle,
+    required String sideJobDesignNotes,
+  }) async {
+    final container = ProviderContainer();
+    try {
+      await container.read(missionNotifierProvider.notifier).createMissions(
+        userId: userId,
+        sideJobId: sideJobId,
+        sideJobTitle: sideJobTitle,
+        sideJobDesignNotes: sideJobDesignNotes,
+      );
+      final state = container.read(missionNotifierProvider);
+      await state.when(
+        initial: () {},
+        loading: () {},
+        success: (steps) async {
+          _missionSteps = steps.map((step) => {
+            'id': step.id,
+            'title': step.title,
+            'order': step.order,
+            'designNotes': step.designNotes,
+          }).toList();
+
+          if (steps.isNotEmpty) {
+            final first = steps.first;
+            final subQuests = await container.read(missionNotifierProvider.notifier).getSubQuests(
+              SubQuestRequestData(
+                userId: userId,
+                missionId: first.id,
+                missionTitle: first.title,
+                missionDesignNotes: first.designNotes,
+              ),
+            );
+            _subQuests = subQuests?.map((s) => {
+              'id': s.id,
+              'title': s.title,
+              'seq': s.seq,
+              'status': s.status,
+              'detail': s.detail,
+            }).toList();
+          }
+        },
+        failure: (f) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(f.userMessage)),
+          );
+        },
+      );
+    } finally {
+      container.dispose();
+    }
+  }
+
+  void _loadInterstitialAd() {
+  InterstitialAd.load(
+    adUnitId: 'ca-app-pub-3940256099942544/1033173712', // 테스트용 ID
+    request: const AdRequest(),
+    adLoadCallback: InterstitialAdLoadCallback(
+      onAdLoaded: (ad) {
+        _interstitialAd = ad;
+        _isAdLoaded = true;
+      },
+      onAdFailedToLoad: (error) {
+        print('InterstitialAd failed to load: $error');
+        _isAdLoaded = false;
+      },
+    ),
+  );
+}
 
   void _handleRecommendAgain(int index) {
     _showFeedbackPopup(index);

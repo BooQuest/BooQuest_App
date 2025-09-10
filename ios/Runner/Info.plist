@@ -92,6 +92,10 @@
 	<string>unToCI8V3H</string>
 	<key>NidAppName</key>
 	<string>Booquest</string>
+
+	<!-- AdMob App ID 설정 -->    
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544/2934735716</string> <!-- 테스트 광고 ID, 실제 광고 ID로 교체필요 -->
 </dict>
 </plist>
 
