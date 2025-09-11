@@ -417,7 +417,7 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
 
   void _loadInterstitialAd() {
   InterstitialAd.load(
-    adUnitId: 'ca-app-pub-3940256099942544/1033173712', // 테스트용 ID
+    adUnitId: 'ca-app-pub-4954826018130837/3285223329', // 테스트용 ID
     request: const AdRequest(),
     adLoadCallback: InterstitialAdLoadCallback(
       onAdLoaded: (ad) {
@@ -897,7 +897,3 @@ class _SideJobCard extends StatelessWidget {
 
 
 }
-
-
-
-
