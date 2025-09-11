@@ -26,6 +26,8 @@ mixin _$MissionStepCompletionEntity {
   MissionStepEntity get step => throw _privateConstructorUsedError;
   CharacterEntity get character => throw _privateConstructorUsedError;
   int get expDelta => throw _privateConstructorUsedError;
+  bool get leveledUp => throw _privateConstructorUsedError;
+  int get currentLevel => throw _privateConstructorUsedError;
 
   /// Serializes this MissionStepCompletionEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -48,7 +50,13 @@ abstract class $MissionStepCompletionEntityCopyWith<$Res> {
         MissionStepCompletionEntity
       >;
   @useResult
-  $Res call({MissionStepEntity step, CharacterEntity character, int expDelta});
+  $Res call({
+    MissionStepEntity step,
+    CharacterEntity character,
+    int expDelta,
+    bool leveledUp,
+    int currentLevel,
+  });
 
   $MissionStepEntityCopyWith<$Res> get step;
   $CharacterEntityCopyWith<$Res> get character;
@@ -75,6 +83,8 @@ class _$MissionStepCompletionEntityCopyWithImpl<
     Object? step = null,
     Object? character = null,
     Object? expDelta = null,
+    Object? leveledUp = null,
+    Object? currentLevel = null,
   }) {
     return _then(
       _value.copyWith(
@@ -89,6 +99,14 @@ class _$MissionStepCompletionEntityCopyWithImpl<
             expDelta: null == expDelta
                 ? _value.expDelta
                 : expDelta // ignore: cast_nullable_to_non_nullable
+                      as int,
+            leveledUp: null == leveledUp
+                ? _value.leveledUp
+                : leveledUp // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            currentLevel: null == currentLevel
+                ? _value.currentLevel
+                : currentLevel // ignore: cast_nullable_to_non_nullable
                       as int,
           )
           as $Val,
@@ -125,7 +143,13 @@ abstract class _$$MissionStepCompletionEntityImplCopyWith<$Res>
   ) = __$$MissionStepCompletionEntityImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({MissionStepEntity step, CharacterEntity character, int expDelta});
+  $Res call({
+    MissionStepEntity step,
+    CharacterEntity character,
+    int expDelta,
+    bool leveledUp,
+    int currentLevel,
+  });
 
   @override
   $MissionStepEntityCopyWith<$Res> get step;
@@ -154,6 +178,8 @@ class __$$MissionStepCompletionEntityImplCopyWithImpl<$Res>
     Object? step = null,
     Object? character = null,
     Object? expDelta = null,
+    Object? leveledUp = null,
+    Object? currentLevel = null,
   }) {
     return _then(
       _$MissionStepCompletionEntityImpl(
@@ -169,6 +195,14 @@ class __$$MissionStepCompletionEntityImplCopyWithImpl<$Res>
             ? _value.expDelta
             : expDelta // ignore: cast_nullable_to_non_nullable
                   as int,
+        leveledUp: null == leveledUp
+            ? _value.leveledUp
+            : leveledUp // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        currentLevel: null == currentLevel
+            ? _value.currentLevel
+            : currentLevel // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -182,6 +216,8 @@ class _$MissionStepCompletionEntityImpl
     required this.step,
     required this.character,
     required this.expDelta,
+    this.leveledUp = false,
+    this.currentLevel = 0,
   });
 
   factory _$MissionStepCompletionEntityImpl.fromJson(
@@ -194,10 +230,16 @@ class _$MissionStepCompletionEntityImpl
   final CharacterEntity character;
   @override
   final int expDelta;
+  @override
+  @JsonKey()
+  final bool leveledUp;
+  @override
+  @JsonKey()
+  final int currentLevel;
 
   @override
   String toString() {
-    return 'MissionStepCompletionEntity(step: $step, character: $character, expDelta: $expDelta)';
+    return 'MissionStepCompletionEntity(step: $step, character: $character, expDelta: $expDelta, leveledUp: $leveledUp, currentLevel: $currentLevel)';
   }
 
   @override
@@ -209,12 +251,23 @@ class _$MissionStepCompletionEntityImpl
             (identical(other.character, character) ||
                 other.character == character) &&
             (identical(other.expDelta, expDelta) ||
-                other.expDelta == expDelta));
+                other.expDelta == expDelta) &&
+            (identical(other.leveledUp, leveledUp) ||
+                other.leveledUp == leveledUp) &&
+            (identical(other.currentLevel, currentLevel) ||
+                other.currentLevel == currentLevel));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, step, character, expDelta);
+  int get hashCode => Object.hash(
+    runtimeType,
+    step,
+    character,
+    expDelta,
+    leveledUp,
+    currentLevel,
+  );
 
   /// Create a copy of MissionStepCompletionEntity
   /// with the given fields replaced by the non-null parameter values.
@@ -239,6 +292,8 @@ abstract class _MissionStepCompletionEntity
     required final MissionStepEntity step,
     required final CharacterEntity character,
     required final int expDelta,
+    final bool leveledUp,
+    final int currentLevel,
   }) = _$MissionStepCompletionEntityImpl;
 
   factory _MissionStepCompletionEntity.fromJson(Map<String, dynamic> json) =
@@ -250,6 +305,10 @@ abstract class _MissionStepCompletionEntity
   CharacterEntity get character;
   @override
   int get expDelta;
+  @override
+  bool get leveledUp;
+  @override
+  int get currentLevel;
 
   /// Create a copy of MissionStepCompletionEntity
   /// with the given fields replaced by the non-null parameter values.

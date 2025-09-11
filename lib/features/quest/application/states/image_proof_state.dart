@@ -15,6 +15,9 @@ class ImageProofState with _$ImageProofState {
   /// 성공 상태
   const factory ImageProofState.success(ImageProofEntity data) = _Success;
   
+  /// 레벨업 상태
+  const factory ImageProofState.levelUp(ImageProofEntity data) = _LevelUp;
+  
   /// 실패 상태
   const factory ImageProofState.failure(String message) = _Failure;
 }

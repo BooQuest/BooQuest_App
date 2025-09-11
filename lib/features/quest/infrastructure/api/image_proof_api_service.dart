@@ -38,7 +38,17 @@ class ImageProofApiService {
 
       if (response.statusCode == 200) {
         final data = response.data['data'];
-        return ImageProofEntity.fromJson(data);
+        
+        // 레벨업 체크 로직 추가
+        final leveledUp = data['leveledUp'] ?? false;
+        final currentLevel = data['currentLevel'] ?? 0;
+        
+        // ImageProofEntity에 레벨업 정보 포함
+        final entityData = Map<String, dynamic>.from(data);
+        entityData['leveledUp'] = leveledUp;
+        entityData['currentLevel'] = currentLevel;
+        
+        return ImageProofEntity.fromJson(entityData);
       } else {
         throw Exception('API 요청 실패: ${response.statusCode}');
       }

@@ -21,7 +21,18 @@ class MissionCompletionApiService {
         throw Exception('already-completed');
       }
       
-      return MissionCompletionEntity.fromJson(response.data['data']);
+      final data = response.data['data'];
+      
+      // 레벨업 체크 로직 추가
+      final leveledUp = data['leveledUp'] ?? false;
+      final currentLevel = data['currentLevel'] ?? 0;
+      
+      // MissionCompletionEntity에 레벨업 정보 포함
+      final entityData = Map<String, dynamic>.from(data);
+      entityData['leveledUp'] = leveledUp;
+      entityData['currentLevel'] = currentLevel;
+      
+      return MissionCompletionEntity.fromJson(entityData);
     } catch (e) {
       rethrow;
     }

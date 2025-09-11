@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:booquest/features/auth/presentation/auth_wrapper.dart';
+import 'package:booquest/features/auth/presentation/splash_screen.dart';
 
 void main() async {
   // Flutter 바인딩 초기화
@@ -29,7 +30,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const AuthWrapper(),
+      home: const SplashScreen(),
+      routes: {
+        '/login': (context) => const AuthWrapper(),
+      },
     );
   }
 }

@@ -8,6 +8,7 @@ class AuthStorageService {
   static const String _userIdKey = 'auth_user_id';
   static const String _emailKey = 'auth_email';
   static const String _nicknameKey = 'auth_nickname';
+  static const String _socialNicknameKey = 'auth_social_nickname';
   static const String _profileImageUrlKey = 'auth_profile_image_url';
   static const String _sideJobIdKey = 'auth_side_job_id';
   static const String _accessTokenKey = 'auth_access_token';
@@ -75,6 +76,16 @@ class AuthStorageService {
   /// 닉네임 조회
   String? getNickname() {
     return _preferences?.getString(_nicknameKey);
+  }
+
+  /// 소셜 닉네임 저장
+  Future<void> setSocialNickname(String socialNickname) async {
+    await _preferences?.setString(_socialNicknameKey, socialNickname);
+  }
+
+  /// 소셜 닉네임 조회
+  String? getSocialNickname() {
+    return _preferences?.getString(_socialNicknameKey);
   }
 
   /// 프로필 이미지 URL 저장
@@ -173,6 +184,7 @@ class AuthStorageService {
     required int userId,
     required String email,
     required String nickname,
+    String? socialNickname,
     String? profileImageUrl,
     int? sideJobId,
     String? characterType,
@@ -180,6 +192,10 @@ class AuthStorageService {
     await _preferences?.setInt(_userIdKey, userId);
     await _preferences?.setString(_emailKey, email);
     await _preferences?.setString(_nicknameKey, nickname);
+    
+    if (socialNickname != null) {
+      await _preferences?.setString(_socialNicknameKey, socialNickname);
+    }
     
     if (profileImageUrl != null) {
       await _preferences?.setString(_profileImageUrlKey, profileImageUrl);
@@ -205,6 +221,7 @@ class AuthStorageService {
       'userId': userId,
       'email': email,
       'nickname': getNickname(),
+      'socialNickname': getSocialNickname(),
       'profileImageUrl': getProfileImageUrl(),
       'sideJobId': getSideJobId(),
       'characterType': getCharacterType(),
@@ -245,6 +262,7 @@ class AuthStorageService {
     await _preferences?.remove(_userIdKey);
     await _preferences?.remove(_emailKey);
     await _preferences?.remove(_nicknameKey);
+    await _preferences?.remove(_socialNicknameKey);
     await _preferences?.remove(_profileImageUrlKey);
     await _preferences?.remove(_sideJobIdKey);
     await _preferences?.remove(_accessTokenKey);
@@ -280,6 +298,7 @@ class AuthStorageService {
     print('UserId: ${getUserId()}');
     print('Email: ${getEmail()}');
     print('Nickname: ${getNickname()}');
+    print('SocialNickname: ${getSocialNickname()}');
     print('ProfileImageUrl: ${getProfileImageUrl()}');
     print('CharacterType: ${getCharacterType()}');
     print('AccessToken: ${getAccessToken()?.substring(0, 20)}...');

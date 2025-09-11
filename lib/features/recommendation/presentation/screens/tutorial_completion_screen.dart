@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 
 class TutorialCompletionScreen extends StatefulWidget {
   final String userName;
@@ -157,7 +158,17 @@ class _TutorialCompletionScreenState extends State<TutorialCompletionScreen> {
           width: double.infinity,
           height: isSmallScreen ? 42 : 46,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              final authStorage = await AuthStorageService.getInstance();
+              
+              // characterType 저장
+              if (_characterType != null) {
+                await authStorage.setCharacterType(_characterType!);
+              }
+              
+              // userName을 nickname으로 저장
+              await authStorage.setNickname(widget.userName);
+              
               // 시작하기 버튼 클릭 시 메인 화면으로 이동
               Navigator.pushAndRemoveUntil(
                 context,

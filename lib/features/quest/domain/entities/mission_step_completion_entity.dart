@@ -10,6 +10,8 @@ class MissionStepCompletionEntity with _$MissionStepCompletionEntity {
     required MissionStepEntity step,
     required CharacterEntity character,
     required int expDelta,
+    @Default(false) bool leveledUp,
+    @Default(0) int currentLevel,
   }) = _MissionStepCompletionEntity;
 
   factory MissionStepCompletionEntity.fromJson(Map<String, dynamic> json) =>

@@ -68,6 +68,19 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
             ),
           );
         },
+        levelUp: (data) {
+          // 레벨업과 함께 인증 완료 화면으로 이동
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VerificationCompleteScreen(
+                method: 'photo',
+                content: '이미지 업로드 완료',
+                leveledUp: true,
+                currentLevel: data.currentLevel,
+              ),
+            ),
+          );
+        },
         failure: (message) {
           // 실패 시 에러 다이얼로그 표시
           _showErrorDialog(message);

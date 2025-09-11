@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/quest/presentation/screens/next_quest_setup_screen.dart';
+import 'package:booquest/features/quest/presentation/screens/level_up_screen.dart';
 import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
 import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
 import 'package:booquest/features/main/infrastructure/providers/main_providers.dart';
@@ -13,6 +14,8 @@ class VerificationCompleteScreen extends ConsumerWidget {
   final String content; // 인증 내용
   final int? expReward; // 획득 경험치 (메인 퀘스트 완료 시 사용)
   final VoidCallback? onHomeTabRequested;
+  final bool leveledUp; // 레벨업 여부
+  final int? currentLevel; // 현재 레벨
 
   const VerificationCompleteScreen({
     super.key,
@@ -20,6 +23,8 @@ class VerificationCompleteScreen extends ConsumerWidget {
     required this.content,
     this.expReward,
     this.onHomeTabRequested,
+    this.leveledUp = false,
+    this.currentLevel,
   });
 
   /// 레벨과 타입에 따라 pleasure GIF 파일 경로를 반환하는 함수
@@ -49,6 +54,24 @@ class VerificationCompleteScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // CharacterGrowthState를 관찰하여 현재 레벨 정보 가져오기
     final characterGrowthState = ref.watch(characterGrowthNotifierProvider);
+    
+    // 레벨업 체크 - 레벨업이 발생한 경우 레벨업 화면으로 이동
+    if (leveledUp && currentLevel != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => LevelUpScreen(
+              newLevel: currentLevel!,
+              onComplete: () {
+                Navigator.of(context).pop(); // 레벨업 화면 닫기
+                // 그 다음에 다음 퀘스트 설정 화면으로 이동
+                _navigateToNextQuestSetup(context);
+              },
+            ),
+          ),
+        );
+      });
+    }
     
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -193,8 +216,10 @@ class VerificationCompleteScreen extends ConsumerWidget {
   String _getExpMessage() {
     if (method == 'main_quest') {
       return '+EXP 50만큼 경험치가 올랐어요';
-    } else if (method == 'sub_quest' || method == 'link' || method == 'text' || method == 'photo') {
+    } else if (method == 'sub_quest') {
       return '+EXP 10만큼 경험치가 올랐어요';
+    } else if (method == 'link' || method == 'text' || method == 'photo') {
+      return '+EXP 20만큼 경험치가 올랐어요';
     } else if (method == 'final_quest') {
       return '+EXP 50만큼 경험치가 올랐어요';
     }
@@ -219,6 +244,17 @@ class VerificationCompleteScreen extends ConsumerWidget {
             fontWeight: FontWeight.w600,
             color: AppColors.white,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// 다음 퀘스트 설정 화면으로 이동
+  void _navigateToNextQuestSetup(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => NextQuestSetupScreen(
+          onHomeTabRequested: onHomeTabRequested,
         ),
       ),
     );

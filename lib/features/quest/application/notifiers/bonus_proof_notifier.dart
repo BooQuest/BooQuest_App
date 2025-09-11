@@ -25,7 +25,13 @@ class BonusProofNotifier extends StateNotifier<BonusProofState> {
         },
         (data) {
           print('✅ BonusProofNotifier: submitProof 성공 - status: ${data.status}, additionalExp: ${data.additionalExp}');
-          state = BonusProofState.success(data);
+          
+          // 레벨업 체크
+          if (data.leveledUp) {
+            state = BonusProofState.levelUp(data);
+          } else {
+            state = BonusProofState.success(data);
+          }
         },
       );
     } catch (e) {

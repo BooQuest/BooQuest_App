@@ -32,7 +32,14 @@ class ImageProofNotifier extends StateNotifier<ImageProofState> {
         },
         (data) {
           print('✅ ImageProofNotifier: uploadImageProof 성공 - status: ${data.status}, additionalExp: ${data.additionalExp}');
-          state = ImageProofState.success(data);
+          
+          // 레벨업 체크
+          if (data.leveledUp) {
+            print('🎉 레벨업 발생! 현재 레벨: ${data.currentLevel}');
+            state = ImageProofState.levelUp(data);
+          } else {
+            state = ImageProofState.success(data);
+          }
         },
       );
     } catch (e) {

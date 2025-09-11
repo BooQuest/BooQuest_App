@@ -17,6 +17,11 @@ class MissionStepCompletionState with _$MissionStepCompletionState {
     MissionStepCompletionEntity data,
   ) = _Success;
 
+  /// 레벨업
+  const factory MissionStepCompletionState.levelUp(
+    MissionStepCompletionEntity data,
+  ) = _LevelUp;
+
   /// 실패
   const factory MissionStepCompletionState.failure(
     String message,

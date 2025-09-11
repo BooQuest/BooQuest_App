@@ -20,8 +20,6 @@ class MissionStepCompletionApiService {
     String status,
   ) async {
     try {
-      print('🌐 API 요청: PATCH /api/missions/steps/$stepId/status');
-      
       final response = await _networkClient.dio.patch(
         '/api/missions/steps/$stepId/status',
         data: {
@@ -29,20 +27,25 @@ class MissionStepCompletionApiService {
         },
       );
 
-      print('📊 응답 데이터: ${response.data}');
-
       if (response.statusCode == 200) {
         final data = response.data['data'];
         
         // null 값 처리
         final sanitizedData = _sanitizeResponseData(data);
         
+        // 레벨업 체크 로직 추가
+        final leveledUp = data['leveledUp'] ?? false;
+        final currentLevel = data['currentLevel'] ?? 0;
+        
+        // MissionStepCompletionEntity에 레벨업 정보 포함
+        sanitizedData['leveledUp'] = leveledUp;
+        sanitizedData['currentLevel'] = currentLevel;
+        
         return MissionStepCompletionEntity.fromJson(sanitizedData);
       } else {
         throw Exception('API 요청 실패: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ API 에러: $e /api/missions/steps/$stepId/status');
       rethrow;
     }
   }

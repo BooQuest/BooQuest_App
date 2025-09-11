@@ -302,14 +302,27 @@ class _LinkVerificationScreenState extends ConsumerState<LinkVerificationScreen>
           initial: () {},
           loading: () {},
           success: (data) {
-            print('✅ 링크 인증 성공: status=${data.status}, additionalExp=${data.additionalExp}');
-            
             // 인증 완료 후 완료 화면으로 이동
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => VerificationCompleteScreen(
                   method: 'link',
                   content: link,
+                ),
+              ),
+            );
+          },
+          levelUp: (data) {
+            print('🎉 링크 인증 성공 + 레벨업: status=${data.status}, additionalExp=${data.additionalExp}, currentLevel=${data.currentLevel}');
+            
+            // 레벨업과 함께 인증 완료 화면으로 이동
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => VerificationCompleteScreen(
+                  method: 'link',
+                  content: link,
+                  leveledUp: true,
+                  currentLevel: data.currentLevel,
                 ),
               ),
             );

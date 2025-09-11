@@ -24,7 +24,14 @@ class MissionStepCompletionNotifier extends StateNotifier<MissionStepCompletionS
         },
         (data) {
           print('✅ MissionStepCompletionNotifier: completeStep 성공 - expDelta: ${data.expDelta}');
-          state = MissionStepCompletionState.success(data);
+          
+          // 레벨업 체크
+          if (data.leveledUp) {
+            print('🎉 레벨업 발생! 현재 레벨: ${data.currentLevel}');
+            state = MissionStepCompletionState.levelUp(data);
+          } else {
+            state = MissionStepCompletionState.success(data);
+          }
         },
       );
     } catch (e) {

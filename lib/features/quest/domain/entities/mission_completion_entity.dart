@@ -16,6 +16,8 @@ class MissionCompletionEntity with _$MissionCompletionEntity {
     required int levelUpCount,
     required int previousLevel,
     required bool missionCompleted,
+    @Default(false) bool leveledUp,
+    @Default(0) int currentLevel,
   }) = _MissionCompletionEntity;
 
   factory MissionCompletionEntity.fromJson(Map<String, dynamic> json) =>
