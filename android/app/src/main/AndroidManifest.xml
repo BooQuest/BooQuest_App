@@ -61,7 +61,7 @@
         
         <!-- 카카오 로그인을 위한 Activity 설정 -->
         <activity
-            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:name="com.kakao.sdk.flutter.AuthCodeCustomTabsActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             tools:replace="android:theme">
@@ -87,6 +87,11 @@
                 <data android:scheme="com.booquest.app" />
             </intent-filter>
         </activity>
+
+         <!-- AdMob App ID 설정 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4954826018130837~6561327191" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

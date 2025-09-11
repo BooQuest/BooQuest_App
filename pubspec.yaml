@@ -74,6 +74,9 @@ dependencies:
   url_launcher: ^6.2.5
   flutter_gif: ^0.0.4
 
+  # 애드몹 광고
+  google_mobile_ads: ^5.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
