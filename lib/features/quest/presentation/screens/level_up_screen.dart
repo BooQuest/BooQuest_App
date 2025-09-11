@@ -5,7 +5,7 @@ import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart'
 /// 
 /// 미션 완료 후 경험치가 오르고 다음 레벨로 올라갈 때 표시되는 화면입니다.
 /// 캐릭터의 진화 과정을 시각적으로 보여주며, 사용자가 레벨업을 확인할 수 있습니다.
-class LevelUpScreen extends StatelessWidget {
+class LevelUpScreen extends StatefulWidget {
   final int newLevel;
   final VoidCallback? onComplete;
 
@@ -16,7 +16,61 @@ class LevelUpScreen extends StatelessWidget {
   });
 
   @override
+  State<LevelUpScreen> createState() => _LevelUpScreenState();
+}
+
+class _LevelUpScreenState extends State<LevelUpScreen> {
+  String? characterType;
+  bool isLoading = true;
+  late final AuthStorageService _authStorageService;
+
+  @override
+  void initState() {
+    super.initState();
+    _authStorageService = AuthStorageService();
+    _loadCharacterType();
+  }
+
+  /// AuthStorageService에서 캐릭터 타입 로드
+  void _loadCharacterType() {
+    try {
+      final type = _authStorageService.getCharacterType() ?? 'BLACK';
+      setState(() {
+        characterType = type;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        characterType = 'BLACK'; // 기본값
+        isLoading = false;
+      });
+    }
+  }
+
+  /// 캐릭터 이미지 경로 생성
+  String _getCharacterImagePath(int level, {bool isPrevious = false}) {
+    if (characterType == null) return '';
+    
+    final typePrefix = characterType == 'BLACK' ? 'B' : 'W';
+    final targetLevel = isPrevious ? level - 1 : level;
+    
+    // 레벨 범위 제한 (1-7)
+    final clampedLevel = targetLevel.clamp(1, 7);
+    
+    return 'assets/images/characters/standing_${typePrefix}${clampedLevel}.png';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -59,7 +113,7 @@ class LevelUpScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     // 레벨 숫자
                     Text(
-                      '$newLevel',
+                      '${widget.newLevel}',
                       style: const TextStyle(
                         fontSize: 120,
                         fontWeight: FontWeight.bold,
@@ -105,243 +159,89 @@ class LevelUpScreen extends StatelessWidget {
 
   /// 이전 캐릭터 (작고 흐릿한 상태)
   Widget _buildPreviousCharacter() {
+    final imagePath = _getCharacterImagePath(widget.newLevel, isPrevious: true);
+    
     return Opacity(
-      opacity: 0.6,
+      opacity: 0.6, // 이미지와 비슷한 투명도
       child: Container(
         width: 80,
         height: 100,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // 고양이 몸체 - 레벨에 따라 색상 변경
-            Container(
-              width: 60,
-              height: 80,
-              decoration: BoxDecoration(
-                color: _getCharacterColor(newLevel - 1),
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            // 귀
-            Positioned(
-              top: 5,
-              child: Row(
-                children: [
-                  _buildEar(),
-                  const SizedBox(width: 20),
-                  _buildEar(),
-                ],
-              ),
-            ),
-            // 눈
-            Positioned(
-              top: 25,
-              child: Row(
-                children: [
-                  _buildEye(),
-                  const SizedBox(width: 20),
-                  _buildEye(),
-                ],
-              ),
-            ),
-            // 이마 별
-            Positioned(
-              top: 15,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF87CEEB),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            // 칼라
-            Positioned(
-              bottom: 15,
-              child: Container(
-                width: 50,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF87CEEB),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white, width: 1),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.star,
-                    size: 8,
-                    color: Colors.amber,
-                  ),
-                ),
-              ),
-            ),
-            // 꼬리
-            Positioned(
-              right: 0,
-              top: 40,
-              child: Container(
-                width: 15,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: _getCharacterColor(newLevel - 1),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: imagePath.isNotEmpty
+            ? Image.asset(
+                imagePath,
+                width: 80,
+                height: 100,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return _buildFallbackCharacter(isPrevious: true);
+                },
+              )
+            : _buildFallbackCharacter(isPrevious: true),
       ),
     );
   }
 
   /// 진화된 캐릭터 (크고 생생한 상태)
   Widget _buildEvolvedCharacter() {
+    final imagePath = _getCharacterImagePath(widget.newLevel, isPrevious: false);
+    
     return Container(
       width: 100,
       height: 120,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // 고양이 몸체 - 현재 레벨에 따라 색상 변경
-          Container(
-            width: 80,
-            height: 100,
-            decoration: BoxDecoration(
-              color: _getCharacterColor(newLevel),
-              borderRadius: BorderRadius.circular(40),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-          ),
-          // 귀
-          Positioned(
-            top: 5,
-            child: Row(
-              children: [
-                _buildEar(isEvolved: true),
-                const SizedBox(width: 30),
-                _buildEar(isEvolved: true),
-              ],
-            ),
-          ),
-          // 눈
-          Positioned(
-            top: 30,
-            child: Row(
-              children: [
-                _buildEye(isEvolved: true),
-                const SizedBox(width: 30),
-                _buildEye(isEvolved: true),
-              ],
-            ),
-          ),
-          // 이마 별 (더 밝고 강렬함)
-          Positioned(
-            top: 20,
-            child: Container(
-              width: 12,
-              height: 12,
-              decoration: const BoxDecoration(
-                color: Color(0xFF4A90E2),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          // 칼라 (나비넥타이 형태)
-          Positioned(
-            bottom: 20,
-            child: Container(
-              width: 70,
-              height: 25,
-              decoration: BoxDecoration(
-                color: const Color(0xFF4A90E2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.star,
-                  size: 12,
-                  color: Colors.amber,
-                ),
-              ),
-            ),
-          ),
-          // 꼬리 (더 길고 우아함)
-          Positioned(
-            right: 0,
-            top: 50,
-            child: Container(
-              width: 20,
-              height: 40,
-              decoration: BoxDecoration(
-                color: _getCharacterColor(newLevel),
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-        ],
-      ),
+      child: imagePath.isNotEmpty
+          ? Image.asset(
+              imagePath,
+              width: 100,
+              height: 120,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return _buildFallbackCharacter(isPrevious: false);
+              },
+            )
+          : _buildFallbackCharacter(isPrevious: false),
     );
   }
 
-  /// 레벨에 따른 캐릭터 색상 반환
-  Color _getCharacterColor(int level) {
-    // 레벨에 따른 색상 그라데이션
-    if (level <= 1) {
-      return const Color(0xFF8B4513); // 갈색 (초기)
-    } else if (level <= 2) {
-      return const Color(0xFF654321); // 어두운 갈색
-    } else if (level <= 3) {
-      return const Color(0xFF2F4F4F); // 다크 슬레이트 그레이
-    } else if (level <= 4) {
-      return const Color(0xFF191970); // 미드나이트 블루
-    } else if (level <= 5) {
-      return const Color(0xFF4B0082); // 인디고
-    } else if (level <= 6) {
-      return const Color(0xFF8B008B); // 다크 매젠타
-    } else {
-      return const Color(0xFF000000); // 검은색 (최고 레벨)
-    }
-  }
 
-  /// 귀 위젯
-  Widget _buildEar({bool isEvolved = false}) {
-    return Container(
-      width: isEvolved ? 12 : 8,
-      height: isEvolved ? 15 : 10,
-      decoration: BoxDecoration(
-        color: isEvolved ? _getCharacterColor(newLevel) : _getCharacterColor(newLevel - 1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-    );
-  }
-
-  /// 눈 위젯
-  Widget _buildEye({bool isEvolved = false}) {
-    return Container(
-      width: isEvolved ? 8 : 6,
-      height: isEvolved ? 8 : 6,
-      decoration: const BoxDecoration(
-        color: Color(0xFF4A90E2),
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  /// 화살표 위젯
+  /// 화살표 위젯 (upto.png 사용)
   Widget _buildArrow() {
     return Container(
       width: 40,
       height: 20,
-      child: CustomPaint(
-        painter: ArrowPainter(),
+      child: Image.asset(
+        'assets/images/quest/upto.png',
+        width: 40,
+        height: 20,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          // 이미지 로드 실패 시 기본 화살표
+          return CustomPaint(
+            painter: ArrowPainter(),
+          );
+        },
+      ),
+    );
+  }
+
+  /// 폴백 캐릭터 (이미지 로드 실패 시)
+  Widget _buildFallbackCharacter({required bool isPrevious}) {
+    final size = isPrevious ? 80.0 : 100.0;
+    final height = isPrevious ? 100.0 : 120.0;
+    
+    return Container(
+      width: size,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[400]!),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.pets,
+          size: 40,
+          color: Colors.grey,
+        ),
       ),
     );
   }
@@ -354,8 +254,8 @@ class LevelUpScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 20),
       child: ElevatedButton(
         onPressed: () {
-          if (onComplete != null) {
-            onComplete!();
+          if (widget.onComplete != null) {
+            widget.onComplete!();
           } else {
             Navigator.of(context).pop();
           }
