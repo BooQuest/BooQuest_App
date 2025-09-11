@@ -6,6 +6,8 @@ import '../../domain/failures/mission_failure.dart';
 import '../../domain/entities/subquest_entity.dart';
 import '../../domain/entities/subquest_request_data.dart';
 import '../../domain/entities/subquest_regenerate_request_data.dart';
+import '../../domain/entities/bonus_ad_request_data.dart';
+import '../../domain/entities/bonus_ad_response_data.dart';
 
 class MissionApiService {
   static MissionApiService? _instance;
@@ -58,15 +60,9 @@ class MissionApiService {
       final authStorage = await AuthStorageService.getInstance();
       final client = NetworkClient(authStorage);
 
-      print('🚀 미션 데이터 API 호출 시작... sideJobId: $sideJobId');
-      
       final response = await client.get<Map<String, dynamic>>(
         '/api/onboarding/$sideJobId',
       );
-
-      print('📥 API 응답:');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode != 200 || response.data == null) {
         return Left(MissionFailure.server('서버 오류 (${response.statusCode})'));
@@ -81,7 +77,6 @@ class MissionApiService {
       final missions = data['missions'] as List<dynamic>?;
       
       if (missions == null || missions.isEmpty) {
-        print('❌ 미션 데이터가 없습니다');
         return Left(MissionFailure.server('미션 데이터가 없습니다'));
       }
 
@@ -102,11 +97,9 @@ class MissionApiService {
       // order 순으로 정렬
       list.sort((a, b) => a.order.compareTo(b.order));
 
-      print('✅ 미션 데이터 파싱 완료: ${list.length}개 스텝');
       return Right(list);
       
     } catch (e) {
-      print('❌ 미션 데이터 로드 중 예외 발생: $e');
       final message = e.toString();
       if (message.contains('SocketException') || message.contains('TimeoutException')) {
         return Left(MissionFailure.network(message));
@@ -122,20 +115,10 @@ class MissionApiService {
       final authStorage = await AuthStorageService.getInstance();
       final client = NetworkClient(authStorage);
 
-      print('🚀 부퀘스트 생성 API 호출 시작...');
-      print('  - userId: ${request.userId}');
-      print('  - missionId: ${request.missionId}');
-      print('  - missionTitle: ${request.missionTitle}');
-      print('  - missionDesignNotes: ${request.missionDesignNotes}');
-
       final response = await client.post<Map<String, dynamic>>(
         '/api/missions/steps',
         data: request.toJson(),
       );
-
-      print('📥 부퀘스트 생성 API 응답:');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode != 200 || response.data == null) {
         return Left(MissionFailure.server('서버 오류 (${response.statusCode})'));
@@ -157,11 +140,9 @@ class MissionApiService {
         );
       }).toList();
 
-      print('✅ 부퀘스트 데이터 파싱 완료: ${list.length}개');
       return Right(list);
       
     } catch (e) {
-      print('❌ 부퀘스트 API 호출 중 예외 발생: $e');
       final message = e.toString();
       if (message.contains('SocketException') || message.contains('TimeoutException')) {
         return Left(MissionFailure.network(message));
@@ -174,7 +155,6 @@ class MissionApiService {
   /// POST /api/missions/{missionId}/start
   Future<Either<MissionFailure, bool>> startMission(int missionId) async {
     try {
-      print('🚀 미션 시작 API 호출 시작... missionId: $missionId');
       
       final authStorage = await AuthStorageService.getInstance();
       final client = NetworkClient(authStorage);
@@ -184,10 +164,6 @@ class MissionApiService {
         data: {}, // 빈 데이터 (요청 바디가 필요 없는 경우)
       );
 
-      print('📥 미션 시작 API 응답:');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
-
       if (response.statusCode != 200 || response.data == null) {
         return Left(MissionFailure.server('서버 오류 (${response.statusCode})'));
       }
@@ -195,15 +171,12 @@ class MissionApiService {
       final body = response.data!;
       if (body['success'] != true) {
         final message = body['message']?.toString();
-        print('❌ API 실패 응답: $message');
         return Left(MissionFailure.server(message ?? 'API 실패'));
       }
 
-      print('✅ 미션 시작 API 성공');
       return const Right(true);
       
     } catch (e) {
-      print('❌ 미션 시작 API 호출 중 예외 발생: $e');
       final message = e.toString();
       if (message.contains('SocketException') || message.contains('TimeoutException')) {
         return Left(MissionFailure.network(message));
@@ -219,20 +192,10 @@ class MissionApiService {
       final authStorage = await AuthStorageService.getInstance();
       final client = NetworkClient(authStorage);
 
-      print('🚀 부퀘스트 재생성 API 호출 시작...');
-      print('  - userId: ${request.generateMissionStep.userId}');
-      print('  - missionId: ${request.generateMissionStep.missionId}');
-      print('  - reasons: ${request.feedbackData.reasons}');
-      print('  - etcFeedback: ${request.feedbackData.etcFeedback}');
-
       final response = await client.post<Map<String, dynamic>>(
         '/api/missions/steps/regenerate',
         data: request.toJson(),
       );
-
-      print('📥 부퀘스트 재생성 API 응답:');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode != 200 || response.data == null) {
         return Left(MissionFailure.server('서버 오류 (${response.statusCode})'));
@@ -254,11 +217,43 @@ class MissionApiService {
         );
       }).toList();
 
-      print('✅ 부퀘스트 재생성 데이터 파싱 완료: ${list.length}개');
       return Right(list);
       
     } catch (e) {
-      print('❌ 부퀘스트 재생성 API 호출 중 예외 발생: $e');
+      final message = e.toString();
+      if (message.contains('SocketException') || message.contains('TimeoutException')) {
+        return Left(MissionFailure.network(message));
+      }
+      return Left(MissionFailure.unknown(message));
+    }
+  }
+
+  /// 보너스 광고 API 호출
+  /// POST /api/bonus/{stepId}/ad
+  Future<Either<MissionFailure, BonusAdResponseData>> submitBonusAd(int stepId, BonusAdRequestData request) async {
+    try {
+      
+      final authStorage = await AuthStorageService.getInstance();
+      final client = NetworkClient(authStorage);
+
+      final response = await client.post<Map<String, dynamic>>(
+        '/api/bonus/$stepId/ad',
+        data: request.toJson(),
+      );
+
+      if (response.statusCode != 200 || response.data == null) {
+        return Left(MissionFailure.server('서버 오류 (${response.statusCode})'));
+      }
+
+      final body = response.data!;
+      if (body['success'] != true) {
+        return Left(MissionFailure.server(body['message']?.toString() ?? 'API 실패'));
+      }
+
+      final responseData = BonusAdResponseData.fromJson(body);
+      return Right(responseData);
+      
+    } catch (e) {
       final message = e.toString();
       if (message.contains('SocketException') || message.contains('TimeoutException')) {
         return Left(MissionFailure.network(message));

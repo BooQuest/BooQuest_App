@@ -6,6 +6,7 @@ import 'package:booquest/features/onboarding/presentation/widgets/onboarding_pro
 import 'package:booquest/features/onboarding/presentation/screens/step5_preferred_method_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
 import 'package:booquest/core/presentation/widgets/common_widgets.dart';
+import 'package:booquest/core/presentation/widgets/custom_loading_screen.dart';
 import 'package:booquest/core/navigation/transitions.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 
@@ -103,9 +104,9 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
           // 로딩 상태 - 아무것도 하지 않음
         },
         success: (recommendations) async {
-          // 성공 시 다음 화면으로 이동
+          // 성공 시 CustomLoadingScreen을 닫고 다음 화면으로 이동
           if (mounted) {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (_) => SideJobRecommendationsScreen(
@@ -213,10 +214,6 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
                     ],
                   ),
                 ),
-              ),
-              if (sideJobState.isLoading) const AILoadingOverlay(
-                title: 'AI가 당신에게 맞는\n부업을 분석하고 있어요...',
-                subtitle: '',
               ),
             ],
           ),
@@ -372,8 +369,22 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
   Future<void> _onNext() async {
     if (_selectedOption == null) return;
 
-    // 단순히 부업 추천 액션만 트리거
-    // 나머지는 ref.listen에서 자동 처리됨
+    // 캐릭터 이름 가져오기 (온보딩에서 입력한 이름)
+    final storage = await OnboardingStorageService.getInstance();
+    final characterName = storage.getCharacterName() ?? '사용자';
+
+    // CustomLoadingScreen으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CustomLoadingScreen(
+          topText: '${characterName}님에게 어울리는 부업을\n생성하고 있어요...',
+          bottomText: '잠시만 기다려주세요',
+        ),
+      ),
+    );
+
+    // 부업 추천 액션 트리거
     ref.read(sideJobNotifierProvider.notifier)
         .getSideJobRecommendations(_selectedOption!);
   }
@@ -383,9 +394,7 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
     try {
       final storage = await OnboardingStorageService.getInstance();
       await storage.setStrengthType(strengthType);
-      print('💾 자신 있는 방식 타입 실시간 저장 성공: $strengthType');
     } catch (error) {
-      print('❌ 자신 있는 방식 타입 실시간 저장 실패: $error');
     }
   }
 

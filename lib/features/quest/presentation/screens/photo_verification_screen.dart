@@ -17,10 +17,14 @@ import 'dart:io';
 /// 사진 인증 화면 - 부업 활동에 관한 모습을 간단히 남기기
 class PhotoVerificationScreen extends ConsumerStatefulWidget {
   final int stepId;
+  final bool leveledUp;
+  final int? currentLevel;
   
   const PhotoVerificationScreen({
     super.key,
     required this.stepId,
+    this.leveledUp = false,
+    this.currentLevel,
   });
 
   @override
@@ -58,25 +62,27 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
         initial: () {},
         loading: () {},
         success: (data) {
-          // 성공 시 인증 완료 화면으로 이동
+          // 성공 시 인증 완료 화면으로 이동 (기존 레벨업 정보 전달)
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => VerificationCompleteScreen(
                 method: 'photo',
                 content: '이미지 업로드 완료',
+                leveledUp: widget.leveledUp,
+                currentLevel: widget.currentLevel,
               ),
             ),
           );
         },
         levelUp: (data) {
-          // 레벨업과 함께 인증 완료 화면으로 이동
+          // 레벨업과 함께 인증 완료 화면으로 이동 (기존 또는 API 레벨업 정보 중 하나라도 true면 레벨업)
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => VerificationCompleteScreen(
                 method: 'photo',
                 content: '이미지 업로드 완료',
-                leveledUp: true,
-                currentLevel: data.currentLevel,
+                leveledUp: widget.leveledUp || true, // 기존 레벨업 또는 API 레벨업
+                currentLevel: data.currentLevel, // API 응답의 현재 레벨 사용
               ),
             ),
           );

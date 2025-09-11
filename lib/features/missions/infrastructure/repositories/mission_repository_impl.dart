@@ -1,4 +1,6 @@
 import 'package:booquest/features/missions/domain/entities/subquest_regenerate_request_data.dart';
+import 'package:booquest/features/missions/domain/entities/bonus_ad_request_data.dart';
+import 'package:booquest/features/missions/domain/entities/bonus_ad_response_data.dart';
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/mission_entity.dart';
 import '../../domain/failures/mission_failure.dart';
@@ -37,6 +39,11 @@ class MissionRepositoryImpl implements MissionRepository {
     SubQuestRegenerateRequestData request,
   ) {
     return apiService.regenerateSubQuests(request);
+  }
+
+  @override
+  Future<Either<MissionFailure, BonusAdResponseData>> submitBonusAd(int stepId, BonusAdRequestData request) {
+    return apiService.submitBonusAd(stepId, request);
   }
 }
 

@@ -13,10 +13,14 @@ import 'package:booquest/features/quest/domain/entities/bonus_proof_entity.dart'
 /// 텍스트 인증 화면 - 부업 활동에 관한 소감을 간단히 남기기
 class TextVerificationScreen extends ConsumerStatefulWidget {
   final int stepId;
+  final bool leveledUp;
+  final int? currentLevel;
   
   const TextVerificationScreen({
     super.key,
     required this.stepId,
+    this.leveledUp = false,
+    this.currentLevel,
   });
 
   @override
@@ -289,7 +293,6 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
     if (text.isEmpty) return;
     
     try {
-      print('📝 텍스트 인증 시작: $text');
       
       // 보너스 인증 API 호출
       await ref.read(bonusProofNotifierProvider.notifier).submitProof(
@@ -306,33 +309,33 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
           initial: () {},
           loading: () {},
           success: (data) {
-            print('✅ 텍스트 인증 성공: status=${data.status}, additionalExp=${data.additionalExp}');
             
-            // 인증 완료 후 완료 화면으로 이동
+            // 인증 완료 후 완료 화면으로 이동 (기존 레벨업 정보 전달)
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => VerificationCompleteScreen(
                   method: 'text',
                   content: text,
+                  leveledUp: widget.leveledUp,
+                  currentLevel: widget.currentLevel,
                 ),
               ),
             );
           },
           levelUp: (data) {
-            // 레벨업과 함께 인증 완료 화면으로 이동
+            // 레벨업과 함께 인증 완료 화면으로 이동 (기존 또는 API 레벨업 정보 중 하나라도 true면 레벨업)
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => VerificationCompleteScreen(
                   method: 'text',
                   content: text,
-                  leveledUp: true,
-                  currentLevel: data.currentLevel,
+                  leveledUp: widget.leveledUp || true, // 기존 레벨업 또는 API 레벨업
+                  currentLevel: data.currentLevel, // API 응답의 현재 레벨 사용
                 ),
               ),
             );
           },
           failure: (message) {
-            print('❌ 텍스트 인증 실패: $message');
             
             // 실패 시 에러 메시지 표시
             ScaffoldMessenger.of(context).showSnackBar(
@@ -345,7 +348,6 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
         );
       }
     } catch (e) {
-      print('❌ 텍스트 인증 처리 중 오류: $e');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

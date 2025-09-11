@@ -117,7 +117,10 @@ class QuestSuccessPopup extends StatelessWidget {
                         showDialog(
                           context: context,
                           barrierDismissible: false,
-                          builder: (BuildContext context) => ExperienceBoostPopup(stepId: stepId),
+                          builder: (BuildContext context) => ExperienceBoostPopup(
+                            stepId: stepId,
+                            leveledUp: false, // quest_success_popup에서는 레벨업 정보 없음
+                          ),
                         );
                       },
                       child: const Text(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/presentation/widgets/ai_loading_overlay.dart';
+import 'package:booquest/core/presentation/widgets/custom_loading_screen.dart';
 import 'package:booquest/core/navigation/transitions.dart';
 import 'package:booquest/features/recommendation/presentation/widgets/feedback_bottom_sheet.dart';
 
@@ -35,7 +36,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   static const double _cardSpacing = 12.0;
 
   String _characterName = '';
-  bool _isLoading = false;
   late List<Map<String, dynamic>> _recommendations;
   List<Map<String, dynamic>>? _subQuests; // 부퀘스트 데이터
 
@@ -72,12 +72,10 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   /// - GET /api/sideJob/{userId}
   /// - 실패 시 스낵바로 사용자에게 안내
   Future<void> _loadExistingRecommendations() async {
-    setState(() { _isLoading = true; });
     final container = ProviderContainer();
     try {
       final userId = await UserDataUtils.instance.getUserId() ?? 0;
       if (userId == 0) {
-        setState(() { _isLoading = false; });
         return;
       }
 
@@ -86,7 +84,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       result.fold(
         (failure) {
           if (mounted) {
-            setState(() { _isLoading = false; });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(failure.userMessage)),
             );
@@ -95,7 +92,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
         (list) {
           if (mounted) {
             setState(() {
-              _isLoading = false;
               _recommendations = list
                   .map((e) => <String, dynamic>{
                         'id': e.id,
@@ -146,10 +142,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
                 _buildBottomBar(context),
               ],
             ),
-          ),
-          if (_isLoading) const AILoadingOverlay(
-            title: 'AI가 추천을 탐색 중...',
-            subtitle: '취향, 패턴, 목표를 분석하고 있어요',
           ),
         ],
       ),
@@ -296,9 +288,18 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
 
     final userId = await UserDataUtils.instance.getUserId() ?? 0;
 
-    setState(() => _isLoading = true);
+    // CustomLoadingScreen으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const CustomLoadingScreen(
+          topText: '선택한 부업으로 퀘스트를\n생성하고 있어요',
+          bottomText: '잠시만 기다려주세요',
+        ),
+      ),
+    );
 
-    // 병렬로 광고 시청 + 미션 생성 진행
+    // 미션 생성 먼저 시작
     final missionFuture = _createMissionsWithoutNavigation(
       userId: userId,
       sideJobId: sideJobId,
@@ -306,14 +307,16 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       sideJobDesignNotes: sideJobDesignNotes,
     );
 
-    final adFuture = _showAdAndWait();
+    // 2초 후에 광고 표시
+    final adFuture = Future.delayed(const Duration(seconds: 2), () async {
+      await _showAdAndWait();
+    });
 
     // 두 작업이 끝난 후 화면 이동
     await Future.wait([missionFuture, adFuture]);
 
     if (mounted) {
-      setState(() => _isLoading = false);
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => QuestStepsScreen(
@@ -447,6 +450,18 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
           onApply: (List<String> selectedReasons, String additionalComment) async {
             // 팝업 닫기
             Navigator.of(context).pop();
+            
+            // CustomLoadingScreen으로 이동
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const CustomLoadingScreen(
+                  topText: '숨어있는 재능과 가능성을\n다시 찾고 있어요...',
+                  bottomText: '잠시만 기다려주세요',
+                ),
+              ),
+            );
+            
             // API 처리 시작
             await _handleFeedbackSubmit(sideJobIndex, selectedReasons, additionalComment);
           },
@@ -465,10 +480,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     final sideJobId = int.tryParse(rec['id']?.toString() ?? '') ?? 0;
     if (sideJobId == 0) return;
 
-    // 로딩 상태 시작
-    if (mounted) {
-      setState(() { _isLoading = true; });
-    }
 
     final container = ProviderContainer();
     try {
@@ -507,7 +518,8 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       result.fold(
         (failure) {
           if (mounted) {
-            setState(() { _isLoading = false; });
+            // CustomLoadingScreen 닫기
+            Navigator.of(context).pop();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(failure.userMessage)),
             );
@@ -515,8 +527,9 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
         },
         (entity) {
           if (mounted) {
+            // CustomLoadingScreen 닫기
+            Navigator.of(context).pop();
             setState(() {
-              _isLoading = false;
               // 해당 카드만 새 데이터로 교체 (타입 안전하게 처리)
               _recommendations[sideJobIndex] = <String, dynamic>{
                 'id': entity.id, // String으로 저장 (API 응답과 일치)
@@ -537,9 +550,9 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
         },
       );
     } catch (e) {
-      // 예외 발생 시에도 로딩 상태 해제
+      // 예외 발생 시 CustomLoadingScreen 닫고 에러 메시지 표시
       if (mounted) {
-        setState(() { _isLoading = false; });
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('재생성 중 오류가 발생했습니다: $e')),
         );
@@ -555,7 +568,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
     required String sideJobTitle,
     required String sideJobDesignNotes,
   }) async {
-    setState(() { _isLoading = true; });
     // Riverpod manual usage through a temporary ProviderScope owner
     final container = ProviderContainer();
     try {
@@ -604,7 +616,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
             }
             
             if (mounted) {
-              setState(() { _isLoading = false; });
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -622,7 +633,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
         },
         failure: (f) {
           if (mounted) {
-            setState(() { _isLoading = false; });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(f.userMessage)),
             );
@@ -686,7 +696,16 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       return;
     }
 
-    setState(() { _isLoading = true; });
+    // CustomLoadingScreen으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const CustomLoadingScreen(
+          topText: '숨어있는 재능과 가능성을\n다시 찾고 있어요...',
+          bottomText: '잠시만 기다려주세요',
+        ),
+      ),
+    );
 
     // 현재 보여지는 3개 부업의 id 수집
     final sideJobIds = _recommendations
@@ -730,7 +749,8 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
       result.fold(
         (failure) {
           if (mounted) {
-            setState(() { _isLoading = false; });
+            // CustomLoadingScreen을 닫고 에러 메시지 표시
+            Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(failure.userMessage)),
             );
@@ -738,7 +758,9 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
         },
         (list) {
           if (mounted) {
-            setState(() { _isLoading = false; });
+            // CustomLoadingScreen을 닫고 화면 업데이트
+            Navigator.pop(context);
+            
             // 화면의 카드 리스트 데이터 업데이트
             _recommendations = list
                 .map((e) => <String, dynamic>{
@@ -864,11 +886,11 @@ class _SideJobCard extends StatelessWidget {
                     SizedBox(width: cardPadding * 0.75), // 패딩의 0.75배만큼 간격
                     Expanded(
                       child: SizedBox(
-                        height: buttonHeight.clamp(36.0, 48.0), // 최소 36, 최대 48으로 제한
+                        height: buttonHeight.clamp(36.0, 48.0),
                                                   child: ElevatedButton(
                             onPressed: onSelect,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF424242), // 더 진한 회색으로 변경
+                              backgroundColor: const Color(0xFF424242), 
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -878,7 +900,7 @@ class _SideJobCard extends StatelessWidget {
                             child: Text(
                               '선택하기',
                               style: TextStyle(
-                                fontSize: buttonFontSize.clamp(12.0, 16.0), // 최소 12, 최대 16으로 제한
+                                fontSize: buttonFontSize.clamp(12.0, 16.0), 
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

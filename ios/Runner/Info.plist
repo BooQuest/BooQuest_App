@@ -90,7 +90,7 @@
 		<string>Booquest</string>
 		<!-- AdMob App ID 설정 -->    
 		<key>GADApplicationIdentifier</key>
-		<string>ca-app-pub-3940256099942544/2934735716</string>
+		<string>ca-app-pub-4954826018130837~1259494084</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

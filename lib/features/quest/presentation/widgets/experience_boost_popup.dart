@@ -4,14 +4,23 @@ import 'package:booquest/features/quest/presentation/screens/quest_verification_
 import 'package:booquest/features/quest/presentation/screens/verification_complete_screen.dart';
 import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
 import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
+import 'package:booquest/features/missions/infrastructure/providers/mission_providers.dart';
+import 'package:booquest/features/missions/domain/entities/bonus_ad_request_data.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 경험치 부스트 팝업 위젯 (광고 포함)
 class ExperienceBoostPopup extends ConsumerStatefulWidget {
   final int stepId;
+  final bool leveledUp;
+  final int? currentLevel;
 
-  const ExperienceBoostPopup({super.key, required this.stepId});
+  const ExperienceBoostPopup({
+    super.key, 
+    required this.stepId,
+    this.leveledUp = false,
+    this.currentLevel,
+  });
 
   @override
   ConsumerState<ExperienceBoostPopup> createState() => _ExperienceBoostPopupState();
@@ -39,7 +48,6 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
           });
         },
         onAdFailedToLoad: (error) {
-          print('❌ 리워드 광고 로드 실패: $error');
           setState(() {
             _rewardedAd = null;
             _isAdLoading = false;
@@ -50,7 +58,9 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
   }
 
   Future<void> _handleRewardAd() async {
-    if (_rewardedAd == null) return;
+    if (_rewardedAd == null) {
+      return;
+    }
 
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
@@ -59,16 +69,35 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
         ad.dispose();
-        print('❌ 광고 표시 실패: $error');
         _loadRewardedAd();
       },
     );
 
     _rewardedAd!.show(
       onUserEarnedReward: (ad, reward) async {
-        print('✅ 광고 시청 완료, 보상 지급 처리');
 
         Navigator.of(context).pop(); // 팝업 닫기
+
+        // 보너스 광고 API 호출
+        bool leveledUp = false;
+        int? currentLevel;
+        
+        try {
+          final request = BonusAdRequestData(
+            receipt: reward.amount.toString(),
+            adSessionId: ad.responseInfo?.responseId ?? '',
+          );
+          
+          final response = await ref.read(submitBonusAdProvider((
+            stepId: widget.stepId,
+            request: request,
+          )).future);
+          
+          leveledUp = response.data.leveledUp;
+          currentLevel = response.data.currentLevel;
+          
+        } catch (e) {
+        }
 
         try {
           final authStorage = await AuthStorageService.getInstance();
@@ -81,15 +110,16 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
             ]);
           }
         } catch (e) {
-          print('❌ 광고 후 API 실패: $e');
         }
 
         if (mounted) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => const VerificationCompleteScreen(
+              builder: (context) => VerificationCompleteScreen(
                 method: 'reward_ad',
-                content: '보상형 광고 완료',
+                content: '광고 신청 완료',
+                leveledUp: leveledUp,
+                currentLevel: currentLevel,
               ),
             ),
           );
@@ -135,9 +165,11 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
                     }
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const VerificationCompleteScreen(
+                        builder: (context) => VerificationCompleteScreen(
                           method: 'sub_quest',
                           content: '부퀘스트 완료',
+                          leveledUp: widget.leveledUp,
+                          currentLevel: widget.currentLevel,
                         ),
                       ),
                     );
@@ -194,7 +226,11 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
                         Navigator.of(context).pop();
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => QuestVerificationScreen(stepId: widget.stepId),
+                            builder: (context) => QuestVerificationScreen(
+                              stepId: widget.stepId,
+                              leveledUp: widget.leveledUp,
+                              currentLevel: widget.currentLevel,
+                            ),
                           ),
                         );
                       },

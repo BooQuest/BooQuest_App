@@ -9,6 +9,7 @@ import 'package:booquest/features/missions/domain/entities/subquest_request_data
 import 'package:booquest/features/missions/domain/entities/subquest_regenerate_request_data.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/quest/presentation/widgets/feedback_popup.dart';
+import 'package:booquest/core/presentation/widgets/custom_loading_screen.dart';
 
 /// 새로운 퀘스트 시작 화면 - 다음 퀘스트 진행하기 버튼 클릭 시
 class NextQuestStartScreen extends ConsumerStatefulWidget {
@@ -102,11 +103,22 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
       builder: (BuildContext context) {
           return FeedbackPopup(
             onSubmit: (List<String> selectedReasons, String additionalComment) async {
-              // 피드백 제출 및 부퀘스트 재생성
-              await _handleFeedbackSubmit(selectedReasons, additionalComment);
-              
               // 팝업 닫기
               Navigator.of(context).pop();
+              
+              // CustomLoadingScreen으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CustomLoadingScreen(
+                    topText: '아쉬운 점을 반영해 퀘스트를\n다시 생성하고 있어요...',
+                    bottomText: '잠시만 기다려주세요',
+                  ),
+                ),
+              );
+              
+              // API 처리 시작
+              await _handleFeedbackSubmit(selectedReasons, additionalComment);
             },
           );
       },
@@ -192,6 +204,11 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
         ),
       );
 
+      // CustomLoadingScreen 닫기
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
       // 성공 메시지 표시 (MissionState 변화를 감지하여 자동으로 UI 업데이트)
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -207,7 +224,12 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
         });
       }
     } catch (e) {
-      print('Error regenerating sub-quests: $e');
+      
+      // CustomLoadingScreen 닫기
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -227,37 +249,13 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: missionState.when(
-          initial: () => const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(
-                  '부퀘스트를 생성하고 있습니다...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+          initial: () => const CustomLoadingScreen(
+            topText: '부퀘스트를 생성하고 있습니다...',
+            bottomText: '잠시만 기다려주세요',
           ),
-          loading: () => const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(
-                  '부퀘스트를 생성하고 있습니다...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+          loading: () => const CustomLoadingScreen(
+            topText: '부퀘스트를 생성하고 있습니다...',
+            bottomText: '잠시만 기다려주세요',
           ),
           success: (data) => Column(
             children: [

@@ -201,6 +201,8 @@ class VerificationCompleteScreen extends ConsumerWidget {
       case 'text':
       case 'photo':
         return '추가 인증 완료';
+      case 'reward_ad':
+        return '광고 신청 완료';
       case 'main_quest':
         return '메인 퀘스트 완료';
       case 'sub_quest':
@@ -218,7 +220,7 @@ class VerificationCompleteScreen extends ConsumerWidget {
       return '+EXP 50만큼 경험치가 올랐어요';
     } else if (method == 'sub_quest') {
       return '+EXP 10만큼 경험치가 올랐어요';
-    } else if (method == 'link' || method == 'text' || method == 'photo') {
+    } else if (method == 'link' || method == 'text' || method == 'photo' || method == 'reward_ad') {
       return '+EXP 20만큼 경험치가 올랐어요';
     } else if (method == 'final_quest') {
       return '+EXP 50만큼 경험치가 올랐어요';

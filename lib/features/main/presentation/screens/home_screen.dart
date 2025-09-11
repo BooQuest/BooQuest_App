@@ -140,36 +140,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             );
                           },
                           orElse: () {
-                            // 기본값은 레벨 1이므로 기존 높이 유지
+                            // 기본값은 로딩 아이콘으로 표시
                             return Container(
                               width: isSmallScreen ? 280 : 320, 
                               height: isSmallScreen ? 200 : 240,
-                              child: ClipRect(
-                                child: OverflowBox(
-                                  alignment: Alignment.topCenter,
-                                  child: Image.network(
-                                    'https://kr.object.ncloudstorage.com/booquest-character/char/Standing_1B.gif', // 기본값
-                                    width: isSmallScreen ? 280 : 320,
-                                    height: isSmallScreen ? 280 : 320,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return SizedBox(
-                                        width: isSmallScreen ? 280 : 320,
-                                        height: isSmallScreen ? 200 : 240,
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                                : null,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(Icons.pets, size: isSmallScreen ? 80 : 100, color: AppColors.textHint);
-                                    },
-                                  ),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.textHint),
                                 ),
                               ),
                             );

@@ -142,7 +142,7 @@ class _FeedbackBottomSheetState extends State<FeedbackBottomSheet> {
 
                     const SizedBox(height: 24),
 
-                    // 적용하기 버튼
+                    //다시 추천받기 버튼
                     Padding(
                       padding: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
                       child: SizedBox(
@@ -177,7 +177,7 @@ class _FeedbackBottomSheetState extends State<FeedbackBottomSheet> {
                             elevation: 0,
                           ),
                           child: const Text(
-                            '적용하기',
+                            '다시 추천받기',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,

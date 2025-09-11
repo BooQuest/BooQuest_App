@@ -20,6 +20,7 @@ import 'package:booquest/features/quest/presentation/widgets/quest_completion_di
 import 'package:booquest/features/quest/presentation/widgets/experience_boost_popup.dart';
 import 'package:booquest/features/quest/presentation/screens/verification_complete_screen.dart';
 import 'package:booquest/features/quest/presentation/screens/next_quest_setup_screen.dart';
+import 'package:booquest/features/quest/presentation/screens/level_up_screen.dart';
 import 'package:booquest/features/quest/infrastructure/providers/mission_step_completion_providers.dart';
 import 'package:booquest/features/quest/infrastructure/providers/mission_completion_providers.dart';
 
@@ -463,8 +464,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           initial: () {},
           loading: () {},
           success: (data) {
-            // 성공 시 ExperienceBoostPopup 표시
-            _showExperienceBoostPopup(context, _selectedStepId!);
+            // 성공 시 ExperienceBoostPopup 표시 (레벨업 없음)
+            _showExperienceBoostPopup(context, _selectedStepId!, leveledUp: false);
             
             // 선택 상태 초기화
             setState(() {
@@ -476,7 +477,13 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           },
           levelUp: (data) {
             // 레벨업과 함께 부퀘스트 완료 처리
-            _showExperienceBoostPopup(context, _selectedStepId!);
+            // ExperienceBoostPopup 표시 (레벨업 정보 전달)
+            _showExperienceBoostPopup(
+              context, 
+              _selectedStepId!, 
+              leveledUp: true, 
+              currentLevel: data.currentLevel,
+            );
             
             // 선택 상태 초기화
             setState(() {
@@ -507,12 +514,17 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
     }
   }
 
+
   /// ExperienceBoostPopup 표시
-  void _showExperienceBoostPopup(BuildContext context, int stepId) {
+  void _showExperienceBoostPopup(BuildContext context, int stepId, {bool leveledUp = false, int? currentLevel}) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) => ExperienceBoostPopup(stepId: stepId),
+      builder: (BuildContext context) => ExperienceBoostPopup(
+        stepId: stepId,
+        leveledUp: leveledUp,
+        currentLevel: currentLevel,
+      ),
     );
   }
 

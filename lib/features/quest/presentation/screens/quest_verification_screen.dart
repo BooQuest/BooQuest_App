@@ -15,10 +15,14 @@ import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart'
 /// 퀘스트 인증 화면 - 퀘스트 수행 결과를 간단하게 인증
 class QuestVerificationScreen extends ConsumerStatefulWidget {
   final int stepId;
+  final bool leveledUp;
+  final int? currentLevel;
   
   const QuestVerificationScreen({
     super.key,
     required this.stepId,
+    this.leveledUp = false,
+    this.currentLevel,
   });
 
   @override
@@ -371,19 +375,31 @@ class _QuestVerificationScreenState extends ConsumerState<QuestVerificationScree
     if (_selectedVerificationMethod == 'link') {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => LinkVerificationScreen(stepId: widget.stepId),
+          builder: (context) => LinkVerificationScreen(
+            stepId: widget.stepId,
+            leveledUp: widget.leveledUp,
+            currentLevel: widget.currentLevel,
+          ),
         ),
       );
     } else if (_selectedVerificationMethod == 'text') {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => TextVerificationScreen(stepId: widget.stepId),
+          builder: (context) => TextVerificationScreen(
+            stepId: widget.stepId,
+            leveledUp: widget.leveledUp,
+            currentLevel: widget.currentLevel,
+          ),
         ),
       );
     } else if (_selectedVerificationMethod == 'photo') {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => PhotoVerificationScreen(stepId: widget.stepId),
+          builder: (context) => PhotoVerificationScreen(
+            stepId: widget.stepId,
+            leveledUp: widget.leveledUp,
+            currentLevel: widget.currentLevel,
+          ),
         ),
       );
     }

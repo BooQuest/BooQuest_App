@@ -8,6 +8,7 @@ import 'package:booquest/features/main/application/states/mission_list_state.dar
 import 'package:booquest/features/main/domain/entities/mission_entity.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/quest/presentation/screens/next_quest_start_screen.dart';
+import 'package:booquest/core/presentation/widgets/custom_loading_screen.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 다음 퀘스트 설정 화면 - 메인 퀘스트 완료 후 다음 퀘스트 준비
@@ -792,44 +793,90 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
+                  // CustomLoadingScreen으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CustomLoadingScreen(
+                        topText: '다음 단계를 위한 퀘스트를\n생성하고 있어요...',
+                        bottomText: '잠시만 기다려주세요',
+                      ),
+                    ),
+                  );
+
                   /// 실제 퀘스트 시작 로직
-                  void startNextQuest() {
-                    // 완료된 메인퀘스트의 다음 단계 정보를 전달
-                    final missionListState = ref.read(missionListNotifierProvider);
-                    missionListState.maybeWhen(
-                      success: (data) {
-                        // 완료된 메인퀘스트들 중 가장 최근 것 찾기
-                        final completedMissions = data.missions.where((m) => m.status == 'COMPLETED').toList();
-                        if (completedMissions.isNotEmpty) {
-                          // 가장 최근에 완료된 메인퀘스트 (orderNo가 가장 큰 것)
-                          final latestCompletedMission = completedMissions.reduce(
-                            (a, b) => (a.orderNo ?? 0) > (b.orderNo ?? 0) ? a : b,
-                          );
+                  void startNextQuest() async {
+                    try {
+                      // 데이터 새로고침 후 다음 퀘스트 찾기
+                      await ref.read(missionListNotifierProvider.notifier).getMissionList('', _sideJobId!);
+                      
+                      // 새로고침된 데이터로 다음 퀘스트 찾기
+                      final missionListState = ref.read(missionListNotifierProvider);
+                      missionListState.maybeWhen(
+                        success: (data) {
+                          // 완료된 메인퀘스트들 중 가장 최근 것 찾기
+                          final completedMissions = data.missions.where((m) => m.status == 'COMPLETED').toList();
+                          if (completedMissions.isNotEmpty) {
+                            // 가장 최근에 완료된 메인퀘스트 (orderNo가 가장 큰 것)
+                            final latestCompletedMission = completedMissions.reduce(
+                              (a, b) => (a.orderNo ?? 0) > (b.orderNo ?? 0) ? a : b,
+                            );
 
-                          // 다음 메인퀘스트 단계 찾기 (orderNo + 1)
-                          final nextMissionOrder = (latestCompletedMission.orderNo ?? 0) + 1;
-                          final nextMission = data.missions.firstWhere(
-                            (m) => m.orderNo == nextMissionOrder,
-                            orElse: () => data.missions.first, // fallback
-                          );
+                            // 다음 메인퀘스트 단계 찾기 (orderNo + 1)
+                            final nextMissionOrder = (latestCompletedMission.orderNo ?? 0) + 1;
+                            final nextMission = data.missions.firstWhere(
+                              (m) => m.orderNo == nextMissionOrder,
+                              orElse: () => data.missions.first, // fallback
+                            );
 
-                          // NextQuestStartScreen으로 이동
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => NextQuestStartScreen(
-                                nextMissionId: nextMission.id,
-                                nextMissionOrder: nextMission.orderNo ?? 0,
-                                nextMissionTitle: nextMission.title,
-                                nextMissionDesignNotes: nextMission.designNotes,
-                                sideJobId: _sideJobId,
-                                onHomeTabRequested: widget.onHomeTabRequested,
+                            // CustomLoadingScreen 닫기
+                            Navigator.of(context).pop();
+                            
+                            // NextQuestStartScreen으로 이동
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => NextQuestStartScreen(
+                                  nextMissionId: nextMission.id,
+                                  nextMissionOrder: nextMission.orderNo ?? 0,
+                                  nextMissionTitle: nextMission.title,
+                                  nextMissionDesignNotes: nextMission.designNotes,
+                                  sideJobId: _sideJobId,
+                                  onHomeTabRequested: widget.onHomeTabRequested,
+                                ),
                               ),
+                            );
+                          } else {
+                            // CustomLoadingScreen 닫기
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('완료된 메인퀘스트를 찾을 수 없습니다.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        orElse: () {
+                          // CustomLoadingScreen 닫기
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('퀘스트 데이터를 불러올 수 없습니다.'),
+                              backgroundColor: Colors.red,
                             ),
                           );
-                        }
-                      },
-                      orElse: () {},
-                    );
+                        },
+                      );
+                    } catch (e) {
+                      // CustomLoadingScreen 닫기
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('오류가 발생했습니다: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   }
 
                   /// 광고가 준비되어 있으면 광고 먼저 실행
