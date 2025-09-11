@@ -318,6 +318,19 @@ class _TextVerificationScreenState extends ConsumerState<TextVerificationScreen>
               ),
             );
           },
+          levelUp: (data) {
+            // 레벨업과 함께 인증 완료 화면으로 이동
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => VerificationCompleteScreen(
+                  method: 'text',
+                  content: text,
+                  leveledUp: true,
+                  currentLevel: data.currentLevel,
+                ),
+              ),
+            );
+          },
           failure: (message) {
             print('❌ 텍스트 인증 실패: $message');
             

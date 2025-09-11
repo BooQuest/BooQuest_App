@@ -30,7 +30,7 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       final authStorage = await AuthStorageService.getInstance();
       final email = authStorage.getEmail();
-      final name = authStorage.getNickname();
+      final name = authStorage.getSocialNickname();
       final profileUrl = authStorage.getProfileImageUrl();
       
       setState(() {
@@ -62,8 +62,6 @@ class _AccountScreenState extends State<AccountScreen> {
                     _buildNameSection(),
                     SizedBox(height: _isSmallScreen ? 20 : 24),
                     _buildEmailSection(),
-                    SizedBox(height: _isSmallScreen ? 24 : 32),
-                    _buildLogoutInfo(),
                     SizedBox(height: _isSmallScreen ? 32 : 40),
                     _buildWithdrawButton(context),
                     SizedBox(height: _isSmallScreen ? 24 : 32),
@@ -203,24 +201,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  /// 로그아웃 안내문
-  Widget _buildLogoutInfo() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(_isSmallScreen ? 14 : 16),
-      child: Text(
-        '로그아웃 시 기기의 데이터가 초기화 됩니다.\n동일 계정으로 재로그인 시 데이터를 다시 불러 올 수 있습니다.',
-        style: TextStyle(
-          fontSize: _isSmallScreen ? 12 : 14,
-          fontWeight: FontWeight.w400,
-          color: AppColors.textSecondary,
-          height: 1.4,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
   /// 회원탈퇴 버튼
   Widget _buildWithdrawButton(BuildContext context) {
     return SizedBox(
@@ -275,17 +255,15 @@ class _AccountScreenState extends State<AccountScreen> {
       final success = await authNotifier.withdraw();
       
       if (success) {
-        print('✅ 회원탈퇴 성공');
         
-        // 성공 시 Navigator를 완전히 리셋하여 AuthWrapper가 다시 초기화되도록 함
+        // 성공 시 로그인 페이지로 직접 이동 (splash screen 없이)
         if (context.mounted) {
           Navigator.of(context).pushNamedAndRemoveUntil(
-            '/',
+            '/login',
             (route) => false,
           );
         }
       } else {
-        print('❌ 회원탈퇴 실패');
         
         // 실패 시 현재 화면 유지하고 실패 메시지 표시
         if (context.mounted) {
@@ -298,7 +276,6 @@ class _AccountScreenState extends State<AccountScreen> {
         }
       }
     } catch (e) {
-      print('❌ 회원탈퇴 처리 중 오류 발생: $e');
       
       // 에러 발생 시 현재 화면 유지하고 에러 메시지 표시
       if (context.mounted) {

@@ -14,6 +14,8 @@ _$MissionStepCompletionEntityImpl _$$MissionStepCompletionEntityImplFromJson(
     json['character'] as Map<String, dynamic>,
   ),
   expDelta: (json['expDelta'] as num).toInt(),
+  leveledUp: json['leveledUp'] as bool? ?? false,
+  currentLevel: (json['currentLevel'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$MissionStepCompletionEntityImplToJson(
@@ -22,6 +24,8 @@ Map<String, dynamic> _$$MissionStepCompletionEntityImplToJson(
   'step': instance.step,
   'character': instance.character,
   'expDelta': instance.expDelta,
+  'leveledUp': instance.leveledUp,
+  'currentLevel': instance.currentLevel,
 };
 
 _$MissionStepEntityImpl _$$MissionStepEntityImplFromJson(

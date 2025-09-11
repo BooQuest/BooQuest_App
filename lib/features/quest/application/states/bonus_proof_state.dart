@@ -17,6 +17,11 @@ class BonusProofState with _$BonusProofState {
     BonusProofEntity data,
   ) = _Success;
 
+  /// 레벨업
+  const factory BonusProofState.levelUp(
+    BonusProofEntity data,
+  ) = _LevelUp;
+
   /// 실패
   const factory BonusProofState.failure(
     String message,

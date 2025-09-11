@@ -32,6 +32,8 @@ mixin _$MissionCompletionEntity {
   int get levelUpCount => throw _privateConstructorUsedError;
   int get previousLevel => throw _privateConstructorUsedError;
   bool get missionCompleted => throw _privateConstructorUsedError;
+  bool get leveledUp => throw _privateConstructorUsedError;
+  int get currentLevel => throw _privateConstructorUsedError;
 
   /// Serializes this MissionCompletionEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -60,6 +62,8 @@ abstract class $MissionCompletionEntityCopyWith<$Res> {
     int levelUpCount,
     int previousLevel,
     bool missionCompleted,
+    bool leveledUp,
+    int currentLevel,
   });
 
   $MissionEntityCopyWith<$Res> get mission;
@@ -93,6 +97,8 @@ class _$MissionCompletionEntityCopyWithImpl<
     Object? levelUpCount = null,
     Object? previousLevel = null,
     Object? missionCompleted = null,
+    Object? leveledUp = null,
+    Object? currentLevel = null,
   }) {
     return _then(
       _value.copyWith(
@@ -132,6 +138,14 @@ class _$MissionCompletionEntityCopyWithImpl<
                 ? _value.missionCompleted
                 : missionCompleted // ignore: cast_nullable_to_non_nullable
                       as bool,
+            leveledUp: null == leveledUp
+                ? _value.leveledUp
+                : leveledUp // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            currentLevel: null == currentLevel
+                ? _value.currentLevel
+                : currentLevel // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -177,6 +191,8 @@ abstract class _$$MissionCompletionEntityImplCopyWith<$Res>
     int levelUpCount,
     int previousLevel,
     bool missionCompleted,
+    bool leveledUp,
+    int currentLevel,
   });
 
   @override
@@ -212,6 +228,8 @@ class __$$MissionCompletionEntityImplCopyWithImpl<$Res>
     Object? levelUpCount = null,
     Object? previousLevel = null,
     Object? missionCompleted = null,
+    Object? leveledUp = null,
+    Object? currentLevel = null,
   }) {
     return _then(
       _$MissionCompletionEntityImpl(
@@ -251,6 +269,14 @@ class __$$MissionCompletionEntityImplCopyWithImpl<$Res>
             ? _value.missionCompleted
             : missionCompleted // ignore: cast_nullable_to_non_nullable
                   as bool,
+        leveledUp: null == leveledUp
+            ? _value.leveledUp
+            : leveledUp // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        currentLevel: null == currentLevel
+            ? _value.currentLevel
+            : currentLevel // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -269,6 +295,8 @@ class _$MissionCompletionEntityImpl implements _MissionCompletionEntity {
     required this.levelUpCount,
     required this.previousLevel,
     required this.missionCompleted,
+    this.leveledUp = false,
+    this.currentLevel = 0,
   });
 
   factory _$MissionCompletionEntityImpl.fromJson(Map<String, dynamic> json) =>
@@ -292,10 +320,16 @@ class _$MissionCompletionEntityImpl implements _MissionCompletionEntity {
   final int previousLevel;
   @override
   final bool missionCompleted;
+  @override
+  @JsonKey()
+  final bool leveledUp;
+  @override
+  @JsonKey()
+  final int currentLevel;
 
   @override
   String toString() {
-    return 'MissionCompletionEntity(mission: $mission, character: $character, totalExpReward: $totalExpReward, stepExpReward: $stepExpReward, bonusExpReward: $bonusExpReward, missionCompletionExpReward: $missionCompletionExpReward, levelUpCount: $levelUpCount, previousLevel: $previousLevel, missionCompleted: $missionCompleted)';
+    return 'MissionCompletionEntity(mission: $mission, character: $character, totalExpReward: $totalExpReward, stepExpReward: $stepExpReward, bonusExpReward: $bonusExpReward, missionCompletionExpReward: $missionCompletionExpReward, levelUpCount: $levelUpCount, previousLevel: $previousLevel, missionCompleted: $missionCompleted, leveledUp: $leveledUp, currentLevel: $currentLevel)';
   }
 
   @override
@@ -323,7 +357,11 @@ class _$MissionCompletionEntityImpl implements _MissionCompletionEntity {
             (identical(other.previousLevel, previousLevel) ||
                 other.previousLevel == previousLevel) &&
             (identical(other.missionCompleted, missionCompleted) ||
-                other.missionCompleted == missionCompleted));
+                other.missionCompleted == missionCompleted) &&
+            (identical(other.leveledUp, leveledUp) ||
+                other.leveledUp == leveledUp) &&
+            (identical(other.currentLevel, currentLevel) ||
+                other.currentLevel == currentLevel));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -339,6 +377,8 @@ class _$MissionCompletionEntityImpl implements _MissionCompletionEntity {
     levelUpCount,
     previousLevel,
     missionCompleted,
+    leveledUp,
+    currentLevel,
   );
 
   /// Create a copy of MissionCompletionEntity
@@ -369,6 +409,8 @@ abstract class _MissionCompletionEntity implements MissionCompletionEntity {
     required final int levelUpCount,
     required final int previousLevel,
     required final bool missionCompleted,
+    final bool leveledUp,
+    final int currentLevel,
   }) = _$MissionCompletionEntityImpl;
 
   factory _MissionCompletionEntity.fromJson(Map<String, dynamic> json) =
@@ -392,6 +434,10 @@ abstract class _MissionCompletionEntity implements MissionCompletionEntity {
   int get previousLevel;
   @override
   bool get missionCompleted;
+  @override
+  bool get leveledUp;
+  @override
+  int get currentLevel;
 
   /// Create a copy of MissionCompletionEntity
   /// with the given fields replaced by the non-null parameter values.

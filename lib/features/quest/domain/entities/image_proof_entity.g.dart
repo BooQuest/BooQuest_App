@@ -11,6 +11,8 @@ _$ImageProofEntityImpl _$$ImageProofEntityImplFromJson(
 ) => _$ImageProofEntityImpl(
   status: json['status'] as String,
   additionalExp: (json['additionalExp'] as num).toInt(),
+  leveledUp: json['leveledUp'] as bool? ?? false,
+  currentLevel: (json['currentLevel'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$ImageProofEntityImplToJson(
@@ -18,6 +20,8 @@ Map<String, dynamic> _$$ImageProofEntityImplToJson(
 ) => <String, dynamic>{
   'status': instance.status,
   'additionalExp': instance.additionalExp,
+  'leveledUp': instance.leveledUp,
+  'currentLevel': instance.currentLevel,
 };
 
 _$ImageProofRequestImpl _$$ImageProofRequestImplFromJson(

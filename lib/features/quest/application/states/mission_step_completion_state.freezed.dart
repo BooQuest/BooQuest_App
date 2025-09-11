@@ -22,6 +22,7 @@ mixin _$MissionStepCompletionState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(MissionStepCompletionEntity data) success,
+    required TResult Function(MissionStepCompletionEntity data) levelUp,
     required TResult Function(String message) failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -29,6 +30,7 @@ mixin _$MissionStepCompletionState {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(MissionStepCompletionEntity data)? success,
+    TResult? Function(MissionStepCompletionEntity data)? levelUp,
     TResult? Function(String message)? failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -36,6 +38,7 @@ mixin _$MissionStepCompletionState {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(MissionStepCompletionEntity data)? success,
+    TResult Function(MissionStepCompletionEntity data)? levelUp,
     TResult Function(String message)? failure,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -44,6 +47,7 @@ mixin _$MissionStepCompletionState {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_LevelUp value) levelUp,
     required TResult Function(_Failure value) failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -51,6 +55,7 @@ mixin _$MissionStepCompletionState {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_LevelUp value)? levelUp,
     TResult? Function(_Failure value)? failure,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -58,6 +63,7 @@ mixin _$MissionStepCompletionState {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_LevelUp value)? levelUp,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -138,6 +144,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(MissionStepCompletionEntity data) success,
+    required TResult Function(MissionStepCompletionEntity data) levelUp,
     required TResult Function(String message) failure,
   }) {
     return initial();
@@ -149,6 +156,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(MissionStepCompletionEntity data)? success,
+    TResult? Function(MissionStepCompletionEntity data)? levelUp,
     TResult? Function(String message)? failure,
   }) {
     return initial?.call();
@@ -160,6 +168,7 @@ class _$InitialImpl implements _Initial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(MissionStepCompletionEntity data)? success,
+    TResult Function(MissionStepCompletionEntity data)? levelUp,
     TResult Function(String message)? failure,
     required TResult orElse(),
   }) {
@@ -175,6 +184,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_LevelUp value) levelUp,
     required TResult Function(_Failure value) failure,
   }) {
     return initial(this);
@@ -186,6 +196,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_LevelUp value)? levelUp,
     TResult? Function(_Failure value)? failure,
   }) {
     return initial?.call(this);
@@ -197,6 +208,7 @@ class _$InitialImpl implements _Initial {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_LevelUp value)? levelUp,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {
@@ -257,6 +269,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(MissionStepCompletionEntity data) success,
+    required TResult Function(MissionStepCompletionEntity data) levelUp,
     required TResult Function(String message) failure,
   }) {
     return loading();
@@ -268,6 +281,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(MissionStepCompletionEntity data)? success,
+    TResult? Function(MissionStepCompletionEntity data)? levelUp,
     TResult? Function(String message)? failure,
   }) {
     return loading?.call();
@@ -279,6 +293,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(MissionStepCompletionEntity data)? success,
+    TResult Function(MissionStepCompletionEntity data)? levelUp,
     TResult Function(String message)? failure,
     required TResult orElse(),
   }) {
@@ -294,6 +309,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_LevelUp value) levelUp,
     required TResult Function(_Failure value) failure,
   }) {
     return loading(this);
@@ -305,6 +321,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_LevelUp value)? levelUp,
     TResult? Function(_Failure value)? failure,
   }) {
     return loading?.call(this);
@@ -316,6 +333,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_LevelUp value)? levelUp,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {
@@ -415,6 +433,7 @@ class _$SuccessImpl implements _Success {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(MissionStepCompletionEntity data) success,
+    required TResult Function(MissionStepCompletionEntity data) levelUp,
     required TResult Function(String message) failure,
   }) {
     return success(data);
@@ -426,6 +445,7 @@ class _$SuccessImpl implements _Success {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(MissionStepCompletionEntity data)? success,
+    TResult? Function(MissionStepCompletionEntity data)? levelUp,
     TResult? Function(String message)? failure,
   }) {
     return success?.call(data);
@@ -437,6 +457,7 @@ class _$SuccessImpl implements _Success {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(MissionStepCompletionEntity data)? success,
+    TResult Function(MissionStepCompletionEntity data)? levelUp,
     TResult Function(String message)? failure,
     required TResult orElse(),
   }) {
@@ -452,6 +473,7 @@ class _$SuccessImpl implements _Success {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_LevelUp value) levelUp,
     required TResult Function(_Failure value) failure,
   }) {
     return success(this);
@@ -463,6 +485,7 @@ class _$SuccessImpl implements _Success {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_LevelUp value)? levelUp,
     TResult? Function(_Failure value)? failure,
   }) {
     return success?.call(this);
@@ -474,6 +497,7 @@ class _$SuccessImpl implements _Success {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_LevelUp value)? levelUp,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {
@@ -494,6 +518,179 @@ abstract class _Success implements MissionStepCompletionState {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SuccessImplCopyWith<_$SuccessImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$LevelUpImplCopyWith<$Res> {
+  factory _$$LevelUpImplCopyWith(
+    _$LevelUpImpl value,
+    $Res Function(_$LevelUpImpl) then,
+  ) = __$$LevelUpImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({MissionStepCompletionEntity data});
+
+  $MissionStepCompletionEntityCopyWith<$Res> get data;
+}
+
+/// @nodoc
+class __$$LevelUpImplCopyWithImpl<$Res>
+    extends _$MissionStepCompletionStateCopyWithImpl<$Res, _$LevelUpImpl>
+    implements _$$LevelUpImplCopyWith<$Res> {
+  __$$LevelUpImplCopyWithImpl(
+    _$LevelUpImpl _value,
+    $Res Function(_$LevelUpImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of MissionStepCompletionState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? data = null}) {
+    return _then(
+      _$LevelUpImpl(
+        null == data
+            ? _value.data
+            : data // ignore: cast_nullable_to_non_nullable
+                  as MissionStepCompletionEntity,
+      ),
+    );
+  }
+
+  /// Create a copy of MissionStepCompletionState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MissionStepCompletionEntityCopyWith<$Res> get data {
+    return $MissionStepCompletionEntityCopyWith<$Res>(_value.data, (value) {
+      return _then(_value.copyWith(data: value));
+    });
+  }
+}
+
+/// @nodoc
+
+class _$LevelUpImpl implements _LevelUp {
+  const _$LevelUpImpl(this.data);
+
+  @override
+  final MissionStepCompletionEntity data;
+
+  @override
+  String toString() {
+    return 'MissionStepCompletionState.levelUp(data: $data)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LevelUpImpl &&
+            (identical(other.data, data) || other.data == data));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, data);
+
+  /// Create a copy of MissionStepCompletionState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LevelUpImplCopyWith<_$LevelUpImpl> get copyWith =>
+      __$$LevelUpImplCopyWithImpl<_$LevelUpImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(MissionStepCompletionEntity data) success,
+    required TResult Function(MissionStepCompletionEntity data) levelUp,
+    required TResult Function(String message) failure,
+  }) {
+    return levelUp(data);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(MissionStepCompletionEntity data)? success,
+    TResult? Function(MissionStepCompletionEntity data)? levelUp,
+    TResult? Function(String message)? failure,
+  }) {
+    return levelUp?.call(data);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(MissionStepCompletionEntity data)? success,
+    TResult Function(MissionStepCompletionEntity data)? levelUp,
+    TResult Function(String message)? failure,
+    required TResult orElse(),
+  }) {
+    if (levelUp != null) {
+      return levelUp(data);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Loading value) loading,
+    required TResult Function(_Success value) success,
+    required TResult Function(_LevelUp value) levelUp,
+    required TResult Function(_Failure value) failure,
+  }) {
+    return levelUp(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Loading value)? loading,
+    TResult? Function(_Success value)? success,
+    TResult? Function(_LevelUp value)? levelUp,
+    TResult? Function(_Failure value)? failure,
+  }) {
+    return levelUp?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Loading value)? loading,
+    TResult Function(_Success value)? success,
+    TResult Function(_LevelUp value)? levelUp,
+    TResult Function(_Failure value)? failure,
+    required TResult orElse(),
+  }) {
+    if (levelUp != null) {
+      return levelUp(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _LevelUp implements MissionStepCompletionState {
+  const factory _LevelUp(final MissionStepCompletionEntity data) =
+      _$LevelUpImpl;
+
+  MissionStepCompletionEntity get data;
+
+  /// Create a copy of MissionStepCompletionState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$LevelUpImplCopyWith<_$LevelUpImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -570,6 +767,7 @@ class _$FailureImpl implements _Failure {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(MissionStepCompletionEntity data) success,
+    required TResult Function(MissionStepCompletionEntity data) levelUp,
     required TResult Function(String message) failure,
   }) {
     return failure(message);
@@ -581,6 +779,7 @@ class _$FailureImpl implements _Failure {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(MissionStepCompletionEntity data)? success,
+    TResult? Function(MissionStepCompletionEntity data)? levelUp,
     TResult? Function(String message)? failure,
   }) {
     return failure?.call(message);
@@ -592,6 +791,7 @@ class _$FailureImpl implements _Failure {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(MissionStepCompletionEntity data)? success,
+    TResult Function(MissionStepCompletionEntity data)? levelUp,
     TResult Function(String message)? failure,
     required TResult orElse(),
   }) {
@@ -607,6 +807,7 @@ class _$FailureImpl implements _Failure {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_LevelUp value) levelUp,
     required TResult Function(_Failure value) failure,
   }) {
     return failure(this);
@@ -618,6 +819,7 @@ class _$FailureImpl implements _Failure {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_LevelUp value)? levelUp,
     TResult? Function(_Failure value)? failure,
   }) {
     return failure?.call(this);
@@ -629,6 +831,7 @@ class _$FailureImpl implements _Failure {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_LevelUp value)? levelUp,
     TResult Function(_Failure value)? failure,
     required TResult orElse(),
   }) {

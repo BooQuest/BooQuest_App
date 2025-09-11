@@ -42,7 +42,7 @@ class AuthApiService {
   /// 
   /// [refreshToken]: 리프레시 토큰
   /// 
-  /// Returns: 새로운 액세스 토큰과 리프레시 토큰
+  /// Returns: 새로운 액세스 토큰과 리프레시 ㅌ토큰
   Future<Response<Map<String, dynamic>>> refreshToken(String refreshToken) async {
     return await _networkClient.post<Map<String, dynamic>>(
       '/api/auth/token/refresh',

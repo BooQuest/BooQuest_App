@@ -9,6 +9,8 @@ class ImageProofEntity with _$ImageProofEntity {
   const factory ImageProofEntity({
     required String status,
     required int additionalExp,
+    @Default(false) bool leveledUp,
+    @Default(0) int currentLevel,
   }) = _ImageProofEntity;
 
   factory ImageProofEntity.fromJson(Map<String, dynamic> json) =>

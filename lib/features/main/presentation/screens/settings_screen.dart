@@ -114,10 +114,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await authStorage.clearAuthData();
       // 로컬 데이터 삭제 완료
       
-      // 3. Navigator를 완전히 리셋하여 AuthWrapper가 다시 초기화되도록 함
+      // 3. 로그인 페이지로 직접 이동 (splash screen 없이)
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/',
+          '/login',
           (route) => false,
         );
       }
@@ -126,7 +126,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // 에러가 발생해도 로그인 페이지로 이동
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/',
+          '/login',
           (route) => false,
         );
       }
@@ -395,18 +395,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: _isSmallScreen ? 12 : 16),
       child: Center(
-        child: GestureDetector(
-          onTap: _handleLogoutDirectly,
-          child: Text(
-            '로그아웃',
-            style: TextStyle(
-              fontSize: _isSmallScreen ? 12 : 14,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-              decoration: TextDecoration.underline,
-              decorationColor: AppColors.textSecondary,
+        child: Column(
+          children: [
+            // 로그아웃 안내 텍스트 (3줄)
+            Text(
+              '로그아웃 시 기기의 데이터가 초기화 됩니다.',
+              style: TextStyle(
+                fontSize: _isSmallScreen ? 12 : 14,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF666666),
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
+            const SizedBox(height: 2),
+            Text(
+              '동일 계정으로 재로그인 시 데이터를',
+              style: TextStyle(
+                fontSize: _isSmallScreen ? 12 : 14,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF666666),
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '다시 불러 올 수 있습니다.',
+              style: TextStyle(
+                fontSize: _isSmallScreen ? 12 : 14,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF666666),
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            // 로그아웃 버튼
+            GestureDetector(
+              onTap: _handleLogoutDirectly,
+              child: Text(
+                '로그아웃',
+                style: TextStyle(
+                  fontSize: _isSmallScreen ? 12 : 14,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF666666),
+                  decoration: TextDecoration.underline,
+                  decorationColor: const Color(0xFF666666),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

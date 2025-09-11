@@ -23,6 +23,8 @@ ImageProofEntity _$ImageProofEntityFromJson(Map<String, dynamic> json) {
 mixin _$ImageProofEntity {
   String get status => throw _privateConstructorUsedError;
   int get additionalExp => throw _privateConstructorUsedError;
+  bool get leveledUp => throw _privateConstructorUsedError;
+  int get currentLevel => throw _privateConstructorUsedError;
 
   /// Serializes this ImageProofEntity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -41,7 +43,12 @@ abstract class $ImageProofEntityCopyWith<$Res> {
     $Res Function(ImageProofEntity) then,
   ) = _$ImageProofEntityCopyWithImpl<$Res, ImageProofEntity>;
   @useResult
-  $Res call({String status, int additionalExp});
+  $Res call({
+    String status,
+    int additionalExp,
+    bool leveledUp,
+    int currentLevel,
+  });
 }
 
 /// @nodoc
@@ -58,7 +65,12 @@ class _$ImageProofEntityCopyWithImpl<$Res, $Val extends ImageProofEntity>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? status = null, Object? additionalExp = null}) {
+  $Res call({
+    Object? status = null,
+    Object? additionalExp = null,
+    Object? leveledUp = null,
+    Object? currentLevel = null,
+  }) {
     return _then(
       _value.copyWith(
             status: null == status
@@ -68,6 +80,14 @@ class _$ImageProofEntityCopyWithImpl<$Res, $Val extends ImageProofEntity>
             additionalExp: null == additionalExp
                 ? _value.additionalExp
                 : additionalExp // ignore: cast_nullable_to_non_nullable
+                      as int,
+            leveledUp: null == leveledUp
+                ? _value.leveledUp
+                : leveledUp // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            currentLevel: null == currentLevel
+                ? _value.currentLevel
+                : currentLevel // ignore: cast_nullable_to_non_nullable
                       as int,
           )
           as $Val,
@@ -84,7 +104,12 @@ abstract class _$$ImageProofEntityImplCopyWith<$Res>
   ) = __$$ImageProofEntityImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String status, int additionalExp});
+  $Res call({
+    String status,
+    int additionalExp,
+    bool leveledUp,
+    int currentLevel,
+  });
 }
 
 /// @nodoc
@@ -100,7 +125,12 @@ class __$$ImageProofEntityImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? status = null, Object? additionalExp = null}) {
+  $Res call({
+    Object? status = null,
+    Object? additionalExp = null,
+    Object? leveledUp = null,
+    Object? currentLevel = null,
+  }) {
     return _then(
       _$ImageProofEntityImpl(
         status: null == status
@@ -110,6 +140,14 @@ class __$$ImageProofEntityImplCopyWithImpl<$Res>
         additionalExp: null == additionalExp
             ? _value.additionalExp
             : additionalExp // ignore: cast_nullable_to_non_nullable
+                  as int,
+        leveledUp: null == leveledUp
+            ? _value.leveledUp
+            : leveledUp // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        currentLevel: null == currentLevel
+            ? _value.currentLevel
+            : currentLevel // ignore: cast_nullable_to_non_nullable
                   as int,
       ),
     );
@@ -122,6 +160,8 @@ class _$ImageProofEntityImpl implements _ImageProofEntity {
   const _$ImageProofEntityImpl({
     required this.status,
     required this.additionalExp,
+    this.leveledUp = false,
+    this.currentLevel = 0,
   });
 
   factory _$ImageProofEntityImpl.fromJson(Map<String, dynamic> json) =>
@@ -131,10 +171,16 @@ class _$ImageProofEntityImpl implements _ImageProofEntity {
   final String status;
   @override
   final int additionalExp;
+  @override
+  @JsonKey()
+  final bool leveledUp;
+  @override
+  @JsonKey()
+  final int currentLevel;
 
   @override
   String toString() {
-    return 'ImageProofEntity(status: $status, additionalExp: $additionalExp)';
+    return 'ImageProofEntity(status: $status, additionalExp: $additionalExp, leveledUp: $leveledUp, currentLevel: $currentLevel)';
   }
 
   @override
@@ -144,12 +190,17 @@ class _$ImageProofEntityImpl implements _ImageProofEntity {
             other is _$ImageProofEntityImpl &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.additionalExp, additionalExp) ||
-                other.additionalExp == additionalExp));
+                other.additionalExp == additionalExp) &&
+            (identical(other.leveledUp, leveledUp) ||
+                other.leveledUp == leveledUp) &&
+            (identical(other.currentLevel, currentLevel) ||
+                other.currentLevel == currentLevel));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, status, additionalExp);
+  int get hashCode =>
+      Object.hash(runtimeType, status, additionalExp, leveledUp, currentLevel);
 
   /// Create a copy of ImageProofEntity
   /// with the given fields replaced by the non-null parameter values.
@@ -172,6 +223,8 @@ abstract class _ImageProofEntity implements ImageProofEntity {
   const factory _ImageProofEntity({
     required final String status,
     required final int additionalExp,
+    final bool leveledUp,
+    final int currentLevel,
   }) = _$ImageProofEntityImpl;
 
   factory _ImageProofEntity.fromJson(Map<String, dynamic> json) =
@@ -181,6 +234,10 @@ abstract class _ImageProofEntity implements ImageProofEntity {
   String get status;
   @override
   int get additionalExp;
+  @override
+  bool get leveledUp;
+  @override
+  int get currentLevel;
 
   /// Create a copy of ImageProofEntity
   /// with the given fields replaced by the non-null parameter values.
