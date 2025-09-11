@@ -78,10 +78,11 @@ class SidejobGuidePopup extends StatelessWidget {
           topRight: Radius.circular(20),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // 상단 드래그 핸들
           Center(
             child: Container(
@@ -146,7 +147,8 @@ class SidejobGuidePopup extends StatelessWidget {
           
           // 하단 여백
           const SizedBox(height: 32),
-        ],
+          ],
+        ),
       ),
     );
   }

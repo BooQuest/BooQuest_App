@@ -68,6 +68,19 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
             ),
           );
         },
+        levelUp: (data) {
+          // 레벨업과 함께 인증 완료 화면으로 이동
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VerificationCompleteScreen(
+                method: 'photo',
+                content: '이미지 업로드 완료',
+                leveledUp: true,
+                currentLevel: data.currentLevel,
+              ),
+            ),
+          );
+        },
         failure: (message) {
           // 실패 시 에러 다이얼로그 표시
           _showErrorDialog(message);
@@ -111,6 +124,8 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
                 _buildTitleSection(),
                 SizedBox(height: _isSmallScreen ? 32 : 40),
                 _buildPhotoUploadSection(),
+                SizedBox(height: _isSmallScreen ? 16 : 20),
+                _buildFileSizeNotice(),
               ],
             ),
           ),
@@ -232,6 +247,64 @@ class _PhotoVerificationScreenState extends ConsumerState<PhotoVerificationScree
           ),
         ),
       ],
+    );
+  }
+
+  /// 파일 크기 안내 문구
+  Widget _buildFileSizeNotice() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(_isSmallScreen ? 12 : 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(_isSmallScreen ? 8 : 10),
+        border: Border.all(
+          color: const Color(0xFFE3F2FD),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: _isSmallScreen ? 16 : 18,
+            color: AppColors.primary,
+          ),
+          SizedBox(width: _isSmallScreen ? 8 : 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '파일 크기 제한: ',
+                    style: TextStyle(
+                      fontSize: _isSmallScreen ? 12 : 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '5MB 이하',
+                    style: TextStyle(
+                      fontSize: _isSmallScreen ? 12 : 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '만 업로드 가능합니다',
+                    style: TextStyle(
+                      fontSize: _isSmallScreen ? 12 : 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

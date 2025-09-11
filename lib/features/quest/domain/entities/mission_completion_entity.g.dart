@@ -21,6 +21,8 @@ _$MissionCompletionEntityImpl _$$MissionCompletionEntityImplFromJson(
   levelUpCount: (json['levelUpCount'] as num).toInt(),
   previousLevel: (json['previousLevel'] as num).toInt(),
   missionCompleted: json['missionCompleted'] as bool,
+  leveledUp: json['leveledUp'] as bool? ?? false,
+  currentLevel: (json['currentLevel'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$MissionCompletionEntityImplToJson(
@@ -35,6 +37,8 @@ Map<String, dynamic> _$$MissionCompletionEntityImplToJson(
   'levelUpCount': instance.levelUpCount,
   'previousLevel': instance.previousLevel,
   'missionCompleted': instance.missionCompleted,
+  'leveledUp': instance.leveledUp,
+  'currentLevel': instance.currentLevel,
 };
 
 _$MissionEntityImpl _$$MissionEntityImplFromJson(Map<String, dynamic> json) =>

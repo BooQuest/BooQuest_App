@@ -11,6 +11,8 @@ _$BonusProofEntityImpl _$$BonusProofEntityImplFromJson(
 ) => _$BonusProofEntityImpl(
   status: json['status'] as String,
   additionalExp: (json['additionalExp'] as num).toInt(),
+  leveledUp: json['leveledUp'] as bool? ?? false,
+  currentLevel: (json['currentLevel'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$BonusProofEntityImplToJson(
@@ -18,6 +20,8 @@ Map<String, dynamic> _$$BonusProofEntityImplToJson(
 ) => <String, dynamic>{
   'status': instance.status,
   'additionalExp': instance.additionalExp,
+  'leveledUp': instance.leveledUp,
+  'currentLevel': instance.currentLevel,
 };
 
 _$BonusProofRequestImpl _$$BonusProofRequestImplFromJson(

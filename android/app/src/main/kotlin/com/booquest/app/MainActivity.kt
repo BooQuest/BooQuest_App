@@ -1,13 +1,12 @@
 package com.booquest.app
 
 import android.os.Bundle
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 네이티브 splash screen 완전 비활성화
+        setTheme(android.R.style.Theme_Translucent_NoTitleBar)
         super.onCreate(savedInstanceState)
-        
-        // 카카오 SDK는 Flutter에서 초기화됨
-        // 네이버 SDK는 flutter_naver_login 패키지에서 자동으로 초기화됨
     }
 }

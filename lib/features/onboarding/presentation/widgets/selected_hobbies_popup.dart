@@ -73,9 +73,10 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
           topRight: Radius.circular(20),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // 상단 드래그 핸들
           Center(
             child: Container(
@@ -146,10 +147,10 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
           
           // 완료 버튼
           Padding(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               left: 20, 
               right: 20, 
-              bottom: isLandscape ? 16 : 20,
+              bottom: 24,
             ),
             child: Container(
               width: double.infinity,
@@ -179,7 +180,8 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
               ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

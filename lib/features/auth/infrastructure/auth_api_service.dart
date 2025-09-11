@@ -42,7 +42,7 @@ class AuthApiService {
   /// 
   /// [refreshToken]: 리프레시 토큰
   /// 
-  /// Returns: 새로운 액세스 토큰과 리프레시 토큰
+  /// Returns: 새로운 액세스 토큰과 리프레시 ㅌ토큰
   Future<Response<Map<String, dynamic>>> refreshToken(String refreshToken) async {
     return await _networkClient.post<Map<String, dynamic>>(
       '/api/auth/token/refresh',
@@ -71,10 +71,21 @@ class AuthApiService {
 
   /// 회원탈퇴 API 호출
   /// 
-  /// JWT 토큰을 헤더에 포함하여 현재 사용자 계정을 삭제합니다.
+  /// JWT 토큰과 소셜 플랫폼 액세스 토큰을 헤더에 포함하여 현재 사용자 계정을 삭제합니다.
+  /// 
+  /// [providerAccessToken]: 소셜 플랫폼에서 발급받은 액세스 토큰 (선택사항)
   /// 
   /// Returns: 탈퇴된 데이터 정보 (deletedUserSideJobs, deletedSideJobs 등)
-  Future<Response<Map<String, dynamic>>> withdraw() async {
-    return await _networkClient.delete<Map<String, dynamic>>('/api/user/me');
+  Future<Response<Map<String, dynamic>>> withdraw({String? providerAccessToken}) async {
+    final headers = <String, String>{};
+    
+    if (providerAccessToken != null) {
+      headers['X-Provider-Access-Token'] = providerAccessToken;
+    }
+    
+    return await _networkClient.delete<Map<String, dynamic>>(
+      '/api/user/me',
+      options: Options(headers: headers),
+    );
   }
 }

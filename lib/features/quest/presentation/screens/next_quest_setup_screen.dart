@@ -12,7 +12,9 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// 다음 퀘스트 설정 화면 - 메인 퀘스트 완료 후 다음 퀘스트 준비
 class NextQuestSetupScreen extends ConsumerStatefulWidget {
-  const NextQuestSetupScreen({super.key});
+  final VoidCallback? onHomeTabRequested;
+  
+  const NextQuestSetupScreen({super.key, this.onHomeTabRequested});
 
   @override
   ConsumerState<NextQuestSetupScreen> createState() => _NextQuestSetupScreenState();
@@ -820,6 +822,7 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
                                 nextMissionTitle: nextMission.title,
                                 nextMissionDesignNotes: nextMission.designNotes,
                                 sideJobId: _sideJobId,
+                                onHomeTabRequested: widget.onHomeTabRequested,
                               ),
                             ),
                           );

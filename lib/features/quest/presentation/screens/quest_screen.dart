@@ -24,7 +24,9 @@ import 'package:booquest/features/quest/infrastructure/providers/mission_step_co
 import 'package:booquest/features/quest/infrastructure/providers/mission_completion_providers.dart';
 
 class QuestScreen extends ConsumerStatefulWidget {
-  const QuestScreen({super.key});
+  final VoidCallback? onHomeTabRequested;
+  
+  const QuestScreen({super.key, this.onHomeTabRequested});
 
   @override
   ConsumerState<QuestScreen> createState() => _QuestScreenState();
@@ -318,6 +320,14 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             // 데이터 새로고침은 MainScreen에서 관리
             // 필요시 여기서 특정 API만 호출
           },
+          levelUp: (data) {
+            // 레벨업과 함께 메인 퀘스트 완료 처리
+            if (currentOrderNo == 5) {
+              _showFinalQuestCompletionScreen(context, data);
+            } else {
+              _showMainQuestSuccessPopup(context, data);
+            }
+          },
           failure: (message) {
             // 실패 시 에러 메시지 표시
             ScaffoldMessenger.of(context).showSnackBar(
@@ -332,7 +342,9 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             if (currentOrderNo != 5) {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const NextQuestSetupScreen(),
+                  builder: (context) => NextQuestSetupScreen(
+                    onHomeTabRequested: widget.onHomeTabRequested,
+                  ),
                 ),
               );
             } else {
@@ -367,7 +379,9 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           } else {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const NextQuestSetupScreen(),
+                builder: (context) => NextQuestSetupScreen(
+                  onHomeTabRequested: widget.onHomeTabRequested,
+                ),
               ),
             );
           }
@@ -460,6 +474,15 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
             // 데이터 새로고침은 MainScreen에서 관리
             // 필요시 여기서 특정 API만 호출
           },
+          levelUp: (data) {
+            // 레벨업과 함께 부퀘스트 완료 처리
+            _showExperienceBoostPopup(context, _selectedStepId!);
+            
+            // 선택 상태 초기화
+            setState(() {
+              _selectedStepId = null;
+            });
+          },
           failure: (message) {
             // 실패 시 에러 메시지 표시
             ScaffoldMessenger.of(context).showSnackBar(
@@ -510,6 +533,9 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           method: 'main_quest',
           content: '메인 퀘스트 완료',
           expReward: data.totalExpReward,
+          onHomeTabRequested: widget.onHomeTabRequested,
+          leveledUp: data.leveledUp ?? false,
+          currentLevel: data.currentLevel,
         ),
       ),
     );
@@ -523,6 +549,9 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
           method: 'final_quest',
           content: '모든 메인 퀘스트 완료',
           expReward: data?.totalExpReward ?? 50,
+          onHomeTabRequested: widget.onHomeTabRequested,
+          leveledUp: data?.leveledUp ?? false,
+          currentLevel: data?.currentLevel,
         ),
       ),
     );

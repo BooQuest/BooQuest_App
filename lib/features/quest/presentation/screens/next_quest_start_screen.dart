@@ -17,6 +17,7 @@ class NextQuestStartScreen extends ConsumerStatefulWidget {
   final String nextMissionTitle;
   final String nextMissionDesignNotes;
   final int? sideJobId;
+  final VoidCallback? onHomeTabRequested;
   
   const NextQuestStartScreen({
     super.key,
@@ -25,6 +26,7 @@ class NextQuestStartScreen extends ConsumerStatefulWidget {
     required this.nextMissionTitle,
     required this.nextMissionDesignNotes,
     this.sideJobId,
+    this.onHomeTabRequested,
   });
 
   @override
@@ -154,7 +156,8 @@ class _NextQuestStartScreenState extends ConsumerState<NextQuestStartScreen> {
 
       }
 
-      // 퀘스트 탭으로 돌아가기
+      // 홈 탭으로 강제 이동
+      widget.onHomeTabRequested?.call();
       Navigator.of(context).popUntil((route) => route.isFirst);
       
     } catch (e) {

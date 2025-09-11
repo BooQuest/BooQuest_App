@@ -16,14 +16,10 @@ class MissionStepCompletionRepositoryImpl implements MissionStepCompletionReposi
     String status,
   ) async {
     try {
-      print('🔍 MissionStepCompletionRepository: completeStep 호출 - stepId: $stepId, status: $status');
-      
       final result = await _apiService.completeStep(stepId, status);
       
-      print('✅ MissionStepCompletionRepository: completeStep 성공');
       return Right(result);
     } catch (e) {
-      print('❌ MissionStepCompletionRepository: completeStep 실패 - $e');
       
       if (e is Exception) {
         return Left(MissionFailure.serverError(e.toString()));

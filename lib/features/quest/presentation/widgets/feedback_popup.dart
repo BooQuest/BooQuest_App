@@ -99,31 +99,18 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
 
                     const SizedBox(height: 24),
 
-                    // 피드백 옵션들
+                    // 피드백 옵션들 (동적 레이아웃)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          // 2열 2행으로 배치
-                          for (int row = 0; row < 2; row++)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Row(
-                                children: [
-                                  for (int col = 0; col < 2; col++)
-                                    Expanded(
-                                      child: Padding(
-                                        padding: EdgeInsets.only(
-                                          right: col == 0 ? 6 : 0,
-                                          left: col == 1 ? 6 : 0,
-                                        ),
-                                        child: _buildFeedbackOption(_feedbackOptions[row * 2 + col]),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                        ],
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                          spacing: 12, 
+                          runSpacing: 12,
+                          children: _feedbackOptions.map((option) => 
+                            _buildFeedbackOption(option),
+                          ).toList(),
+                        ),
                       ),
                     ),
 
@@ -189,7 +176,7 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
                             elevation: 0,
                           ),
                           child: const Text(
-                            '제출',
+                            '부퀘스트 재생성',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -236,7 +223,7 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
         });
       },
       child: Container(
-        height: 40,
+        constraints: const BoxConstraints(minWidth: 80),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF666666) : Colors.white,
@@ -246,18 +233,14 @@ class _FeedbackPopupState extends State<FeedbackPopup> {
             width: 1,
           ),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: isSelected ? Colors.white : const Color(0xFF666666),
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: isSelected ? Colors.white : const Color(0xFF666666),
           ),
+          textAlign: TextAlign.left,
         ),
       ),
     );

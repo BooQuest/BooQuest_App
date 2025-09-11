@@ -9,6 +9,8 @@ class BonusProofEntity with _$BonusProofEntity {
   const factory BonusProofEntity({
     required String status,
     required int additionalExp,
+    @Default(false) bool leveledUp,
+    @Default(0) int currentLevel,
   }) = _BonusProofEntity;
 
   factory BonusProofEntity.fromJson(Map<String, dynamic> json) =>
