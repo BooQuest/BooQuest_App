@@ -1,3 +1,4 @@
+import 'dart:io'; // Platform 사용을 위해 추가
 import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
@@ -419,9 +420,14 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
   }
 
   void _loadInterstitialAd() {
-  InterstitialAd.load(
-    adUnitId: 'ca-app-pub-4954826018130837/3285223329', // 테스트용 ID
-    request: const AdRequest(),
+    // 플랫폼별 실제 광고 ID 설정
+    final adUnitId = Platform.isAndroid
+        ? 'ca-app-pub-4954826018130837/3285223329' // Android 실제 ID
+        : 'ca-app-pub-4954826018130837/5142898771'; // iOS 실제 ID
+        
+    InterstitialAd.load(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
     adLoadCallback: InterstitialAdLoadCallback(
       onAdLoaded: (ad) {
         _interstitialAd = ad;

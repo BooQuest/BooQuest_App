@@ -1,3 +1,4 @@
+import 'dart:io'; // Platform 사용을 위해 추가
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/features/quest/presentation/screens/quest_verification_screen.dart';
@@ -37,8 +38,13 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
   }
 
   void _loadRewardedAd() {
+    // 플랫폼별 실제 광고 ID 설정
+    final adUnitId = Platform.isAndroid
+        ? 'ca-app-pub-4954826018130837/2011476584' // Android 실제 ID
+        : 'ca-app-pub-4954826018130837/2943384493'; // iOS 실제 ID
+        
     RewardedAd.load(
-      adUnitId: 'ca-app-pub-3940256099942544/5224354917', 
+      adUnitId: adUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {

@@ -1,3 +1,4 @@
+import 'dart:io'; // Platform 사용을 위해 추가
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
@@ -927,22 +928,26 @@ class _NextQuestSetupScreenState extends ConsumerState<NextQuestSetupScreen> {
 }
 
   void _loadInterstitialAd() {
-  InterstitialAd.load(
-    adUnitId: 'ca-app-pub-3940256099942544/1033173712', // ✅ 테스트용 ID
-    request: const AdRequest(),
-    adLoadCallback: InterstitialAdLoadCallback(
-      onAdLoaded: (ad) {
-        _interstitialAd = ad;
-        _isAdReady = true;
-      },
-      onAdFailedToLoad: (error) {
-        print('❌ 전면 광고 로드 실패: $error');
-        _interstitialAd = null;
-        _isAdReady = false;
-      },
-    ),
-  );
-}
+    // 플랫폼별 실제 광고 ID 설정
+    final adUnitId = Platform.isAndroid
+        ? 'ca-app-pub-4954826018130837/3285223329' // Android 실제 ID
+        : 'ca-app-pub-4954826018130837/5142898771'; // iOS 실제 ID
+        
+    InterstitialAd.load(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAd = ad;
+          _isAdReady = true;
+        },
+        onAdFailedToLoad: (error) {
+          _interstitialAd = null;
+          _isAdReady = false;
+        },
+      ),
+    );
+  }
   
   /// 부퀘스트 섹션 (완료된 퀘스트에만 표시)
   Widget _buildSubQuestSection(MissionEntity mission) {
