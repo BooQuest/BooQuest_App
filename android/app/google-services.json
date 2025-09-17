@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "62966873324",
+    "project_id": "booquest-31d62",
+    "storage_bucket": "booquest-31d62.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62966873324:android:8e66fdc83bc09d0361b9c9",
+        "android_client_info": {
+          "package_name": "com.booquest.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjb498DPDItFMW6fnAusIwV44yS2xQny0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -116,7 +116,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 소셜 로그인 수행
   /// 
   /// [accessToken]: 소셜 플랫폼에서 발급받은 액세스 토큰
-  /// [provider]: 소셜 플랫폼 종류 (kakao, google 등)
+  /// [provider]: 소셜 플랫폼 종류 (kakao, google, apple 등)
   /// 
   /// Returns: 로그인 성공 여부
   Future<bool> loginWithSocial({

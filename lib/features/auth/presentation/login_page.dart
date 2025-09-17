@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/features/auth/application/auth_notifier.dart';
+import 'package:booquest/features/auth/presentation/apple_login_service.dart';
 import 'package:booquest/features/auth/presentation/kakao_login_service.dart';
 import 'package:booquest/features/auth/presentation/naver_login_service.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart' as sign_in_with_apple;
 
 /// Presentation 계층: 로그인 페이지
 /// 
@@ -40,8 +43,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   // 화면 크기에 따른 버튼 높이 계산
   double _getButtonHeight() {
     final screenHeight = MediaQuery.of(context).size.height;
-    // 작은 화면: 48px, 큰 화면: 64px
-    return (screenHeight * 0.07).clamp(48.0, 64.0);
+    
+    // iOS에서는 Apple 버튼이 추가되어 3개이므로 높이를 줄임
+    if (Platform.isIOS) {
+      // 작은 화면: 44px, 큰 화면: 56px (iOS용)
+      return (screenHeight * 0.06).clamp(44.0, 56.0);
+    } else {
+      // Android에서는 2개 버튼이므로 기존 높이 유지
+      // 작은 화면: 48px, 큰 화면: 64px
+      return (screenHeight * 0.07).clamp(48.0, 64.0);
+    }
   }
 
   /// 카카오 로그인 버튼 클릭 핸들러
@@ -126,6 +137,53 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  /// Apple 로그인 버튼 클릭 핸들러
+  /// 
+  /// 1. Apple Sign In을 통해 소셜 로그인 수행
+  /// 2. 발급받은 identityToken으로 앱 인증 진행
+  /// 3. 결과에 따라 사용자에게 피드백 제공
+  Future<void> _handleAppleLogin() async {
+    // Android에서는 Apple Login을 지원하지 않음
+    if (!Platform.isIOS) {
+      _showErrorMessage('Apple 로그인은 iOS에서만 지원됩니다.');
+      return;
+    }
+
+    try {
+      // 1. Apple 소셜 로그인 (AppleLoginService 사용)
+      final appleService = AppleLoginService();
+      final String? authorizationCode = await appleService.login();
+
+      if (!mounted) return;
+
+      if (authorizationCode == null) {
+        _showErrorMessage('Apple 로그인에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      // 2. 앱 인증 진행
+      final bool loginSuccess = await widget.authNotifier.loginWithSocial(
+        accessToken: authorizationCode,
+        provider: 'apple',
+      );
+
+      if (!mounted) return;
+
+      // 3. 로그인 결과 처리
+      if (!loginSuccess) {
+        final errorMessage = widget.authNotifier.currentErrorMessage ??
+            'Apple 로그인 중 오류가 발생했습니다.';
+        _showErrorMessage(errorMessage);
+      }
+      
+      // 성공 시에는 AuthWrapper에서 자동으로 화면 전환됨
+    } catch (e) {
+      if (mounted) {
+        _showErrorMessage('Apple 로그인 중 예상치 못한 오류가 발생했습니다.');
+      }
+    }
+  }
+
   /// 에러 메시지 표시
   void _showErrorMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -164,16 +222,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                                                  _buildAppTitle(),
-                        SizedBox(height: _titleToImageSpacing),
-                        _buildImageSection(),
+                          _buildAppTitle(),
+                          SizedBox(height: _titleToImageSpacing),
+                          _buildImageSection(),
                         ],
                       ),
                     ),
                   ),
                   _buildKakaoLoginButton(),
-                  const SizedBox(height: 16), // 버튼 간 간격
+                  const SizedBox(height: 12), 
                   _buildNaverLoginButton(),
+                  const SizedBox(height: 12),
+                  if (Platform.isIOS) _buildAppleLoginButton(),
                   SizedBox(height: _bottomSpacing),
                 ],
               ),
@@ -245,7 +305,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4285F4).withValues(alpha: 0.3),
+            color: const Color(0xFFFEE500).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -255,11 +315,39 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         borderRadius: BorderRadius.circular(16),
         child: GestureDetector(
           onTap: _handleKakaoLogin,
-          child: SvgPicture.asset(
-            'assets/images/login/kakao.svg',
+          child: Container(
             width: double.infinity,
             height: _getButtonHeight(),
-            fit: BoxFit.fill,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEE500), // 카카오 옐로우
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Stack(
+              children: [
+                  const Center(
+                    child: Text(
+                      '카카오로 로그인',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  left: 20,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Image(
+                      image: const AssetImage('assets/images/login/kakao_logo2.png'),
+                      height: _getButtonHeight() * 0.5,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -285,12 +373,74 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         borderRadius: BorderRadius.circular(16),
         child: GestureDetector(
           onTap: _handleNaverLogin,
-          child: SvgPicture.asset(
-            'assets/images/login/naver.svg',
+          child: Container(
             width: double.infinity,
             height: _getButtonHeight(),
-            fit: BoxFit.cover,
+            decoration: BoxDecoration(
+              color: const Color(0xFF03C75A),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Stack(
+              children: [
+                  const Center(
+                    child: Text(
+                      '네이버로 로그인',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                const Positioned(
+                  left: 20,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Text(
+                      'N',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Apple 로그인 버튼 빌드
+  /// 
+  /// iOS에서만 표시되며, 다른 로그인 버튼들과 동일한 구조를 사용합니다.
+  Widget _buildAppleLoginButton() {
+    return Container(
+      width: double.infinity,
+      height: _getButtonHeight(),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: sign_in_with_apple.SignInWithAppleButton(
+          onPressed: _handleAppleLogin,
+          text: 'Apple로 로그인',
+          height: _getButtonHeight(),
+          style: sign_in_with_apple.SignInWithAppleButtonStyle.black,
+          borderRadius: BorderRadius.circular(16),
+          iconAlignment: sign_in_with_apple.IconAlignment.left,
         ),
       ),
     );
