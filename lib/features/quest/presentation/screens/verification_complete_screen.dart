@@ -202,7 +202,7 @@ class VerificationCompleteScreen extends ConsumerWidget {
       case 'photo':
         return '추가 인증 완료';
       case 'reward_ad':
-        return '광고 신청 완료';
+        return '광고 시청 완료';
       case 'main_quest':
         return '메인 퀘스트 완료';
       case 'sub_quest':
@@ -307,7 +307,6 @@ class VerificationCompleteScreen extends ConsumerWidget {
           ]);
         }
       } catch (e) {
-        print('데이터 리로드 중 오류: $e');
       }
       
       // quest screen으로 돌아가기

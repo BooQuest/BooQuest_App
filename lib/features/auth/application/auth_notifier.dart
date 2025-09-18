@@ -154,11 +154,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
           await _storageService.saveUserInfo(
             userId: userInfo['userId'] as int,
             email: userInfo['email'] ?? '',
-            nickname: userInfo['nickname'],
-            socialNickname: userInfo['socialNickname'],
-            profileImageUrl: userInfo['profileImageUrl'],
+            nickname: userInfo['nickname'] ?? '',
+            socialNickname: userInfo['socialNickname'] ?? '',
+            profileImageUrl: userInfo['profileImageUrl'] ?? '',
             sideJobId: sideJobId,
-            characterType: userInfo['characterType'],
+            characterType: userInfo['characterType'] ?? '',
           );
           userForState = Map<String, dynamic>.from(userInfo);
         }
@@ -234,16 +234,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 회원탈퇴 수행
   /// 
   /// 서버에 회원탈퇴 요청을 보내고 로컬 데이터를 모두 삭제합니다.
+  /// Apple 로그인의 경우 별도 API를 사용합니다.
   /// 실패 시 현재 상태를 유지하고 에러 메시지를 반환합니다.
   Future<bool> withdraw() async {
     try {
-      // 1. 소셜 플랫폼 액세스 토큰 조회
+      // 1. Provider 타입 확인
+      final provider = _storageService.getProvider();
       final providerAccessToken = _storageService.getProviderAccessToken();
       
-      // 2. 서버에 회원탈퇴 요청 (소셜 플랫폼 액세스 토큰 포함)
-      final response = await _apiService.withdraw(
-        providerAccessToken: providerAccessToken,
-      );
+      // 2. Provider에 따라 다른 API 호출
+      Response<Map<String, dynamic>> response;
+      
+      if (provider == 'apple') {
+        // Apple 로그인: 별도 API 사용 (헤더 불필요)
+        response = await _apiService.withdrawApple();
+      } else {
+        // 기타 소셜 로그인: 기존 API 사용 (X-Provider-Access-Token 헤더 포함)
+        response = await _apiService.withdraw(
+          providerAccessToken: providerAccessToken,
+        );
+      }
       
       if (response.statusCode == 200 && 
           response.data != null && 

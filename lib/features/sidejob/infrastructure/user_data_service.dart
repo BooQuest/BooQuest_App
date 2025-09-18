@@ -44,14 +44,11 @@ class UserDataService {
         return const Left(SideJobFailure.userDataError('사용자 ID를 찾을 수 없습니다'));
       }
 
-      if (nickname == null || nickname.isEmpty) {
-        return const Left(SideJobFailure.userDataError('사용자 닉네임을 찾을 수 없습니다'));
-      }
 
       // SideJobRequestData 생성
       final requestData = SideJobRequestData(
         userId: userId,
-        nickname: characterName ?? '',
+        nickname: (nickname == null || nickname.isEmpty) ? '사용자' : nickname,
         job: job ?? '',
         hobbies: hobbies ?? [],
         expressionStyle: expressionStyle ?? '',

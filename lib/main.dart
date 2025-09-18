@@ -13,27 +13,30 @@ void main() async {
   // Flutter 바인딩 초기화
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Firebase 초기화
-  await Firebase.initializeApp();
-  
-  // Firebase Analytics 초기화
-  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-  
-  // Firebase Crashlytics 초기화
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  
-  // Firebase Messaging 초기화
-  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  try {
+    // Firebase 초기화
+    await Firebase.initializeApp();
+    
+    // Firebase Analytics 초기화
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+    
+    // Firebase Crashlytics 초기화
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    
+    // Firebase Messaging 초기화
+    await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  } catch (e) {
+    // Firebase 초기화 실패 시 앱은 계속 실행
+    print('Firebase 초기화 실패: $e');
+  }
   
   // 카카오 SDK 초기화
   KakaoSdk.init(
     nativeAppKey: '635d855eae5acd47eaaaf28fc6b49ca8',
     javaScriptAppKey: '635d855eae5acd47eaaaf28fc6b49ca8',
   );
-  
-  // NetworkClient는 AuthWrapper에서 필요할 때 초기화됩니다
   
   // AdMob 초기화
   await MobileAds.instance.initialize();

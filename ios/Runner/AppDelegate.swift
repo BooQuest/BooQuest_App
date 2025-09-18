@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import NidThirdPartyLogin
 import KakaoSDKCommon
+import Firebase
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -9,6 +10,13 @@ import KakaoSDKCommon
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    
+    // Firebase 초기화
+    if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+       FileManager.default.fileExists(atPath: path) {
+      FirebaseApp.configure()
+    } else {
+    }
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

@@ -88,4 +88,13 @@ class AuthApiService {
       options: Options(headers: headers),
     );
   }
+
+  /// Apple 회원탈퇴 API 호출
+  /// 
+  /// Apple 로그인 사용자의 경우 별도 API를 사용합니다.
+  /// 
+  /// Returns: 탈퇴된 데이터 정보 (deletedUserSideJobs, deletedSideJobs 등)
+  Future<Response<Map<String, dynamic>>> withdrawApple() async {
+    return await _networkClient.delete<Map<String, dynamic>>('/api/user/me/apple');
+  }
 }

@@ -32,6 +32,7 @@ class AppleLoginService {
 
       // authorizationCode 있는지 확인
       if (credential.authorizationCode != null && credential.authorizationCode!.isNotEmpty) {
+        print('Apple Login Success: ${credential.authorizationCode}');
         return credential.authorizationCode;
       } else {
         return null;
