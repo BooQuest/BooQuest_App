@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
@@ -27,9 +27,11 @@ class Step6MethodSelectionScreen extends ConsumerStatefulWidget {
 class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectionScreen> {
 
   String? _selectedOption;
+  Timer? _timeoutTimer;
+  bool _isProcessing = false;
   
   // 진행 가능 여부 계산
-  bool get _canProceed => _selectedOption != null && !ref.watch(sideJobNotifierProvider).isLoading;
+  bool get _canProceed => _selectedOption != null && !ref.watch(sideJobNotifierProvider).isLoading && !_isProcessing;
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
 
   @override
   void dispose() {
+    _timeoutTimer?.cancel();
     super.dispose();
   }
 
@@ -70,20 +73,6 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
     }
   }
 
-  /// 저장된 자신 있는 방식 타입 불러오기 (기존 메서드 - 호환성 유지)
-  Future<void> _loadSavedStrengthType() async {
-    try {
-      final savedStrengthType = await UserDataUtils.instance.getStrengthType();
-      if (savedStrengthType != null) {
-        setState(() {
-          _selectedOption = savedStrengthType;
-        });
-        print('📖 저장된 자신 있는 방식 타입 불러옴: $savedStrengthType');
-      }
-    } catch (error) {
-      print('❌ 저장된 자신 있는 방식 타입 불러오기 실패: $error');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +93,14 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
           // 로딩 상태 - 아무것도 하지 않음
         },
         success: (recommendations) async {
-          // 성공 시 CustomLoadingScreen을 닫고 다음 화면으로 이동
+          // 성공 시 타이머 취소하고 처리 완료 표시
+          _timeoutTimer?.cancel();
+          _isProcessing = false;
+          
           if (mounted) {
+            // CustomLoadingScreen 닫기
+            Navigator.pop(context);
+            // 다음 화면으로 이동
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -120,8 +115,16 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
           // 사용자 부업 선택 완료 - 이 화면에서는 처리하지 않음
         },
         failure: (failure) {
-          // 실패 시 에러는 이미 UI에서 표시됨
-          print('❌ 부업 추천 실패: ${failure.debugMessage}');
+          // 실패 시 타이머 취소하고 처리 완료 표시
+          _timeoutTimer?.cancel();
+          _isProcessing = false;
+          
+          if (mounted) {
+            // CustomLoadingScreen 닫기
+            Navigator.pop(context);
+            // 네트워크 에러 다이얼로그 표시
+            _showNetworkErrorDialog();
+          }
         },
       );
     });
@@ -134,8 +137,6 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
         
         // 동적으로 계산되는 값들 (실시간 업데이트)
         final double horizontalPadding = screenWidth * 0.05; // 화면 너비의 5%
-        final double topSpacing = screenHeight * 0.1; // 화면 높이의 10%
-        final double bottomSpacing = screenHeight * 0.04; // 화면 높이의 4%
         
         // 상단 여백 관련
         final double topMargin = screenHeight * 0.05; // 화면 높이의 5%
@@ -367,22 +368,41 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
 
 
   Future<void> _onNext() async {
-    if (_selectedOption == null) return;
+    if (_selectedOption == null || _isProcessing) return;
+
+    setState(() {
+      _isProcessing = true;
+    });
 
     // 캐릭터 이름 가져오기 (온보딩에서 입력한 이름)
     final storage = await OnboardingStorageService.getInstance();
     final characterName = storage.getCharacterName() ?? '사용자';
 
     // CustomLoadingScreen으로 이동
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CustomLoadingScreen(
-          topText: '${characterName}님에게 어울리는 부업을\n생성하고 있어요...',
-          bottomText: '잠시만 기다려주세요',
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CustomLoadingScreen(
+            topText: '$characterName님에게 어울리는 부업을\n생성하고 있어요...',
+            bottomText: '잠시만 기다려주세요',
+          ),
         ),
-      ),
-    );
+      );
+    }
+
+    // 30초 타임아웃 설정
+    _timeoutTimer = Timer(const Duration(seconds: 30), () {
+      if (mounted && _isProcessing) {
+        setState(() {
+          _isProcessing = false;
+        });
+        // 로딩 화면 닫기
+        Navigator.pop(context);
+        // 네트워크 문제 메시지 표시
+        _showNetworkErrorDialog();
+      }
+    });
 
     // 부업 추천 액션 트리거
     ref.read(sideJobNotifierProvider.notifier)
@@ -395,7 +415,80 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
       final storage = await OnboardingStorageService.getInstance();
       await storage.setStrengthType(strengthType);
     } catch (error) {
+      // 에러 무시 (선택적 저장이므로)
     }
+  }
+
+  /// 네트워크 에러 다이얼로그 표시
+  void _showNetworkErrorDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.wifi_off_rounded,
+              color: Colors.orange,
+              size: 24,
+            ),
+            SizedBox(width: 8),
+            Text(
+              '네트워크 연결 문제',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          '서버와의 연결이 불안정합니다.\n잠시 후 다시 시도해주세요.',
+          style: TextStyle(
+            fontSize: 16,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text(
+              '취소',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // 다시 시도
+              _onNext();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1976D2),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              '다시 시도',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
 

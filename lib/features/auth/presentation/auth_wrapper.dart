@@ -13,6 +13,7 @@ import 'package:booquest/features/onboarding/presentation/screens/step5_preferre
 import 'package:booquest/features/onboarding/presentation/screens/step6_method_selection_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/sidejob_recommendations_screen.dart';
 import 'package:booquest/features/recommendation/presentation/screens/quest_steps_screen.dart';
+import 'package:booquest/core/services/force_update_service.dart';
 
 /// Presentation 계층: 인증 상태에 따른 화면 분기 래퍼
 /// 
@@ -28,6 +29,7 @@ class AuthWrapper extends ConsumerStatefulWidget {
 class _AuthWrapperState extends ConsumerState<AuthWrapper> {
   bool _isInitialized = false;
   AuthNotifier? _authNotifier;
+  bool _hasCheckedUpdate = false;
 
   @override
   void initState() {
@@ -51,14 +53,27 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
         setState(() {
           _isInitialized = true;
         });
+        
+        // 백그라운드에서 업데이트 체크
+        _checkForUpdatesInBackground();
       }
     } catch (e) {
-      print('AuthWrapper 초기화 실패: $e');
       if (mounted) {
         setState(() {
           _isInitialized = true;
         });
       }
+    }
+  }
+
+  /// 백그라운드에서 업데이트 체크
+  Future<void> _checkForUpdatesInBackground() async {
+    if (_hasCheckedUpdate) return;
+
+    _hasCheckedUpdate = true;
+
+    if (mounted) {
+      await ForceUpdateService().checkAndForceUpdate(context);
     }
   }
 
@@ -121,29 +136,20 @@ class _OnboardingRouter extends StatelessWidget {
       final missionRecommended = onboardingProgressInfo['missionRecommended'] as bool? ?? false;
       final sideJobRecommended = onboardingProgressInfo['sideJobRecommended'] as bool? ?? false;
       
-      print('📊 온보딩 진행 정보 기반 라우팅:');
-      print('  - sideJobCreated: $sideJobCreated');
-      print('  - missionRecommended: $missionRecommended');
-      print('  - sideJobRecommended: $sideJobRecommended');
-      
       // sideJobCreated가 true면 메인 페이지
       if (sideJobCreated) {
-        print('🏠 sideJobCreated = true → MainScreen');
         return const MainScreen();
       }
       
       // missionRecommended가 true면 퀘스트 스텝 화면
       if (missionRecommended) {
-        print('📋 missionRecommended = true → QuestStepsScreen');
         // selectedSideJobId가 있으면 전달
         final selectedSideJobId = onboardingProgressInfo['selectedSideJobId'] as int?;
-        print('📋 selectedSideJobId: $selectedSideJobId');
         return QuestStepsScreen(selectedSideJobId: selectedSideJobId);
       }
       
       // sideJobRecommended가 true면 부업 추천 화면
       if (sideJobRecommended) {
-        print('💼 sideJobRecommended = true → SideJobRecommendationsScreen');
         // 부업 추천 데이터는 빈 배열로 전달 (실제로는 API에서 가져와야 함)
         return const SideJobRecommendationsScreen(recommendations: []);
       }
@@ -156,13 +162,10 @@ class _OnboardingRouter extends StatelessWidget {
     final onboardingStorage = await OnboardingStorageService.getInstance();
     final int currentStep = onboardingStorage.getCurrentStep();
     
-    print('🔄 온보딩 라우터: 현재 단계 = $currentStep');
-    
     switch (currentStep) {
       case 0:
         // Step 0: 캐릭터 선택/생성
         final String? screenType = onboardingStorage.getCharacterScreenType();
-        print('🔄 온보딩 라우터: 캐릭터 화면 타입 = $screenType');
         if (screenType == 'creation') {
           return const Step2CharacterCreationScreen();
         } else {
@@ -182,7 +185,6 @@ class _OnboardingRouter extends StatelessWidget {
         return const Step6MethodSelectionScreen();
       default:
         // 기본값: 캐릭터 선택부터 시작
-        print('🔄 온보딩 라우터: 기본값으로 캐릭터 선택 화면');
         return const Step1CharacterSelectionScreen();
     }
   }
@@ -203,7 +205,6 @@ class _OnboardingRouter extends StatelessWidget {
 
         // 에러 발생 시 기본 화면 (캐릭터 선택)
         if (snapshot.hasError) {
-          print('OnboardingRouter 에러: ${snapshot.error}');
           return const Step1CharacterSelectionScreen();
         }
 

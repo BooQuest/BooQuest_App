@@ -26,7 +26,7 @@ android {
         applicationId = "com.booquest.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23  
+        minSdk = flutter.minSdkVersion  
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -51,10 +51,10 @@ android {
             // ProGuard 및 리소스 축소 비활성화 (네이버 로그인 문제 해결을 위해 임시)
             isMinifyEnabled = false
             isShrinkResources = false
-            // proguardFiles(
-            //     getDefaultProguardFile("proguard-android.txt"),
-            //     "proguard-rules.pro"
-            // )
+            proguardFiles(
+                getDefaultProguardFile("proguard-android.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
