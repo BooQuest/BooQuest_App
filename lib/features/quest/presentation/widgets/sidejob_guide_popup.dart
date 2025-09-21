@@ -12,9 +12,9 @@ class SidejobGuidePopup extends StatelessWidget {
     required this.missions,
   });
 
-  /// 가이드 데이터 파싱
-  Map<String, dynamic> _parseGuideData(String? guideText) {
-    if (guideText == null || guideText.isEmpty) {
+  /// 가이드 데이터 파싱 (steps 배열에서 데이터 추출)
+  Map<String, dynamic> _parseGuideData(List<MissionEntity> missions) {
+    if (missions.isEmpty) {
       return {
         'title': '부업 가이드',
         'description': '부업 성공을 위한 단계별 가이드입니다.',
@@ -22,43 +22,23 @@ class SidejobGuidePopup extends StatelessWidget {
       };
     }
 
-    final lines = guideText.split('\n').where((line) => line.trim().isNotEmpty).toList();
-    final steps = <Map<String, String>>[];
-    String currentDescription = '';
+    final currentMission = missions.first;
+    final steps = <Map<String, dynamic>>[];
     
-    for (final line in lines) {
-      final trimmedLine = line.trim();
-      
-      if (trimmedLine.startsWith('**') && trimmedLine.contains('.')) {
-        // **1. 제목** 형식의 단계 - 번호 제거
-        final titleWithNumber = trimmedLine.substring(2).replaceAll('**', '').trim();
-        // "1. " 또는 "2. " 등의 번호 패턴 제거
-        final title = titleWithNumber.replaceAll(RegExp(r'^\d+\.\s*'), '');
-        steps.add({
-          'title': title,
-          'description': '',
-        });
-        currentDescription = '';
-      } else if (trimmedLine.startsWith('- ')) {
-        // - 설명 형식
-        final description = trimmedLine.substring(2).trim();
-        if (steps.isNotEmpty) {
-          if (currentDescription.isNotEmpty) {
-            currentDescription += ' ';
-          }
-          currentDescription += description;
-          steps.last['description'] = currentDescription;
-        }
-      }
-    }
-
-    print('🔍 파싱된 steps 개수: ${steps.length}');
-    for (int i = 0; i < steps.length; i++) {
-      print('  [$i] title: ${steps[i]['title']}, description: ${steps[i]['description']}');
+    // steps 배열을 seq 순서대로 정렬
+    final sortedSteps = List.from(currentMission.steps)
+      ..sort((a, b) => (a.seq ?? 0).compareTo(b.seq ?? 0));
+    
+    for (final step in sortedSteps) {
+      steps.add({
+        'seq': step.seq ?? 0,
+        'title': step.title ?? '',
+        'description': step.detail ?? '',
+      });
     }
 
     return {
-      'title': '부업 가이드',
+      'title': currentMission.title ?? '부업 가이드',
       'description': '부업 성공을 위한 단계별 가이드입니다.',
       'steps': steps,
     };
@@ -67,10 +47,19 @@ class SidejobGuidePopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 현재 미션의 가이드 데이터 파싱
-    final currentMission = missions.isNotEmpty ? missions.first : null;
-    final guideData = _parseGuideData(currentMission?.guide);
+    final guideData = _parseGuideData(missions);
+    
+    // 화면 크기 계산
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
+    
+    // 팝업 높이 계산 (화면 높이의 60-70%, 최소 400px, 최대 600px)
+    final double popupHeight = (screenHeight * (isSmallScreen ? 0.7 : 0.6))
+        .clamp(400.0, 600.0);
     
     return Container(
+      height: popupHeight,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -78,11 +67,8 @@ class SidejobGuidePopup extends StatelessWidget {
           topRight: Radius.circular(20),
         ),
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Column(
+        children: [
           // 상단 드래그 핸들
           Center(
             child: Container(
@@ -96,59 +82,66 @@ class SidejobGuidePopup extends StatelessWidget {
             ),
           ),
           
-          // 제목 영역
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '키워드 & 콘텐츠 전략 설계',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+          // 스크롤 가능한 콘텐츠
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 제목 영역
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          guideData['title'] ?? '부업 가이드',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '이렇게 하세요!',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '부업의 출발점이자 성장의 방향을\n결정짓는 핵심 단계예요.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF666666),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  '이렇게 하세요!',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+          
+                  // 가이드 단계들 (회색 카드 배경)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F8F8), // 회색 배경
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: _buildGuideSteps(guideData['steps'] ?? []),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  '부업의 출발점이자 성장의 방향을\n결정짓는 핵심 단계예요.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF666666),
-                    height: 1.4,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          
-          // 가이드 단계들 (회색 카드 배경)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F8F8), // 회색 배경
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: _buildGuideSteps(guideData['steps'] ?? []),
-            ),
-          ),
-          
-          // 하단 여백
-          const SizedBox(height: 32),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -174,10 +167,10 @@ class SidejobGuidePopup extends StatelessWidget {
 
     final List<Widget> widgets = [];
     for (int i = 0; i < steps.length; i++) {
-      final step = steps[i] as Map<String, String>;
+      final step = steps[i] as Map<String, dynamic>;
       widgets.add(
         _buildGuideStep(
-          number: i + 1,
+          number: step['seq'] ?? (i + 1),
           title: step['title'] ?? '',
           description: step['description'] ?? '',
         ),

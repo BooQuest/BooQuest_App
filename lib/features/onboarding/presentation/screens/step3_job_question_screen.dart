@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step2_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step2_character_selection_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step4_hobby_question_screen.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/utils/debouncer.dart';
@@ -232,7 +232,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
     
     Navigator.of(context).pushReplacement(
       SlideFromLeftPageRoute(
-        builder: (_) => const Step2CharacterCreationScreen(),
+        builder: (_) => const Step2CharacterSelectionScreen(),
       ),
     );
   }
@@ -267,9 +267,7 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
       final storage = await OnboardingStorageService.getInstance();
       final job = _jobController.text.trim();
       await storage.setJob(job);
-      print('💾 직업 저장됨: "${job.isEmpty ? "(빈 값)" : job}"');
     } catch (error) {
-      print('❌ 직업 실시간 저장 실패: $error');
     }
   }
 
@@ -279,7 +277,6 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
       final storage = await OnboardingStorageService.getInstance();
       await storage.setCurrentStep(1);
     } catch (error) {
-      print('❌ 현재 온보딩 단계 저장 실패: $error');
     }
   }
 
@@ -295,7 +292,6 @@ class _Step3JobQuestionScreenState extends State<Step3JobQuestionScreen> {
         });
       }
     } catch (error) {
-      print('❌ 저장된 직업 데이터 불러오기 실패: $error');
     }
   }
 }

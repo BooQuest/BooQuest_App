@@ -489,7 +489,7 @@ class ForceUpdateDialog extends StatelessWidget {
     try {
       
       // App Store URL 생성
-      const String appStoreUrl = 'https://apps.apple.com/app/id1234567890'; // 실제 앱 ID로 변경 필요
+      const String appStoreUrl = 'https://apps.apple.com/app/id6751897728'; // BooQuest 앱 ID
       
       final Uri url = Uri.parse(appStoreUrl);
       

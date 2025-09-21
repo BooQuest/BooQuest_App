@@ -15,7 +15,6 @@ class MissionListApiService {
   /// Returns: API 응답
   Future<Response> getMissionList(String status, int sideJobId) async {
     try {
-      print('🔍 MissionListApiService: getMissionList 호출 - status: $status, sideJobId: $sideJobId');
       
       final response = await _client.get('/api/missions', 
         queryParameters: {
@@ -23,13 +22,8 @@ class MissionListApiService {
           'sideJobId': sideJobId,
         });
       
-      print('✅ MissionListApiService: API 응답 성공');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
-      
       return response;
     } catch (e) {
-      print('❌ MissionListApiService: API 호출 실패 - $e');
       rethrow;
     }
   }

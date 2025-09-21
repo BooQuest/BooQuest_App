@@ -125,7 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         child: Center(
                                           child: CircularProgressIndicator(
                                             value: loadingProgress.expectedTotalBytes != null
-                                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                ? (loadingProgress.cumulativeBytesLoaded ?? 0) / (loadingProgress.expectedTotalBytes ?? 1)
                                                 : null,
                                           ),
                                         ),

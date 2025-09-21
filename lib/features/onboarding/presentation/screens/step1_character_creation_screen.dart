@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:booquest/core/constants/colors.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step1_character_selection_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step3_job_question_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step2_character_selection_screen.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/core/utils/debouncer.dart';
-import 'package:booquest/core/navigation/transitions.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
+import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/features/auth/presentation/auth_wrapper.dart';
 
 /// 온보딩 2단계 - 캐릭터 생성 화면
-class Step2CharacterCreationScreen extends StatefulWidget {
-  const Step2CharacterCreationScreen({super.key});
+class Step1CharacterCreationScreen extends StatefulWidget {
+  const Step1CharacterCreationScreen({super.key});
 
   @override
-  State<Step2CharacterCreationScreen> createState() => _Step2CharacterCreationScreenState();
+  State<Step1CharacterCreationScreen> createState() => _Step1CharacterCreationScreenState();
 }
 
-class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScreen> {
+class _Step1CharacterCreationScreenState extends State<Step1CharacterCreationScreen> {
   final TextEditingController _nameController = TextEditingController();
   final FocusNode _nameFocusNode = FocusNode();
   bool _isNameValid = false;
@@ -80,12 +80,26 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
   }
 
   void _goBack() async {
-    await _saveCurrentStep();
+    // JWT 토큰 삭제
+    try {
+      final authStorage = await AuthStorageService.getInstance();
+      await authStorage.clearTokens();
+    } catch (error) {
+    }
     
-    Navigator.of(context).pushReplacement(
-      SlideFromLeftPageRoute(
-        builder: (_) => const Step1CharacterSelectionScreen(),
+    // 온보딩 데이터 삭제
+    try {
+      final onboardingStorage = await OnboardingStorageService.getInstance();
+      await onboardingStorage.clearAllData();
+    } catch (error) {
+    }
+    
+    // AuthWrapper로 이동 (로그인 페이지 포함)
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => const AuthWrapper(),
       ),
+      (route) => false, // 모든 이전 화면 제거
     );
   }
 
@@ -101,7 +115,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
       if (mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const Step3JobQuestionScreen()),
+          MaterialPageRoute(builder: (_) => const Step2CharacterSelectionScreen()),
         );
       }
     }
@@ -146,10 +160,10 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
         final double titleTopSpacing = screenHeight * 0.05; // 화면 높이의 5%
         final double titleBottomSpacing = screenHeight * 0.05; // 화면 높이의 5%
         
-        // 캐릭터 이미지 관련 - 가로 모드에서는 더 큰 높이 사용
+        // 캐릭터 이미지 관련 
         final double characterImageHeight = isLandscape 
             ? screenHeight * 0.5  // 가로 모드에서는 화면 높이의 50%
-            : screenHeight * 0.35; // 세로 모드에서는 화면 높이의 35%
+            : screenHeight * 0.4; 
         
         // 하단 버튼 관련 - isSmallScreen 반응형 적용
         final double buttonHeight = isSmallScreen ? 46.0 : 60.0;
@@ -174,7 +188,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                '어떻게 불러드리면 될까요?',
+                                '이름을 입력해주세요',
                                 style: TextStyle(
                                   fontSize: (screenWidth * 0.06).clamp(16.0, isSmallScreen ? 20.0 : 24.0), // 최소 16, 최대 20(작은화면) 또는 24(큰화면)
                                   fontWeight: FontWeight.w700,
@@ -291,7 +305,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
           onPressed: _goBack,
         ),
         const Expanded(
-          child: Center(child: OnboardingProgress(currentStep: 1)),  // 6단계 중 두번째
+          child: Center(child: OnboardingProgress(currentStep: 0)),  // 6단계 중 첫번째
         ),
         SizedBox(width: rightPadding),
       ],
@@ -306,7 +320,7 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
     
     return Center(
       child: SizedBox(
-        height: characterImageHeight > 0 ? characterImageHeight : (isSmallScreen ? 350.0 : 400.0), // characterImageHeight 우선 사용
+        height: characterImageHeight > 0 ? characterImageHeight + 50.0 : (isSmallScreen ? 400.0 : 450.0), 
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -333,22 +347,22 @@ class _Step2CharacterCreationScreenState extends State<Step2CharacterCreationScr
                 ),
               ),
             ),
-            // 하단 고양이 캐릭터 (작게, 약간 겹치게)
-            Positioned(
-              top: isSmallScreen ? 160.0 : 180.0, // 겹치도록 위치 조정
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Transform.translate(
-                  offset: Offset(isSmallScreen ? -25.0 : -30.0, 0),
-                  child: Image.asset(
-                    'assets/images/onboarding/onboarding_create_2.png',
-                    height: isSmallScreen ? 130.0 : 150.0, 
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
+             // 하단 고양이 캐릭터 (작게, 약간 겹치게)
+             Positioned(
+               top: isSmallScreen ? 140.0 : 160.0, // 겹치도록 위치 조정 (위로 올림)
+               left: 0,
+               right: 0,
+               child: Center(
+                 child: Transform.translate(
+                   offset: Offset(isSmallScreen ? -25.0 : -30.0, 0),
+                   child: Image.asset(
+                     'assets/images/onboarding/onboarding_create_2.png',
+                     height: isSmallScreen ? 150.0 : 170.0, // 높이 증가
+                     fit: BoxFit.contain,
+                   ),
+                 ),
+               ),
+             ),
           ],
         ),
       ),

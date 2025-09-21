@@ -5,8 +5,8 @@ import 'package:booquest/features/auth/domain/auth_state.dart';
 import 'package:booquest/features/auth/presentation/login_page.dart';
 import 'package:booquest/features/main/presentation/screens/main_screen.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step1_character_selection_screen.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step2_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step1_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step2_character_selection_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step3_job_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step4_hobby_question_screen.dart';
 import 'package:booquest/features/onboarding/presentation/screens/step5_preferred_method_screen.dart';
@@ -166,10 +166,10 @@ class _OnboardingRouter extends StatelessWidget {
       case 0:
         // Step 0: 캐릭터 선택/생성
         final String? screenType = onboardingStorage.getCharacterScreenType();
-        if (screenType == 'creation') {
-          return const Step2CharacterCreationScreen();
+        if (screenType == 'selection') {
+          return const Step2CharacterSelectionScreen();
         } else {
-          return const Step1CharacterSelectionScreen();
+          return const Step1CharacterCreationScreen();
         }
       case 1:
         // Step 1: 직업 질문
@@ -184,8 +184,8 @@ class _OnboardingRouter extends StatelessWidget {
         // Step 4: 방법 선택
         return const Step6MethodSelectionScreen();
       default:
-        // 기본값: 캐릭터 선택부터 시작
-        return const Step1CharacterSelectionScreen();
+        // 기본값: 캐릭터 이름 생성부터 시작
+        return const Step1CharacterCreationScreen();
     }
   }
 
@@ -205,11 +205,11 @@ class _OnboardingRouter extends StatelessWidget {
 
         // 에러 발생 시 기본 화면 (캐릭터 선택)
         if (snapshot.hasError) {
-          return const Step1CharacterSelectionScreen();
+          return const Step1CharacterCreationScreen();
         }
 
         // 결정된 화면 반환
-        return snapshot.data ?? const Step1CharacterSelectionScreen();
+        return snapshot.data ?? const Step1CharacterCreationScreen();
       },
     );
   }

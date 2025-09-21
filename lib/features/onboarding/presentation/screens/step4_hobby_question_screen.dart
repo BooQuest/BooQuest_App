@@ -514,10 +514,6 @@ class _Step4HobbyQuestionScreenState extends State<Step4HobbyQuestionScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width,
-        maxHeight: isSmallScreen ? 300.0 : 400.0,
-      ),
       builder: (context) => SelectedHobbiesPopup(
         selectedHobbies: _selected.toList(),
         onConfirm: () {

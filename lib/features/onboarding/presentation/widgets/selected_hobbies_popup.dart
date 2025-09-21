@@ -55,13 +55,29 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     
-    // 가로 모드일 때는 더 작은 높이 사용
-    final popupHeight = isLandscape 
-        ? screenHeight * 0.6  // 가로 모드에서는 60%
-        : screenHeight * 0.4; // 세로 모드에서는 40%
+    // 선택된 취미 개수에 따른 동적 높이 계산
+    final selectedCount = widget.selectedHobbies.length;
+    
+    // 기본 높이 (제목 + 버튼 영역)
+    final baseHeight = isLandscape ? 160.0 : 200.0;
+    
+    // 선택된 취미 개수에 따른 높이 조정
+    double additionalHeight;
+    if (selectedCount == 1) {
+      // 1개 선택: 2-3줄 정도의 옵션 공간
+      additionalHeight = isLandscape ? 100.0 : 120.0;
+    } else if (selectedCount == 2) {
+      // 2개 선택: 3-4줄 정도의 옵션 공간
+      additionalHeight = isLandscape ? 140.0 : 160.0;
+    } else {
+      // 3개 선택: 4-5줄 정도의 옵션 공간
+      additionalHeight = isLandscape ? 180.0 : 200.0;
+    }
+    
+    // 최종 높이 계산
+    final popupHeight = baseHeight + additionalHeight;
     
     return Container(
       width: double.infinity, // 화면 너비 100% 명시적 설정

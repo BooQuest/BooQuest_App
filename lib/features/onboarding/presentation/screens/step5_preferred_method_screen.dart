@@ -182,11 +182,11 @@ class _Step5PreferredMethodScreenState extends State<Step5PreferredMethodScreen>
       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
       child: Column(
         children: [
+          _buildOptionButton('영상', Icons.videocam, 'VIDEO'),
+          const SizedBox(height: 12),
           _buildOptionButton('글쓰기', Icons.edit, 'TEXT'),
           const SizedBox(height: 12),
           _buildOptionButton('그림 그리기', Icons.brush, 'IMAGE'),
-          const SizedBox(height: 12),
-          _buildOptionButton('영상', Icons.videocam, 'VIDEO'),
         ],
       ),
     );

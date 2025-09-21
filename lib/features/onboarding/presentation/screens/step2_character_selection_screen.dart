@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:booquest/core/constants/colors.dart';
-import 'package:booquest/features/onboarding/presentation/screens/step2_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step1_character_creation_screen.dart';
+import 'package:booquest/features/onboarding/presentation/screens/step3_job_question_screen.dart';
 import 'package:booquest/core/storage/onboarding_storage_service.dart';
 import 'package:booquest/features/onboarding/presentation/widgets/onboarding_progress.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/auth/presentation/auth_wrapper.dart';
+import 'package:booquest/core/navigation/transitions.dart';
 
 /// 온보딩 1단계 - 캐릭터 선택 화면
-class Step1CharacterSelectionScreen extends StatefulWidget {
-  const Step1CharacterSelectionScreen({super.key});
+class Step2CharacterSelectionScreen extends StatefulWidget {
+  const Step2CharacterSelectionScreen({super.key});
 
   @override
-  State<Step1CharacterSelectionScreen> createState() => _Step1CharacterSelectionScreenState();
+  State<Step2CharacterSelectionScreen> createState() => _Step2CharacterSelectionScreenState();
 }
 
-class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionScreen> {
+class _Step2CharacterSelectionScreenState extends State<Step2CharacterSelectionScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -61,7 +63,7 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
   Future<void> _saveCurrentStep() async {
     try {
       final storage = await OnboardingStorageService.getInstance();
-      await storage.setCurrentStep(0);
+      await storage.setCurrentStep(1);
       await storage.setCharacterScreenType('selection');
     } catch (error) {
       print('❌ 현재 온보딩 단계 저장 실패: $error');
@@ -98,21 +100,12 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
   }
 
   void _goBack() async {
-    // JWT 토큰 삭제
-    try {
-      final authStorage = await AuthStorageService.getInstance();
-      await authStorage.clearTokens();
-      print('🔒 JWT 토큰이 삭제되었습니다.');
-    } catch (error) {
-      print('❌ JWT 토큰 삭제 실패: $error');
-    }
+    await _saveCurrentStep();
     
-    // AuthWrapper로 이동 (로그인 페이지 포함)
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => const AuthWrapper(),
+    Navigator.of(context).pushReplacement(
+      SlideFromLeftPageRoute(
+        builder: (_) => const Step1CharacterCreationScreen(),
       ),
-      (route) => false, // 모든 이전 화면 제거
     );
   }
 
@@ -122,7 +115,7 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
     
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const Step2CharacterCreationScreen()),
+      MaterialPageRoute(builder: (_) => const Step3JobQuestionScreen()),
     );
   }
 
@@ -277,7 +270,7 @@ class _Step1CharacterSelectionScreenState extends State<Step1CharacterSelectionS
           onPressed: _goBack,
         ),
         const Expanded(
-          child: Center(child: OnboardingProgress(currentStep: 0)),  // 6단계 중 첫번째
+          child: Center(child: OnboardingProgress(currentStep: 1)),  // 6단계 중 두번째
         ),
         SizedBox(width: rightPadding),
       ],
