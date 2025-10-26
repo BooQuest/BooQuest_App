@@ -203,7 +203,7 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF1976D2)),
               textAlign: TextAlign.center),
             const SizedBox(height: 16),
-            const Text('보너스 찬스를 놓치지 마세요',
+            const Text('추가 경험치를 받을 수 있어요',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF333333)),
               textAlign: TextAlign.center),
             const SizedBox(height: 16),
@@ -261,7 +261,7 @@ class _ExperienceBoostPopupState extends ConsumerState<ExperienceBoostPopup> {
                           ? null
                           : () => _handleRewardAd(),
                       child: Text(
-                        _isAdLoading ? '광고 로딩 중...' : '광고보기',
+                        _isAdLoading ? '준비 중...' : '보상 받기',
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                       ),
                     ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:booquest/core/constants/colors.dart';
 import 'package:booquest/features/main/domain/entities/mission_entity.dart';
 
 /// 부업 가이드 팝업
@@ -38,7 +37,7 @@ class SidejobGuidePopup extends StatelessWidget {
     }
 
     return {
-      'title': currentMission.title ?? '부업 가이드',
+      'title': currentMission.title,
       'description': '부업 성공을 위한 단계별 가이드입니다.',
       'steps': steps,
     };
@@ -51,12 +50,9 @@ class SidejobGuidePopup extends StatelessWidget {
     
     // 화면 크기 계산
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 400;
     
-    // 팝업 높이 계산 (화면 높이의 60-70%, 최소 400px, 최대 600px)
-    final double popupHeight = (screenHeight * (isSmallScreen ? 0.7 : 0.6))
-        .clamp(400.0, 600.0);
+    // 팝업 높이 계산 (화면 높이의 80%, 최소 400px, 최대 600px)
+    final double popupHeight = screenHeight * 0.8;
     
     return Container(
       height: popupHeight,
@@ -68,27 +64,27 @@ class SidejobGuidePopup extends StatelessWidget {
         ),
       ),
       child: Column(
-        children: [
-          // 상단 드래그 핸들
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(2),
+          children: [
+            // 상단 드래그 핸들
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          
-          // 스크롤 가능한 콘텐츠
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            
+            // 스크롤 가능한 콘텐츠
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   // 제목 영역
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
@@ -112,15 +108,6 @@ class SidejobGuidePopup extends StatelessWidget {
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          '부업의 출발점이자 성장의 방향을\n결정짓는 핵심 단계예요.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF666666),
-                            height: 1.4,
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -137,6 +124,8 @@ class SidejobGuidePopup extends StatelessWidget {
                       children: _buildGuideSteps(guideData['steps'] ?? []),
                     ),
                   ),
+                  
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

@@ -8,6 +8,8 @@ import 'package:booquest/features/main/infrastructure/providers/main_providers.d
 import 'package:booquest/features/main/infrastructure/providers/user_activity_summary_providers.dart';
 import 'package:booquest/features/main/infrastructure/providers/user_sidejob_list_providers.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
+import 'package:booquest/features/chatbot/presentation/widgets/chatbot_button.dart';
+import 'package:booquest/features/chatbot/presentation/screens/chatbot_dialog.dart';
 
 import 'package:booquest/features/main/infrastructure/providers/sidejob_progress_providers.dart';
 import 'package:booquest/features/main/infrastructure/providers/mission_list_providers.dart';
@@ -157,9 +159,25 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
+          // 챗봇 버튼 (모든 화면에서 표시)
+          ChatbotButton(
+            onTap: () {
+              // 챗봇 다이얼로그 열기 (하단 모달)
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const ChatbotDialog(),
+              );
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: CommonBottomNavigation(
         currentIndex: _currentIndex,

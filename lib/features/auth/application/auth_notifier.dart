@@ -39,6 +39,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 현재 상태의 온보딩 진행 정보 반환
   Map<String, dynamic>? get currentOnboardingProgressInfo => state.onboardingProgressInfo;
 
+  /// 현재 사용자의 닉네임 반환
+  String get currentNickname {
+    if (state.user != null) {
+      return state.user!['nickname'] ?? '사용자';
+    }
+    return '사용자';
+  }
+
   /// 앱 시작 시 저장된 인증 상태 확인
   /// 
   /// 로컬 스토리지에서 토큰과 사용자 정보를 확인하고,
@@ -175,6 +183,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
             refreshToken: tokenInfo['refreshToken'] as String,
           );
         }
+
+        // print refresh token
+        print('refreshToken: ${_storageService.getRefreshToken()}');
 
         // 3. 소셜 로그인 정보 저장 (탈퇴 시 필요)
         await _storageService.saveSocialLoginInfo(
