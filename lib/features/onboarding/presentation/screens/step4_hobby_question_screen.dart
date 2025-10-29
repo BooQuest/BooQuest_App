@@ -564,7 +564,6 @@ class _Step4HobbyQuestionScreenState extends State<Step4HobbyQuestionScreen> {
         }
       } else {
         hobbies = _selected.toList();
-        print('💾 선택 모드 - 취미 실시간 저장: $hobbies');
       }
       
       await storage.setHobbies(hobbies);

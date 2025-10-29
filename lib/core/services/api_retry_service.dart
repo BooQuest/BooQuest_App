@@ -35,13 +35,11 @@ class ApiRetryService {
     } on DioException catch (e) {
       // 401 에러인 경우 토큰 갱신 후 재시도
       if (e.response?.statusCode == 401) {
-        print('🔒 401 에러 감지 - 토큰 갱신 시도');
         
         // 토큰 갱신 시도
         final refreshSuccess = await _tokenRefreshService.refreshTokens();
         
         if (refreshSuccess) {
-          print('✅ 토큰 갱신 성공 - API 재시도');
           // 토큰 갱신 성공 시 재시도
           return await apiCall();
         } else {

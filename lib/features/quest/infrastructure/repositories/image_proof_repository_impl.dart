@@ -17,11 +17,9 @@ class ImageProofRepositoryImpl implements ImageProofRepository {
     File imageFile,
   ) async {
     try {
-      print('🚀 ImageProofRepositoryImpl: uploadImageProof 시작 - stepId: $stepId');
       
       final result = await _apiService.uploadImageProof(stepId, imageFile);
       
-      print('✅ ImageProofRepositoryImpl: uploadImageProof 성공');
       return Right(result);
     } catch (e) {
       print('❌ ImageProofRepositoryImpl: uploadImageProof 실패 - $e');

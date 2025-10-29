@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import '../constants.dart';
 import 'package:booquest/features/auth/infrastructure/auth_storage_service.dart';
 import 'package:booquest/features/auth/application/auth_notifier.dart';
-import 'package:booquest/core/services/token_refresh_service.dart';
 
 /// Infrastructure 계층: HTTP 네트워크 클라이언트
 /// 
@@ -12,7 +12,11 @@ import 'package:booquest/core/services/token_refresh_service.dart';
 class NetworkClient {
   final AuthStorageService _authStorageService;
   late final Dio _dio;
-  static bool _hasTriedRefresh = false; // 토큰 갱신을 시도했는지 확인하는 전역 플래그
+  
+  // 토큰 갱신 관련
+  bool _isRefreshing = false;
+  Completer<void>? _refreshCompleter;
+  static const String _refreshTokenPath = '/api/auth/token/refresh';
 
   /// 생성자에서 AuthStorageService를 주입받아 의존성을 명확히 합니다.
   NetworkClient(this._authStorageService) {
@@ -47,6 +51,15 @@ class NetworkClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // refresh token API 호출 자체는 인터셉터 스킵
+          if (options.path == _refreshTokenPath) {
+            handler.next(options);
+            return;
+          }
+          
+          // 토큰 만료 체크 및 필요시 갱신
+          await _checkAndRefreshTokenIfNeeded();
+          
           // AuthStorageService에서 JWT 토큰을 가져와서 헤더에 추가
           try {
             final token = _authStorageService.getAccessToken();
@@ -54,14 +67,7 @@ class NetworkClient {
               options.headers['Authorization'] = 'Bearer $token';
             }
           } catch (e) {
-          }
-          
-          // 디버깅용 로그 (개발 환경에서만)
-          print('🌐 API 요청: ${options.method} ${options.path}');
-          if (options.headers['Authorization'] != null) {
-            final token = options.headers['Authorization'] as String;
-            
-            print('🔐 Authorization: $token');
+            // 에러 무시
           }
           
           handler.next(options);
@@ -76,7 +82,7 @@ class NetworkClient {
             
               try {
                 // 로컬 스토리지 데이터 삭제
-                await _authStorageService.clearAuthData();                print('🚫 토큰 만료로 인한 로그아웃 처리 완료');
+                await _authStorageService.clearAuthData();
                 
                 // AuthNotifier 강제 로그아웃 호출
                 final authNotifier = AuthNotifier.instance;
@@ -91,6 +97,97 @@ class NetworkClient {
         },
       ),
     );
+  }
+
+  /// 토큰 만료 체크 및 필요시 갱신
+  /// 
+  /// 만료되었거나 5분 이내라면 refresh token API 호출
+  /// 여러 요청이 동시에 들어와도 한 번만 갱신하도록 처리
+  Future<void> _checkAndRefreshTokenIfNeeded() async {
+    try {
+      // 토큰 만료시간 확인
+      final expiresAt = _authStorageService.getTokenExpiresAt();
+      if (expiresAt == null) {
+        return;
+      }
+
+      final currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final timeUntilExpiry = expiresAt - currentTime;
+
+      // 만료되었거나 5분 이내라면 갱신
+      if (timeUntilExpiry > 300) { // 5분 = 300초
+        return;
+      }
+
+      // 이미 갱신 중이면 완료될 때까지 대기
+      if (_isRefreshing && _refreshCompleter != null) {
+        await _refreshCompleter!.future;
+        return;
+      }
+
+      // 토큰 갱신 시작
+      _isRefreshing = true;
+      _refreshCompleter = Completer<void>();
+
+      try {
+        final refreshToken = _authStorageService.getRefreshToken();
+        if (refreshToken == null) {
+          await _handleTokenRefreshFailure();
+          return;
+        }
+
+        // Refresh token API 직접 호출 (인터셉터 우회)
+        final response = await _dio.post<Map<String, dynamic>>(
+          _refreshTokenPath,
+          options: Options(
+            headers: {
+              'X-Refresh-Token': refreshToken,
+            },
+          ),
+        );
+
+        if (response.statusCode == 200 && 
+            response.data != null && 
+            response.data!['success'] == true) {
+          
+          final tokenData = response.data!['data'] as Map<String, dynamic>;
+          final expiresIn = tokenData['expiresIn'] as int?;
+          
+          await _authStorageService.saveTokens(
+            accessToken: tokenData['accessToken'] as String,
+            refreshToken: tokenData['refreshToken'] as String,
+            expiresIn: expiresIn,
+          );
+        } else {
+          await _handleTokenRefreshFailure();
+        }
+      } catch (e) {
+        await _handleTokenRefreshFailure();
+      } finally {
+        _isRefreshing = false;
+        _refreshCompleter?.complete();
+        _refreshCompleter = null;
+      }
+    } catch (e) {
+      // 에러 발생 시 무시하고 원래 요청 진행
+      _isRefreshing = false;
+      _refreshCompleter?.complete();
+      _refreshCompleter = null;
+    }
+  }
+
+  /// 토큰 갱신 실패 시 처리
+  Future<void> _handleTokenRefreshFailure() async {
+    try {
+      await _authStorageService.clearAuthData();
+      
+      final authNotifier = AuthNotifier.instance;
+      if (authNotifier != null) {
+        await authNotifier.forceLogout();
+      }
+    } catch (e) {
+      // 에러 무시
+    }
   }
 
   /// GET 요청

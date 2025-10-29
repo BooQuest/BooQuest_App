@@ -22,9 +22,6 @@ class BonusProofApiService {
     String content,
   ) async {
     try {
-      print('🌐 API 요청: POST /api/bonus/$stepId/proof');
-      print('📋 요청 데이터: proofType=$proofType, content=$content');
-      
       final response = await _networkClient.dio.post(
         '/api/bonus/$stepId/proof',
         data: {
@@ -32,8 +29,6 @@ class BonusProofApiService {
           'content': content,
         },
       );
-
-      print('📊 응답 데이터: ${response.data}');
 
       if (response.statusCode == 200) {
         final data = response.data['data'];

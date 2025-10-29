@@ -13,7 +13,6 @@ class ImageProofNotifier extends StateNotifier<ImageProofState> {
   /// 이미지 인증 업로드
   Future<void> uploadImageProof(int stepId, File imageFile) async {
     try {
-      print('🚀 ImageProofNotifier: uploadImageProof 시작 - stepId: $stepId, imageFile: ${imageFile.path}');
       
       state = const ImageProofState.loading();
 
@@ -31,11 +30,8 @@ class ImageProofNotifier extends StateNotifier<ImageProofState> {
           state = ImageProofState.failure(message);
         },
         (data) {
-          print('✅ ImageProofNotifier: uploadImageProof 성공 - status: ${data.status}, additionalExp: ${data.additionalExp}');
-          
           // 레벨업 체크
           if (data.leveledUp) {
-            print('🎉 레벨업 발생! 현재 레벨: ${data.currentLevel}');
             state = ImageProofState.levelUp(data);
           } else {
             state = ImageProofState.success(data);

@@ -10,18 +10,12 @@ class UserSideJobListRepositoryImpl {
   /// 사용자 사이드잡 목록 조회
   Future<Either<MainFailure, UserSideJobListEntity>> getUserSideJobList() async {
     try {
-      print('🔍 UserSideJobListRepository: getUserSideJobList 호출');
-      
       // Create AuthStorageService and NetworkClient asynchronously within the method
       final authStorage = await AuthStorageService.getInstance();
       final client = NetworkClient(authStorage);
       final apiService = UserSideJobListApiService(client);
 
       final response = await apiService.getUserSideJobList();
-      
-      print('✅ UserSideJobListRepository: API 응답 성공');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode == 200 && 
           response.data != null && 
@@ -31,13 +25,6 @@ class UserSideJobListRepositoryImpl {
         final sideJobList = UserSideJobListEntity(
           sideJobs: data.map((json) => UserSideJobEntity.fromJson(json)).toList(),
         );
-
-        print('📊 UserSideJobListRepository: 데이터 파싱 성공');
-        print('  - sideJobs count: ${sideJobList.sideJobs.length}');
-        if (sideJobList.sideJobs.isNotEmpty) {
-          print('  - first sideJob title: ${sideJobList.sideJobs.first.title}');
-          print('  - first sideJob status: ${sideJobList.sideJobs.first.status}');
-        }
 
         return Right(sideJobList);
       } else {

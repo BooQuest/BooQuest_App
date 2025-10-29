@@ -246,7 +246,6 @@ class _SelectedHobbiesPopupState extends State<SelectedHobbiesPopup> {
       final newHobbies = [...filteredHobbies, ..._selectedDetails];
       
       await storage.setHobbies(newHobbies);
-      print('💾 세부 옵션 포함 취미 목록 저장: $newHobbies');
     } catch (error) {
       print('❌ 실시간 세부 옵션 저장 실패: $error');
     }

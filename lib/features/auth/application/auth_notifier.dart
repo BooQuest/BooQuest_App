@@ -50,7 +50,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 앱 시작 시 저장된 인증 상태 확인
   /// 
   /// 로컬 스토리지에서 토큰과 사용자 정보를 확인하고,
-  /// 유효한 경우 서버에서 최신 사용자 정보를 가져옵니다.
+  /// 토큰 만료 여부를 체크한 후 서버에서 최신 사용자 정보를 가져옵니다.
   Future<void> checkAuthStatus() async {
     state = state.loading();
 
@@ -61,7 +61,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
       
-      // 2. 서버에서 사용자 정보 검증 및 갱신
+      // 2. 토큰 만료시간 체크 및 필요시 갱신
+      var expiresAt = _storageService.getTokenExpiresAt();
+      
+      // expires가 null이면 refresh token API 호출하여 expiresIn 받아오기
+      if (expiresAt == null) {
+        final refreshSuccess = await refreshTokens();
+        if (!refreshSuccess) {
+          return;
+        }
+        
+        expiresAt = _storageService.getTokenExpiresAt();
+      }
+      
+      if (expiresAt != null) {
+        final currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+        final timeUntilExpiry = expiresAt - currentTime;
+        
+        // 만료되었거나 5분 이내라면 토큰 갱신
+        if (timeUntilExpiry <= 300) { // 5분 = 300초
+          final refreshSuccess = await refreshTokens();
+          if (!refreshSuccess) {
+            state = state.unauthenticated('인증이 만료되었습니다. 다시 로그인해주세요.');
+            return;
+          }
+        }
+      }
+      
+      // 3. 서버에서 사용자 정보 검증 및 갱신
       final response = await _apiService.getUserInfo();
       
       if (response.statusCode == 200 && 
@@ -178,14 +205,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         // 2. 토큰 정보 저장
         if (responseData['tokenInfo'] != null) {
           final tokenInfo = responseData['tokenInfo'] as Map<String, dynamic>;
+          final expiresIn = tokenInfo['expiresIn'] as int?;
+          
           await _storageService.saveTokens(
             accessToken: tokenInfo['accessToken'] as String,
             refreshToken: tokenInfo['refreshToken'] as String,
+            expiresIn: expiresIn,
           );
         }
-
-        // print refresh token
-        print('refreshToken: ${_storageService.getRefreshToken()}');
 
         // 3. 소셜 로그인 정보 저장 (탈퇴 시 필요)
         await _storageService.saveSocialLoginInfo(
@@ -305,10 +332,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
           response.data!['success'] == true) {
         
         final tokenData = response.data!['data'] as Map<String, dynamic>;
+        final expiresIn = tokenData['expiresIn'] as int?;
         
         await _storageService.saveTokens(
           accessToken: tokenData['accessToken'] as String,
           refreshToken: tokenData['refreshToken'] as String,
+          expiresIn: expiresIn,
         );
 
         return true;

@@ -14,14 +14,8 @@ class SideJobProgressApiService {
   /// Returns: API 응답
   Future<Response> getSideJobProgress(int sideJobId) async {
     try {
-      print('🔍 SideJobProgressApiService: getSideJobProgress 호출 - sideJobId: $sideJobId');
-      
       final response = await _client.get('/api/user/sideJob/progress/', 
         queryParameters: {'sideJobId': sideJobId});
-      
-      print('✅ SideJobProgressApiService: API 응답 성공');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
       
       return response;
     } catch (e) {

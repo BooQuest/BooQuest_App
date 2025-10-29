@@ -11,7 +11,6 @@ class MissionStepCompletionNotifier extends StateNotifier<MissionStepCompletionS
   /// 퀘스트 스텝 완료 처리
   Future<void> completeStep(int stepId, String status) async {
     try {
-      print('🚀 MissionStepCompletionNotifier: completeStep 시작 - stepId: $stepId');
       
       state = const MissionStepCompletionState.loading();
 
@@ -23,11 +22,9 @@ class MissionStepCompletionNotifier extends StateNotifier<MissionStepCompletionS
           state = MissionStepCompletionState.failure(failure.message);
         },
         (data) {
-          print('✅ MissionStepCompletionNotifier: completeStep 성공 - expDelta: ${data.expDelta}');
           
           // 레벨업 체크
           if (data.leveledUp) {
-            print('🎉 레벨업 발생! 현재 레벨: ${data.currentLevel}');
             state = MissionStepCompletionState.levelUp(data);
           } else {
             state = MissionStepCompletionState.success(data);

@@ -23,11 +23,6 @@ class AddIncomeApiService {
       'memo': memo,
     };
     
-    print('🚀 AddIncomeApiService: API 요청 데이터');
-    print('  - URL: /api/income');
-    print('  - Method: POST');
-    print('  - Data: $data');
-    
     return await _client.post('/api/income', data: data);
   }
 }

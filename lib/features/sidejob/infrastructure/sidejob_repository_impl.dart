@@ -22,18 +22,15 @@ class SideJobRepositoryImpl implements SideJobRepository {
     SideJobRequestData requestData,
   ) async {
     try {
-      print('🔄 Repository: 부업 추천 요청 처리 중...');
       
       // API 서비스 호출
       final result = await _apiService.getSideJobRecommendations(requestData);
       
       return result.fold(
         (failure) {
-          print('❌ Repository: API 서비스 실패 - ${failure.debugMessage}');
           return Left(failure);
         },
         (recommendations) {
-          print('✅ Repository: API 서비스 성공 - ${recommendations.length}개');
           return Right(recommendations);
         },
       );
@@ -49,7 +46,6 @@ class SideJobRepositoryImpl implements SideJobRepository {
     String strengthType,
   ) async {
     try {
-      print('🔄 Repository: 사용자 데이터 수집 중...');
       
       // 사용자 데이터 서비스 호출
       final result = await _userDataService.collectUserData(strengthType);
@@ -60,7 +56,6 @@ class SideJobRepositoryImpl implements SideJobRepository {
           return Left(failure);
         },
         (requestData) {
-          print('✅ Repository: 사용자 데이터 수집 성공');
           return Right(requestData);
         },
       );
@@ -125,15 +120,12 @@ class SideJobRepositoryImpl implements SideJobRepository {
   /// 성공 시 서버에 저장된 최근 추천 목록을 반환
   Future<Either<SideJobFailure, List<SideJobEntity>>> getExistingSideJobs(int userId) async {
     try {
-      print('🔄 Repository: 기존 부업 추천 목록 조회 요청 처리 중...');
       final result = await _apiService.getExistingSideJobs(userId);
       return result.fold(
         (failure) {
-          print('❌ Repository: 기존 부업 추천 목록 조회 실패 - ${failure.debugMessage}');
           return Left(failure);
         },
         (entities) {
-          print('✅ Repository: 기존 부업 추천 목록 조회 성공 - ${entities.length}개');
           return Right(entities);
         },
       );

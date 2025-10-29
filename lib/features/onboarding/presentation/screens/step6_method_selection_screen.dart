@@ -65,7 +65,6 @@ class _Step6MethodSelectionScreenState extends ConsumerState<Step6MethodSelectio
         setState(() {
           _selectedOption = savedStrengthType;
         });
-        print('📖 저장된 자신 있는 방식 타입 불러옴: $savedStrengthType');
       }
       
     } catch (error) {

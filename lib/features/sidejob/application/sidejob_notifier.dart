@@ -30,7 +30,6 @@ class SideJobNotifier extends StateNotifier<SideJobState> {
         state = SideJobState.failure(failure);
       },
       (recommendations) {
-        print('✅ 부업 추천 성공: ${recommendations.length}개');
         state = SideJobState.success(recommendations);
       },
     );

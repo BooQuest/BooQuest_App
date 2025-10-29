@@ -50,7 +50,6 @@ class MissionNotifier extends StateNotifier<MissionState> {
         return null;
       },
       (List<SubQuestEntity> subQuests) {
-        print('✅ 부퀘스트 조회 성공: ${subQuests.length}개');
         return subQuests;
       },
     );
@@ -72,7 +71,6 @@ class MissionNotifier extends StateNotifier<MissionState> {
         state = MissionState.failure(f);
       },
       (List<SubQuestEntity> subQuests) {
-        print('✅ 부퀘스트 재생성 성공: ${subQuests.length}개');
         // SubQuestEntity를 MissionStepEntity로 변환
         final missionSteps = subQuests.map((subQuest) => MissionStepEntity(
           id: subQuest.id,
@@ -87,7 +85,6 @@ class MissionNotifier extends StateNotifier<MissionState> {
 
   /// 미션 시작
   Future<bool> startMission(int missionId) async {
-    print('🚀 미션 시작 시작... missionId: $missionId');
     
     final result = await repository.startMission(missionId);
     return result.fold(
@@ -96,7 +93,6 @@ class MissionNotifier extends StateNotifier<MissionState> {
         return false;
       },
       (bool success) {
-        print('✅ 미션 시작 성공');
         return success;
       },
     );

@@ -68,13 +68,6 @@ class PlannedQuestCard extends StatelessWidget {
           );
         }
 
-        // 디버깅용: 데이터 개수 표시
-        print('🔍 예정 탭 데이터: ${plannedMissions.length}개 (전체: ${data.missions.length}개)');
-        for (int i = 0; i < plannedMissions.length; i++) {
-          final mission = plannedMissions[i];
-          print('  [$i] orderNo: ${mission.orderNo}, title: ${mission.title}');
-        }
-
         // orderNo 순서로 정렬 (null 체크 포함)
         final sortedMissions = List<dynamic>.from(plannedMissions)
           ..sort((a, b) {

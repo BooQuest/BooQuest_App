@@ -21,9 +21,6 @@ class ImageProofApiService {
     File imageFile,
   ) async {
     try {
-      print('🌐 API 요청: POST /api/bonus/$stepId/proof/image');
-      print('📋 요청 데이터: stepId=$stepId, imageFile=${imageFile.path}');
-      
       // FormData 생성 - File 객체에서 직접 MultipartFile 생성
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(imageFile.path),
@@ -33,8 +30,6 @@ class ImageProofApiService {
         '/api/bonus/$stepId/proof/image',
         data: formData,
       );
-
-      print('📊 응답 데이터: ${response.data}');
 
       if (response.statusCode == 200) {
         final data = response.data['data'];

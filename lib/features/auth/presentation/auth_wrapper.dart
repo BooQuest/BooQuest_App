@@ -37,6 +37,11 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
     _initializeAuth();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   /// 인증 시스템 초기화
   /// 
   /// AuthStorageService가 비동기 초기화가 필요하므로
@@ -106,7 +111,9 @@ class _AuthWrapperState extends ConsumerState<AuthWrapper> {
 
         // 미인증 상태 → 로그인 페이지 (AuthNotifier 전달)
         if (!authState.isAuthenticated) {
-          return LoginPage(authNotifier: _authNotifier!);
+          return LoginPage(
+            authNotifier: _authNotifier!,
+          );
         }
 
         // 인증됨 → 온보딩 상태 확인 후 적절한 화면으로 분기

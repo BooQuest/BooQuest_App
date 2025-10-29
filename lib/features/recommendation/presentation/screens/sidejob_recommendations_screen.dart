@@ -543,7 +543,6 @@ class _SideJobRecommendationsScreenState extends State<SideJobRecommendationsScr
                 'description': entity.description,
               };
               
-              print('✅ 재생성 완료 - 카드 인덱스: $sideJobIndex, 새 ID: ${entity.id}');
             });
             // 성공 메시지 표시
             ScaffoldMessenger.of(context).showSnackBar(

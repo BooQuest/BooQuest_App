@@ -39,7 +39,6 @@ class MissionCompletionNotifier extends StateNotifier<MissionCompletionState> {
         (data) {
           // 레벨업 체크
           if (data.leveledUp) {
-            print('🎉 레벨업 발생! 현재 레벨: ${data.currentLevel}');
             state = MissionCompletionState.levelUp(data);
           } else {
             state = MissionCompletionState.success(data);

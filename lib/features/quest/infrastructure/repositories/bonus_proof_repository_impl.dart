@@ -17,11 +17,8 @@ class BonusProofRepositoryImpl implements BonusProofRepository {
     String content,
   ) async {
     try {
-      print('🔍 BonusProofRepository: submitProof 호출 - stepId: $stepId, proofType: $proofType');
-      
       final result = await _apiService.submitProof(stepId, proofType, content);
       
-      print('✅ BonusProofRepository: submitProof 성공 - status: ${result.status}, additionalExp: ${result.additionalExp}');
       return Right(result);
     } catch (e) {
       print('❌ BonusProofRepository: submitProof 실패 - $e');

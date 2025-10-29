@@ -157,7 +157,6 @@ class SubquestSection extends StatelessWidget {
                                   Center(
                                     child: GestureDetector(
                                       onTap: () {
-                                        print('🔍 부업가이드 버튼 1 클릭됨');
                                         onSidejobGuide();
                                       },
                                       child: Container(
@@ -208,7 +207,6 @@ class SubquestSection extends StatelessWidget {
                               Center(
                                 child: GestureDetector(
                                   onTap: () {
-                                    print('🔍 부업가이드 버튼 2 클릭됨');
                                     onSidejobGuide();
                                   },
                                   child: Container(

@@ -16,7 +16,6 @@ class MissionListRepositoryImpl {
   /// Returns: 성공 시 MissionListEntity, 실패 시 MainFailure
   Future<Either<MainFailure, MissionListEntity>> getMissionList(String status, int sideJobId) async {
     try {
-      print('🔍 MissionListRepository: getMissionList 호출 - status: $status');
       
       // Create AuthStorageService and NetworkClient asynchronously within the method
       final authStorage = await AuthStorageService.getInstance();
@@ -24,10 +23,6 @@ class MissionListRepositoryImpl {
       final apiService = MissionListApiService(client); // Local instance
 
       final response = await apiService.getMissionList(status, sideJobId); // Use local instance
-      
-      print('✅ MissionListRepository: API 응답 성공');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode == 200 && 
           response.data != null && 
@@ -36,19 +31,6 @@ class MissionListRepositoryImpl {
         final data = response.data!['data'] as Map<String, dynamic>;
         
         final missionList = MissionListEntity.fromJson(data);
-
-        print('📊 MissionListRepository: 데이터 파싱 성공');
-        print('  - missions count: ${missionList.missions.length}');
-        if (missionList.missions.isNotEmpty) {
-          print('  - first mission title: ${missionList.missions.first.title}');
-          print('  - first mission orderNo: ${missionList.missions.first.orderNo}');
-          print('  - first mission guide: ${missionList.missions.first.guide}');
-          print('  - all missions:');
-          for (int i = 0; i < missionList.missions.length; i++) {
-            final mission = missionList.missions[i];
-            print('    [$i] orderNo: ${mission.orderNo}, title: ${mission.title}, guide: ${mission.guide}');
-          }
-        }
 
         return Right(missionList);
       } else {

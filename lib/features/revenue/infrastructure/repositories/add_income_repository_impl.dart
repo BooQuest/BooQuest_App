@@ -30,9 +30,6 @@ class AddIncomeRepositoryImpl {
         memo: memo,
       );
 
-      print('✅ AddIncomeRepository: API 응답 성공');
-      print('  - Response Data: ${response.data}');
-
       if (response.statusCode == 200 &&
           response.data != null &&
           response.data!['success'] == true) {

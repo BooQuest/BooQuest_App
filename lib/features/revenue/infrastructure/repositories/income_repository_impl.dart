@@ -10,7 +10,6 @@ class IncomeRepositoryImpl {
   /// 수익 목록 조회
   Future<Either<MainFailure, IncomeListEntity>> getIncomeList(int userSideJobId) async {
     try {
-      print('🔍 IncomeRepository: getIncomeList 호출 - userSideJobId=$userSideJobId');
 
       // AuthStorageService와 NetworkClient를 메서드 내부에서 비동기로 준비 (main 패턴과 동일)
       final authStorage = await AuthStorageService.getInstance();
@@ -19,19 +18,11 @@ class IncomeRepositoryImpl {
 
       final response = await apiService.getIncomeList(userSideJobId);
 
-      print('✅ IncomeRepository: API 응답 성공');
-      print('  - Response Data: ${response.data}');
-
       if (response.statusCode == 200 &&
           response.data != null &&
           response.data!['success'] == true) {
         final data = response.data!['data'] as Map<String, dynamic>;
         final incomeList = IncomeListEntity.fromJson(data);
-
-        print('📊 IncomeRepository: 데이터 파싱 성공');
-        print('  - totalCount: ${incomeList.totalCount}');
-        print('  - totalAmount: ${incomeList.totalAmount}');
-        print('  - incomes count: ${incomeList.incomes.length}');
 
         return Right(incomeList);
       } else {

@@ -15,7 +15,6 @@ class SideJobProgressRepositoryImpl {
   /// Returns: 성공 시 SideJobProgressEntity, 실패 시 MainFailure
   Future<Either<MainFailure, SideJobProgressEntity>> getSideJobProgress(int sideJobId) async {
     try {
-      print('🔍 SideJobProgressRepository: getSideJobProgress 호출 - sideJobId: $sideJobId');
       
       // Create AuthStorageService and NetworkClient asynchronously within the method
       final authStorage = await AuthStorageService.getInstance();
@@ -23,10 +22,6 @@ class SideJobProgressRepositoryImpl {
       final apiService = SideJobProgressApiService(client); // Local instance
 
       final response = await apiService.getSideJobProgress(sideJobId); // Use local instance
-      
-      print('✅ SideJobProgressRepository: API 응답 성공');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode == 200 && 
           response.data != null && 
@@ -42,12 +37,6 @@ class SideJobProgressRepositoryImpl {
           currentOrder: stage['currentOrder'] as int? ?? 0, // null일 경우 0으로 기본값 설정
           totalStages: stage['total'] as int,
         );
-
-        print('📊 SideJobProgressRepository: 데이터 파싱 성공');
-        print('  - title: ${sideJobProgress.title}');
-        print('  - progressPercent: ${sideJobProgress.progressPercent}');
-        print('  - currentOrder: ${sideJobProgress.currentOrder}');
-        print('  - totalStages: ${sideJobProgress.totalStages}');
 
         return Right(sideJobProgress);
       } else {

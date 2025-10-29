@@ -48,7 +48,6 @@ class TokenRefreshService {
   /// Returns: 토큰 갱신 성공 여부
   Future<bool> refreshTokens() async {
     try {
-      print('🔄 토큰 갱신 시도 시작');
       
       // 1. refresh token 확인
       final refreshToken = _authStorageService.getRefreshToken();
@@ -66,10 +65,6 @@ class TokenRefreshService {
           },
         ),
       );
-      
-      print('🔍 토큰 갱신 API 응답:');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       // 3. 응답 검증
       if (response.statusCode == 200 && 
@@ -93,7 +88,6 @@ class TokenRefreshService {
           refreshToken: newRefreshToken,
         );
         
-        print('✅ 토큰 갱신 성공 및 로컬 스토리지 업데이트 완료');
         return true;
       } else {
         print('❌ 토큰 갱신 API 실패:');

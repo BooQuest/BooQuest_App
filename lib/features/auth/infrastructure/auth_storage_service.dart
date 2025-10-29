@@ -17,6 +17,7 @@ class AuthStorageService {
   static const String _providerKey = 'auth_provider';
   static const String _characterTypeKey = 'auth_character_type';
   static const String _isAuthenticatedKey = 'auth_is_authenticated';
+  static const String _tokenExpiresAtKey = 'auth_token_expires_at';
 
   static AuthStorageService? _instance;
   static SharedPreferences? _preferences;
@@ -165,6 +166,16 @@ class AuthStorageService {
     return _preferences?.getString(_characterTypeKey);
   }
 
+  /// Token 만료 시간 저장 (Unix timestamp)
+  Future<void> setTokenExpiresAt(int timestamp) async {
+    await _preferences?.setInt(_tokenExpiresAtKey, timestamp);
+  }
+
+  /// Token 만료 시간 조회 (Unix timestamp)
+  int? getTokenExpiresAt() {
+    return _preferences?.getInt(_tokenExpiresAtKey);
+  }
+
   // ========== 인증 상태 관련 ==========
 
   /// 인증 상태 저장
@@ -232,10 +243,17 @@ class AuthStorageService {
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
+    int? expiresIn, // 초 단위
   }) async {
     await setAccessToken(accessToken);
     await setRefreshToken(refreshToken);
     await setIsAuthenticated(true);
+    
+    // expires 값이 있으면 현재 시간 + expiresIn으로 만료시간 계산
+    if (expiresIn != null) {
+      final expiresAt = DateTime.now().millisecondsSinceEpoch ~/ 1000 + expiresIn;
+      await setTokenExpiresAt(expiresAt);
+    }
   }
 
   /// 소셜 로그인 정보 저장
@@ -271,6 +289,7 @@ class AuthStorageService {
     await _preferences?.remove(_providerKey);
     await _preferences?.remove(_characterTypeKey);
     await _preferences?.remove(_isAuthenticatedKey);
+    await _preferences?.remove(_tokenExpiresAtKey);
   }
 
   /// 토큰만 삭제 (토큰 만료 시)
@@ -280,6 +299,7 @@ class AuthStorageService {
     await _preferences?.remove(_providerAccessTokenKey);
     await _preferences?.remove(_providerKey);
     await _preferences?.remove(_characterTypeKey);
+    await _preferences?.remove(_tokenExpiresAtKey);
     await setIsAuthenticated(false);
   }
 

@@ -10,17 +10,12 @@ class SideJobSummaryRepositoryImpl {
   /// 부업 프로젝트 요약 조회
   Future<Either<MainFailure, SideJobSummaryEntity>> getSideJobSummary(int userSideJobId) async {
     try {
-      print('🔍 SideJobSummaryRepository: getSideJobSummary 호출 - userSideJobId=$userSideJobId');
-
       // AuthStorageService와 NetworkClient를 메서드 내부에서 비동기로 준비 (main 패턴과 동일)
       final authStorage = await AuthStorageService.getInstance();
       final client = NetworkClient(authStorage);
       final apiService = SideJobSummaryApiService(client);
 
       final response = await apiService.getSideJobSummary(userSideJobId);
-
-      print('✅ SideJobSummaryRepository: API 응답 성공');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode == 200 &&
           response.data != null &&

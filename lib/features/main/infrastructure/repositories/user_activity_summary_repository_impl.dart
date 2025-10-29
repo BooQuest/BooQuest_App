@@ -10,7 +10,6 @@ class UserActivitySummaryRepositoryImpl {
   /// 사용자 활동 요약 조회
   Future<Either<MainFailure, UserActivitySummaryEntity>> getUserActivitySummary() async {
     try {
-      print('🔍 UserActivitySummaryRepository: getUserActivitySummary 호출');
       
       // Create AuthStorageService and NetworkClient asynchronously within the method
       final authStorage = await AuthStorageService.getInstance();
@@ -18,10 +17,6 @@ class UserActivitySummaryRepositoryImpl {
       final apiService = UserActivitySummaryApiService(client);
 
       final response = await apiService.getUserActivitySummary();
-      
-      print('✅ UserActivitySummaryRepository: API 응답 성공');
-      print('  - Status Code: ${response.statusCode}');
-      print('  - Response Data: ${response.data}');
 
       if (response.statusCode == 200 && 
           response.data != null && 
@@ -29,11 +24,6 @@ class UserActivitySummaryRepositoryImpl {
         
         final data = response.data!['data'] as Map<String, dynamic>;
         final summary = UserActivitySummaryEntity.fromJson(data);
-
-        print('📊 UserActivitySummaryRepository: 데이터 파싱 성공');
-        print('  - totalIncome: ${summary.totalIncome}');
-        print('  - completedSideJobCount: ${summary.completedSideJobCount}');
-        print('  - completedQuestCount: ${summary.completedQuestCount}');
 
         return Right(summary);
       } else {

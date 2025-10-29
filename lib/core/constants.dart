@@ -36,7 +36,7 @@ class AppConstants {
   
   // API 관련 (나중에 Spring API 구현시 사용)
   // static const String baseUrl = 'http://49.50.129.68:8080'; // 실제 API UR
-  static const String baseUrl = 'https://api-dev.booquest.p-e.kr/'; // DEV URL
+  static const String baseUrl = 'https://api-develop.booquest.p-e.kr/'; // DEV URL
   // static const String baseUrl = 'https://api-prod.booquest.p-e.kr'; // PROD URL
 
   static const String loginEndpoint = '/api/auth/login';
